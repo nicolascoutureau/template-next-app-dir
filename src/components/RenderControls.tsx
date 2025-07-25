@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { useRendering } from "../helpers/use-rendering";
 import { AlignEnd } from "./AlignEnd";
 import { Button } from "./Button/Button";
@@ -7,8 +6,14 @@ import { DownloadButton } from "./DownloadButton";
 import { ErrorComp } from "./Error";
 import { ProgressBar } from "./ProgressBar";
 
-export const RenderControls: React.FC = () => {
-  const { renderMedia, state, undo } = useRendering("HelloWorld", {});
+interface RenderControlsProps {
+  compositionId: string;
+}
+
+export const RenderControls: React.FC<RenderControlsProps> = ({
+  compositionId,
+}) => {
+  const { renderMedia, state, undo } = useRendering(compositionId, {});
 
   return (
     <InputContainer>
