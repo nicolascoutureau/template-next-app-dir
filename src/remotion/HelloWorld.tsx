@@ -2,15 +2,20 @@ import { AbsoluteFill } from "remotion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { TextAnimation } from "./base/components/TextAnimation";
+import { loadFont } from "@remotion/google-fonts/Inter";
 
 export const HelloWorld: React.FC = () => {
+  const { fontFamily } = loadFont();
+
   return (
     <AbsoluteFill className="flex items-center justify-center bg-white">
       <TextAnimation
         text={
           <>
             Welcome to{" "}
-            <span className="text-green-400 font-light">Motionable</span>
+            <span className={`${fontFamily} text-green-400 font-light`}>
+              Motionable
+            </span>
           </>
         }
         createTimeline={({ textRef, tl }) => {
