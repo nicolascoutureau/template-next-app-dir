@@ -11,12 +11,10 @@ export const HelloWorld: React.FC = () => {
     <AbsoluteFill className="flex items-center justify-center bg-white">
       <TextAnimation
         text={
-          <>
+          <div className="text-xl" style={{ fontFamily }}>
             Welcome to{" "}
-            <span className={`${fontFamily} text-green-400 font-light`}>
-              Motionable
-            </span>
-          </>
+            <span className={`text-green-400 font-light`}>Motionable</span>
+          </div>
         }
         createTimeline={({ textRef, tl }) => {
           // Split the text into individual characters using the ref
