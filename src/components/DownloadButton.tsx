@@ -1,7 +1,6 @@
 import React from "react";
 import { State } from "../helpers/use-rendering";
 import { Button } from "./Button/Button";
-import { Spacing } from "./Spacing";
 
 const light: React.CSSProperties = {
   opacity: 0.6,
@@ -45,11 +44,9 @@ export const DownloadButton: React.FC<{
       <Button secondary onClick={undo}>
         <UndoIcon></UndoIcon>
       </Button>
-      <Spacing></Spacing>
       <a style={link} href={state.url}>
         <Button>
           Download video
-          <Spacing></Spacing>
           <Megabytes sizeInBytes={state.size}></Megabytes>
         </Button>
       </a>
