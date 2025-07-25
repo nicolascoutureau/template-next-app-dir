@@ -1,4 +1,5 @@
 import { HelloWorld } from "./compositions/HelloWorld";
+import { VerticalStory } from "./compositions/VerticalStory";
 
 // Define composition metadata for auto-registration
 export interface CompositionMeta {
@@ -21,6 +22,14 @@ export const compositions: CompositionMeta[] = [
     fps: 30,
     width: 1920,
     height: 1080,
+  },
+  {
+    id: "VerticalStory",
+    component: VerticalStory,
+    durationInFrames: 180,
+    fps: 30,
+    width: 1080,
+    height: 1920,
   },
 ];
 
