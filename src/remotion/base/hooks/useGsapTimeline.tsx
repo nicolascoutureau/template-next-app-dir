@@ -11,7 +11,6 @@ export const useGsapTimeline = <T extends HTMLElement>(
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedTimelineFactory = useCallback(gsapTimelineFactory, deps);
 
   useEffect(() => {
