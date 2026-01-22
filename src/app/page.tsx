@@ -2,6 +2,7 @@
 
 import type { NextPage } from "next";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { DynamicPlayer } from "../components/DynamicPlayer";
 import { RenderControls } from "../components/RenderControls";
 import {
@@ -10,13 +11,28 @@ import {
 } from "../remotion/compositions";
 
 const Home: NextPage = () => {
-  const [selectedComposition, setSelectedComposition] = useState("HelloWorld");
+  const searchParams = useSearchParams();
+  const compositionIds = getCompositionIds();
+  
+  // Get composition from URL param, fallback to first available or "HelloWorld"
+  const urlComposition = searchParams.get("composition");
+  const defaultComposition = urlComposition && compositionIds.includes(urlComposition) 
+    ? urlComposition 
+    : compositionIds[0] || "HelloWorld";
+  
+  const [selectedComposition, setSelectedComposition] = useState(defaultComposition);
   const [customProps, setCustomProps] = useState<Record<string, unknown>>({});
   const [playerSize, setPlayerSize] = useState<React.CSSProperties>({
     width: "100%",
     height: "100%",
   });
-  const compositionIds = getCompositionIds();
+
+  // Update selected composition when URL param changes
+  useEffect(() => {
+    if (urlComposition && compositionIds.includes(urlComposition)) {
+      setSelectedComposition(urlComposition);
+    }
+  }, [urlComposition, compositionIds]);
 
   // Get the current composition to calculate dimensions
   const currentComposition = getCompositionById(selectedComposition);
