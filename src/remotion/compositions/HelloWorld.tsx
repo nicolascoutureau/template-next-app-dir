@@ -4,16 +4,20 @@ import { SplitText } from "gsap/SplitText";
 import { TextAnimation } from "../base/components/TextAnimation";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
+// This re-runs on every HMR update of this file
+const hmrKey = Date.now();
+
 export const HelloWorld: React.FC = () => {
   const { fontFamily } = loadFont();
 
   return (
-    <AbsoluteFill className="flex items-center justify-center bg-white">      
+    <AbsoluteFill className="flex items-center justify-center bg-white">
       <TextAnimation
+        key={hmrKey}
         text={
           <div className="text-5xl" style={{ fontFamily }}>
             welcome to{" "}
-            <span className={`text-red-400 font-light`}>Motionable</span>
+            <span className="text-4 text-blue-400 font-light">Motionable</span>
           </div>
         }
         createTimeline={({ textRef, tl }) => {
