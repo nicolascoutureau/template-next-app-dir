@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import { useRendering } from "../helpers/use-rendering";
+import { useClientRendering } from "../helpers/use-client-rendering";
 import { AlignEnd } from "./AlignEnd";
 import { Button } from "./Button/Button";
 import { InputContainer } from "./Container";
@@ -10,13 +14,61 @@ interface RenderControlsProps {
   compositionId: string;
 }
 
+type RenderMode = "lambda" | "client";
+
 export const RenderControls: React.FC<RenderControlsProps> = ({
   compositionId,
 }) => {
-  const { renderMedia, state, undo } = useRendering(compositionId, {});
+  const [renderMode, setRenderMode] = useState<RenderMode>("lambda");
+
+  const lambdaRendering = useRendering(compositionId, {});
+  const clientRendering = useClientRendering(compositionId, {});
+
+  const { renderMedia, state, undo } =
+    renderMode === "lambda" ? lambdaRendering : clientRendering;
+
+  const handleModeChange = (mode: RenderMode) => {
+    // Reset both states when switching modes
+    lambdaRendering.undo();
+    clientRendering.undo();
+    setRenderMode(mode);
+  };
 
   return (
     <InputContainer>
+      {/* Render Mode Toggle */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-sm text-gray-600">Render with:</span>
+        <div className="flex rounded-lg overflow-hidden border border-gray-300">
+          <button
+            onClick={() => handleModeChange("lambda")}
+            className={`px-3 py-1 text-sm transition-colors ${
+              renderMode === "lambda"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Lambda (Server)
+          </button>
+          <button
+            onClick={() => handleModeChange("client")}
+            className={`px-3 py-1 text-sm transition-colors ${
+              renderMode === "client"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            Browser (Client)
+          </button>
+        </div>
+        {renderMode === "client" && (
+          <span className="text-xs text-amber-600 font-medium">
+            ⚠️ Experimental
+          </span>
+        )}
+      </div>
+
+      {/* Render Controls */}
       {state.status === "init" ||
       state.status === "invoking" ||
       state.status === "error" ? (

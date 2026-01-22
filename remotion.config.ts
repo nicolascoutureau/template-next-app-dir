@@ -10,3 +10,6 @@ Config.setVideoImageFormat("jpeg");
 Config.overrideWebpackConfig((currentConfiguration) => {
   return enableTailwind(currentConfiguration);
 });
+
+// Enable experimental client-side rendering in the Studio
+Config.setExperimentalClientSideRenderingEnabled(true);

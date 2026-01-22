@@ -1,5 +1,6 @@
 import React from "react";
 import { State } from "../helpers/use-rendering";
+import { ClientRenderState } from "../helpers/use-client-rendering";
 import { Button } from "./Button/Button";
 
 const light: React.CSSProperties = {
@@ -28,7 +29,7 @@ const Megabytes: React.FC<{
 };
 
 export const DownloadButton: React.FC<{
-  state: State;
+  state: State | ClientRenderState;
   undo: () => void;
 }> = ({ state, undo }) => {
   if (state.status === "rendering") {
@@ -39,12 +40,19 @@ export const DownloadButton: React.FC<{
     throw new Error("Download button should not be rendered when not done");
   }
 
+  // Check if it's a blob URL (client-side rendering) vs a regular URL (Lambda)
+  const isBlobUrl = state.url.startsWith("blob:");
+
   return (
     <div style={row}>
       <Button secondary onClick={undo}>
         <UndoIcon></UndoIcon>
       </Button>
-      <a style={link} href={state.url}>
+      <a
+        style={link}
+        href={state.url}
+        download={isBlobUrl ? "video.mp4" : undefined}
+      >
         <Button>
           Download video
           <Megabytes sizeInBytes={state.size}></Megabytes>

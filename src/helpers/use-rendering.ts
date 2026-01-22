@@ -33,7 +33,7 @@ const wait = async (milliSeconds: number) => {
   });
 };
 
-export const useRendering = (id: string, inputProps: any) => {
+export const useRendering = (id: string, inputProps: Record<string, unknown>) => {
   const [state, setState] = useState<State>({
     status: "init",
   });
