@@ -8,12 +8,12 @@ export const HelloWorld: React.FC = () => {
   const { fontFamily } = loadFont();
 
   return (
-    <AbsoluteFill className="flex items-center justify-center bg-white">
+    <AbsoluteFill className="flex items-center justify-center bg-white">      
       <TextAnimation
         text={
           <div className="text-5xl" style={{ fontFamily }}>
-            Welcome to{" "}
-            <span className={`text-green-400 font-light`}>Motionable</span>
+            welcome to{" "}
+            <span className={`text-red-400 font-light`}>Motionable</span>
           </div>
         }
         createTimeline={({ textRef, tl }) => {
