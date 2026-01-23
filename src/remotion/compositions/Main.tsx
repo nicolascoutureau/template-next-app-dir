@@ -7,7 +7,7 @@ import { loadFont } from "@remotion/google-fonts/Inter";
 // This re-runs on every HMR update of this file
 const hmrKey = Date.now();
 
-export const HelloWorld: React.FC = () => {
+export const Main: React.FC = () => {
   const { fontFamily } = loadFont();
 
   return (

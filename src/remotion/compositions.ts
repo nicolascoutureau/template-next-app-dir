@@ -1,9 +1,9 @@
-import { HelloWorld } from "./compositions/HelloWorld";
+import { Main } from "./compositions/Main";
 
 // Single composition configuration
 export const composition = {
-  id: "HelloWorld",
-  component: HelloWorld,
+  id: "Main",
+  component: Main,
   durationInFrames: 150,
   fps: 30,
   width: 1920,
