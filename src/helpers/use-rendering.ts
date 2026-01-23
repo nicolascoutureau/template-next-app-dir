@@ -33,7 +33,7 @@ const wait = async (milliSeconds: number) => {
   });
 };
 
-export const useRendering = (id: string, inputProps: Record<string, unknown>) => {
+export const useRendering = (inputProps: Record<string, unknown>) => {
   const [state, setState] = useState<State>({
     status: "init",
   });
@@ -43,7 +43,7 @@ export const useRendering = (id: string, inputProps: Record<string, unknown>) =>
       status: "invoking",
     });
     try {
-      const { renderId, bucketName } = await renderVideo({ id, inputProps });
+      const { renderId, bucketName } = await renderVideo({ inputProps });
       setState({
         status: "rendering",
         progress: 0,
@@ -95,7 +95,7 @@ export const useRendering = (id: string, inputProps: Record<string, unknown>) =>
         renderId: null,
       });
     }
-  }, [id, inputProps]);
+  }, [inputProps]);
 
   const undo = useCallback(() => {
     setState({ status: "init" });

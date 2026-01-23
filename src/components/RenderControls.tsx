@@ -10,19 +10,13 @@ import { DownloadButton } from "./DownloadButton";
 import { ErrorComp } from "./Error";
 import { ProgressBar } from "./ProgressBar";
 
-interface RenderControlsProps {
-  compositionId: string;
-}
-
 type RenderMode = "lambda" | "client";
 
-export const RenderControls: React.FC<RenderControlsProps> = ({
-  compositionId,
-}) => {
+export const RenderControls: React.FC = () => {
   const [renderMode, setRenderMode] = useState<RenderMode>("lambda");
 
-  const lambdaRendering = useRendering(compositionId, {});
-  const clientRendering = useClientRendering(compositionId, {});
+  const lambdaRendering = useRendering({});
+  const clientRendering = useClientRendering({});
 
   const { renderMedia, state, undo } =
     renderMode === "lambda" ? lambdaRendering : clientRendering;

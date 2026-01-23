@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 export const RenderRequest = z.object({
-  id: z.string(),
-  inputProps: z.any(),
+  inputProps: z.record(z.string(), z.unknown()).optional(),
 });
 
 export const ProgressRequest = z.object({

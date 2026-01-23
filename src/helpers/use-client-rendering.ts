@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { getCompositionById } from "../remotion/compositions";
+import { composition } from "../remotion/compositions";
 
 export type ClientRenderState =
   | {
@@ -21,10 +21,7 @@ export type ClientRenderState =
       size: number;
     };
 
-export const useClientRendering = (
-  compositionId: string,
-  inputProps: Record<string, unknown>
-) => {
+export const useClientRendering = (inputProps: Record<string, unknown>) => {
   const [state, setState] = useState<ClientRenderState>({
     status: "init",
   });
@@ -35,12 +32,6 @@ export const useClientRendering = (
     try {
       // Dynamically import to avoid SSR issues
       const { renderMediaOnWeb } = await import("@remotion/web-renderer");
-
-      const composition = getCompositionById(compositionId);
-
-      if (!composition) {
-        throw new Error(`Composition "${compositionId}" not found`);
-      }
 
       const totalFrames = composition.durationInFrames;
 
@@ -76,7 +67,7 @@ export const useClientRendering = (
         error: err instanceof Error ? err : new Error(String(err)),
       });
     }
-  }, [compositionId, inputProps]);
+  }, [inputProps]);
 
   const undo = useCallback(() => {
     setState({ status: "init" });
