@@ -1,4 +1,5 @@
 import "../styles/global.css";
+
 import { Composition } from "remotion";
 import { composition } from "./compositions";
 
