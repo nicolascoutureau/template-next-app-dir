@@ -1,14 +1,10 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { State } from "../helpers/use-rendering";
 import { ClientRenderState } from "../helpers/use-client-rendering";
 import { Button } from "./Button/Button";
 
 const light: React.CSSProperties = {
   opacity: 0.6,
-};
-
-const link: React.CSSProperties = {
-  textDecoration: "none",
 };
 
 const row: React.CSSProperties = {
@@ -28,10 +24,73 @@ const Megabytes: React.FC<{
   return <span style={light}>{megabytes}</span>;
 };
 
+// Helper to download blob using File System Access API or fallback
+const downloadBlob = async (blobUrl: string, filename: string) => {
+  try {
+    // Fetch the blob from the URL
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+
+    // Try File System Access API first (works in sandboxed contexts)
+    if ("showSaveFilePicker" in window) {
+      try {
+        const handle = await (window as typeof window & {
+          showSaveFilePicker: (options: {
+            suggestedName: string;
+            types: { description: string; accept: Record<string, string[]> }[];
+          }) => Promise<FileSystemFileHandle>;
+        }).showSaveFilePicker({
+          suggestedName: filename,
+          types: [
+            {
+              description: "Video file",
+              accept: { "video/mp4": [".mp4"] },
+            },
+          ],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (err) {
+        // User cancelled or API not available, fall through to fallback
+        if ((err as Error).name === "AbortError") return;
+      }
+    }
+
+    // Fallback: Create a temporary link and click it
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Download failed:", err);
+    // Last resort: open in new tab
+    window.open(blobUrl, "_blank");
+  }
+};
+
 export const DownloadButton: React.FC<{
   state: State | ClientRenderState;
   undo: () => void;
 }> = ({ state, undo }) => {
+  const handleDownload = useCallback(async () => {
+    if (state.status !== "done") return;
+
+    const isBlobUrl = state.url.startsWith("blob:");
+
+    if (isBlobUrl) {
+      await downloadBlob(state.url, "video.mp4");
+    } else {
+      // For regular URLs (Lambda), open in new tab to trigger download
+      window.open(state.url, "_blank");
+    }
+  }, [state]);
+
   if (state.status === "rendering") {
     return <Button disabled>Download video</Button>;
   }
@@ -40,24 +99,15 @@ export const DownloadButton: React.FC<{
     throw new Error("Download button should not be rendered when not done");
   }
 
-  // Check if it's a blob URL (client-side rendering) vs a regular URL (Lambda)
-  const isBlobUrl = state.url.startsWith("blob:");
-
   return (
     <div style={row}>
       <Button secondary onClick={undo}>
         <UndoIcon></UndoIcon>
       </Button>
-      <a
-        style={link}
-        href={state.url}
-        download={isBlobUrl ? "video.mp4" : undefined}
-      >
-        <Button>
-          Download video
-          <Megabytes sizeInBytes={state.size}></Megabytes>
-        </Button>
-      </a>
+      <Button onClick={handleDownload}>
+        Download video
+        <Megabytes sizeInBytes={state.size}></Megabytes>
+      </Button>
     </div>
   );
 };
