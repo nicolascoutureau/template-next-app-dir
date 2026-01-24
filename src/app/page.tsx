@@ -3,7 +3,6 @@
 import type { NextPage } from "next";
 import React, { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { RenderControls } from "../components/RenderControls";
 import { composition } from "../remotion/compositions";
 
 const Home: NextPage = () => {
@@ -54,7 +53,6 @@ const Home: NextPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen p-4">
       <div className="w-full h-full max-w-6xl max-h-[80vh] flex flex-col items-center justify-center">
-        {/* Player */}
         <div className="w-full h-full flex items-center justify-center">
           <Player
             component={composition.component}
@@ -68,10 +66,6 @@ const Home: NextPage = () => {
             style={playerSize}
           />
         </div>
-      </div>
-
-      <div className="mt-4">
-        <RenderControls />
       </div>
     </div>
   );
