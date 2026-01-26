@@ -13,15 +13,20 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({
-  // Layouts must accept a children prop.
-  // This will be populated with nested layouts or pages
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        {children}
+        {/*  DO NOT REMOVE: Element selector for builder preview - only active when in iframe */}
+        <script
+          src="https://builder-blush.vercel.app/element-selector.js"
+          defer
+        />
+      </body>
     </html>
   );
 }
