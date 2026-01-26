@@ -18,8 +18,8 @@ const Home: NextPage = () => {
     const aspectRatio = composition.width / composition.height;
 
     // Maximum available space
-    const maxWidth = 1200;
-    const maxHeight = window.innerHeight * 0.6;
+    const maxWidth = window.innerWidth * 0.9;
+    const maxHeight = window.innerHeight * 0.85;
 
     let playerWidth = maxWidth;
     let playerHeight = playerWidth / aspectRatio;
@@ -51,8 +51,8 @@ const Home: NextPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen p-4">
-      <div className="w-full h-full max-w-6xl max-h-[80vh] flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center h-screen w-screen p-2">
+      <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="w-full h-full flex items-center justify-center">
           <Player
             component={composition.component}
