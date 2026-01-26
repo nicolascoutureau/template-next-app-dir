@@ -1,4 +1,4 @@
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, Artifact, useCurrentFrame } from "remotion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { TextAnimation } from "../base/components/TextAnimation";
@@ -9,58 +9,64 @@ const hmrKey = Date.now();
 
 export const Main: React.FC = () => {
   const { fontFamily } = loadFont();
-
+  const frame = useCurrentFrame();
   return (
-    <AbsoluteFill className="flex items-center justify-center bg-white">
-      <TextAnimation
-        key={hmrKey}
-        text={
-          <div className="text-5xl" style={{ fontFamily }}>
-            welcome to{" "}
-            <span className="text-4 text-blue-400 font-light">Motionable</span>
-          </div>
-        }
-        createTimeline={({ textRef, tl }) => {
-          // Split the text into individual characters using the ref
-          const splitText = new SplitText(textRef.current, {
-            type: "chars",
-            charsClass: "char",
-          });
+    <>
+      {/* Leave this here to generate a thumbnail */}
+      {frame === 0 && (
+        <Artifact content={Artifact.Thumbnail} filename="thumbnail.jpeg" />
+      )}
+      <AbsoluteFill className="flex items-center justify-center bg-white">
+        <TextAnimation
+          key={hmrKey}
+          text={
+            <div className="text-5xl" style={{ fontFamily }}>
+              welcome to{" "}
+              <span className="text-4 text-blue-400 font-light">Motionabl</span>
+            </div>
+          }
+          createTimeline={({ textRef, tl }) => {
+            // Split the text into individual characters using the ref
+            const splitText = new SplitText(textRef.current, {
+              type: "chars",
+              charsClass: "char",
+            });
 
-          // Set initial state - characters are invisible and moved down
-          gsap.set(splitText.chars, {
-            opacity: 0,
-            y: 50,
-            rotationX: 90,
-          });
+            // Set initial state - characters are invisible and moved down
+            gsap.set(splitText.chars, {
+              opacity: 0,
+              y: 50,
+              rotationX: 90,
+            });
 
-          // Animate characters appearing with stagger effect
-          tl.to(splitText.chars, {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            duration: 0.8,
-            stagger: 0.05,
-            ease: "back.out(1.7)",
-          });
+            // Animate characters appearing with stagger effect
+            tl.to(splitText.chars, {
+              opacity: 1,
+              y: 0,
+              rotationX: 0,
+              duration: 0.8,
+              stagger: 0.05,
+              ease: "back.out(1.7)",
+            });
 
-          // Optional: Add a subtle hover effect that scales characters
-          tl.to(
-            splitText.chars,
-            {
-              scale: 1.1,
-              duration: 0.3,
-              stagger: 0.02,
-              yoyo: true,
-              repeat: 1,
-              ease: "power2.inOut",
-            },
-            "+=0.5",
-          );
+            // Optional: Add a subtle hover effect that scales characters
+            tl.to(
+              splitText.chars,
+              {
+                scale: 1.1,
+                duration: 0.3,
+                stagger: 0.02,
+                yoyo: true,
+                repeat: 1,
+                ease: "power2.inOut",
+              },
+              "+=0.5",
+            );
 
-          return tl;
-        }}
-      />
-    </AbsoluteFill>
+            return tl;
+          }}
+        />
+      </AbsoluteFill>
+    </>
   );
 };
