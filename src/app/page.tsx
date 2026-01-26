@@ -64,6 +64,8 @@ const Home: NextPage = () => {
             autoPlay
             loop
             style={playerSize}
+            allowFullscreen
+            doubleClickToFullscreen
           />
         </div>
       </div>
