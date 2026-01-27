@@ -522,16 +522,310 @@ export const LiquidMorph: Story = {
               },
               duration: 0.8,
               ease: "elastic.out(1, 0.6)",
+            });
+        }}
+      />
+    </RemotionPreview>
+  ),
+};
+
+// ============ IN & OUT ANIMATIONS ============
+
+export const InOutBasic: Story = {
+  name: "In/Out - Basic",
+  render: () => (
+    <RemotionPreview durationInFrames={150} width={800} height={300}>
+      <TextAnimation
+        text="HELLO WORLD"
+        className="text-white"
+        style={{ fontSize: "5rem", fontWeight: 700 }}
+        createTimeline={({ textRef, tl }) => {
+          const split = new SplitText(textRef.current, { type: "chars" });
+          return tl
+            // IN: fade up
+            .from(split.chars, {
+              opacity: 0,
+              y: 50,
+              stagger: 0.04,
+              duration: 0.5,
+              ease: "back.out(1.7)",
             })
-            .to(
-              split.chars,
-              {
-                y: (i) => Math.sin(i * 0.8) * 10,
-                duration: 0.5,
-                ease: "sine.inOut",
+            // HOLD
+            .to({}, { duration: 1 })
+            // OUT: fade down
+            .to(split.chars, {
+              opacity: 0,
+              y: -50,
+              stagger: 0.03,
+              duration: 0.4,
+              ease: "power2.in",
+            });
+        }}
+      />
+    </RemotionPreview>
+  ),
+};
+
+export const InOutScale: Story = {
+  name: "In/Out - Scale Burst",
+  render: () => (
+    <RemotionPreview durationInFrames={150} width={900} height={300}>
+      <TextAnimation
+        text="IMPACT"
+        className="text-amber-400"
+        style={{ fontSize: "7rem", fontWeight: 900 }}
+        createTimeline={({ textRef, tl }) => {
+          const split = new SplitText(textRef.current, { type: "chars" });
+          return tl
+            // IN: scale from center
+            .from(split.chars, {
+              opacity: 0,
+              scale: 0,
+              stagger: {
+                each: 0.05,
+                from: "center",
               },
-              "-=0.3"
-            );
+              duration: 0.6,
+              ease: "back.out(2)",
+            })
+            // HOLD
+            .to({}, { duration: 0.8 })
+            // OUT: explode outward
+            .to(split.chars, {
+              opacity: 0,
+              scale: 2,
+              stagger: {
+                each: 0.03,
+                from: "center",
+              },
+              duration: 0.4,
+              ease: "power2.in",
+            });
+        }}
+      />
+    </RemotionPreview>
+  ),
+};
+
+export const InOutSlide: Story = {
+  name: "In/Out - Slide Through",
+  render: () => (
+    <RemotionPreview durationInFrames={150} width={900} height={300}>
+      <div className="overflow-hidden">
+        <TextAnimation
+          text="SLIDING TEXT"
+          className="text-sky-400"
+          style={{ fontSize: "5rem", fontWeight: 800 }}
+          createTimeline={({ textRef, tl }) => {
+            const split = new SplitText(textRef.current, { type: "chars" });
+            return tl
+              // IN: slide from left
+              .from(split.chars, {
+                opacity: 0,
+                x: -100,
+                stagger: 0.03,
+                duration: 0.5,
+                ease: "power3.out",
+              })
+              // HOLD
+              .to({}, { duration: 0.8 })
+              // OUT: slide to right
+              .to(split.chars, {
+                opacity: 0,
+                x: 100,
+                stagger: 0.03,
+                duration: 0.5,
+                ease: "power3.in",
+              });
+          }}
+        />
+      </div>
+    </RemotionPreview>
+  ),
+};
+
+export const InOutRotate: Story = {
+  name: "In/Out - Flip",
+  render: () => (
+    <RemotionPreview durationInFrames={180} width={900} height={350}>
+      <div style={{ perspective: "1000px" }}>
+        <TextAnimation
+          text="FLIP ME"
+          className="text-rose-400"
+          style={{ fontSize: "6rem", fontWeight: 900 }}
+          createTimeline={({ textRef, tl }) => {
+            const split = new SplitText(textRef.current, { type: "chars" });
+            gsap.set(split.chars, { transformPerspective: 1000 });
+            return tl
+              // IN: flip from top
+              .from(split.chars, {
+                opacity: 0,
+                rotationX: -90,
+                y: -50,
+                stagger: 0.06,
+                duration: 0.7,
+                ease: "power3.out",
+              })
+              // HOLD
+              .to({}, { duration: 0.8 })
+              // OUT: flip to bottom
+              .to(split.chars, {
+                opacity: 0,
+                rotationX: 90,
+                y: 50,
+                stagger: 0.04,
+                duration: 0.5,
+                ease: "power3.in",
+              });
+          }}
+        />
+      </div>
+    </RemotionPreview>
+  ),
+};
+
+export const InOutBlur: Story = {
+  name: "In/Out - Focus",
+  render: () => (
+    <RemotionPreview durationInFrames={150} width={800} height={300}>
+      <TextAnimation
+        text="FOCUS"
+        className="text-violet-400"
+        style={{ fontSize: "7rem", fontWeight: 900 }}
+        createTimeline={({ textRef, tl }) => {
+          const split = new SplitText(textRef.current, { type: "chars" });
+          return tl
+            // IN: blur in with scale
+            .from(split.chars, {
+              opacity: 0,
+              filter: "blur(20px)",
+              scale: 1.5,
+              stagger: 0.05,
+              duration: 0.6,
+              ease: "power2.out",
+            })
+            // HOLD
+            .to({}, { duration: 0.8 })
+            // OUT: blur out with scale
+            .to(split.chars, {
+              opacity: 0,
+              filter: "blur(20px)",
+              scale: 0.5,
+              stagger: {
+                each: 0.04,
+                from: "end",
+              },
+              duration: 0.5,
+              ease: "power2.in",
+            });
+        }}
+      />
+    </RemotionPreview>
+  ),
+};
+
+export const InOutSequence: Story = {
+  name: "In/Out - Word Sequence",
+  render: () => (
+    <RemotionPreview durationInFrames={210} width={900} height={350}>
+      <div className="relative flex items-center justify-center h-full w-full">
+        <TextAnimation
+          text="CREATE"
+          className="text-emerald-400 absolute"
+          style={{ fontSize: "5rem", fontWeight: 800 }}
+          createTimeline={({ textRef, tl }) => {
+            return tl
+              .from(textRef.current, {
+                opacity: 0,
+                y: 40,
+                duration: 0.4,
+                ease: "power3.out",
+              })
+              .to({}, { duration: 0.6 })
+              .to(textRef.current, {
+                opacity: 0,
+                y: -40,
+                duration: 0.3,
+                ease: "power2.in",
+              });
+          }}
+        />
+        <TextAnimation
+          text="INSPIRE"
+          className="text-blue-400 absolute"
+          style={{ fontSize: "5rem", fontWeight: 800 }}
+          createTimeline={({ textRef, tl }) => {
+            return tl
+              .set(textRef.current, { opacity: 0 })
+              .to({}, { duration: 1.2 })
+              .to(textRef.current, {
+                opacity: 1,
+                duration: 0.01,
+              })
+              .from(textRef.current, {
+                y: 40,
+                duration: 0.4,
+                ease: "power3.out",
+              })
+              .to({}, { duration: 0.6 })
+              .to(textRef.current, {
+                opacity: 0,
+                y: -40,
+                duration: 0.3,
+                ease: "power2.in",
+              });
+          }}
+        />
+        <TextAnimation
+          text="ACHIEVE"
+          className="text-purple-400 absolute"
+          style={{ fontSize: "5rem", fontWeight: 800 }}
+          createTimeline={({ textRef, tl }) => {
+            return tl
+              .set(textRef.current, { opacity: 0 })
+              .to({}, { duration: 2.4 })
+              .to(textRef.current, {
+                opacity: 1,
+                duration: 0.01,
+              })
+              .from(textRef.current, {
+                y: 40,
+                scale: 0.9,
+                duration: 0.5,
+                ease: "back.out(1.5)",
+              });
+          }}
+        />
+      </div>
+    </RemotionPreview>
+  ),
+};
+
+export const InOutMask: Story = {
+  name: "In/Out - Wipe",
+  render: () => (
+    <RemotionPreview durationInFrames={150} width={900} height={300}>
+      <TextAnimation
+        text="REVEAL"
+        className="text-white"
+        style={{ fontSize: "8rem", fontWeight: 900, lineHeight: 1 }}
+        createTimeline={({ textRef, tl }) => {
+          return tl
+            // IN: wipe from left
+            .set(textRef.current, { clipPath: "inset(0 100% 0 0)" })
+            .to(textRef.current, {
+              clipPath: "inset(0 0% 0 0)",
+              duration: 0.6,
+              ease: "power3.inOut",
+            })
+            // HOLD
+            .to({}, { duration: 1 })
+            // OUT: wipe to right
+            .to(textRef.current, {
+              clipPath: "inset(0 0 0 100%)",
+              duration: 0.5,
+              ease: "power3.inOut",
+            });
         }}
       />
     </RemotionPreview>

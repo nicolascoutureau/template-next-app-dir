@@ -35,6 +35,14 @@ export type { CounterProps } from "./components/Counter";
 export { TextAnimation } from "./components/TextAnimation";
 export type { TextAnimationProps } from "./components/TextAnimation";
 
+export { Camera } from "./components/Camera";
+export type {
+  CameraProps,
+  CameraRef,
+  EasingFunction,
+  EasingPreset,
+} from "./components/Camera";
+
 // Hooks
 export { useFrameProgress } from "./hooks/useFrameProgress";
 export type { FrameProgressOptions } from "./hooks/useFrameProgress";
