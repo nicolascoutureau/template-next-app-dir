@@ -2,6 +2,9 @@
 export { Shimmer } from "./components/Shimmer";
 export type { ShimmerProps } from "./components/Shimmer";
 
+export { TextShimmer } from "./components/TextShimmer";
+export type { TextShimmerProps } from "./components/TextShimmer";
+
 export { PhoneMockup } from "./components/PhoneMockup";
 export type {
   PhoneMockupProps,
