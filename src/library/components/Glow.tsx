@@ -62,41 +62,31 @@ export const Glow = ({
     ...style,
   };
 
-  // Create multiple blur layers for smoother falloff
-  const glowLayers = Array.from({ length: layers }, (_, i) => {
-    const layerIndex = i + 1;
-    const layerRadius = radius * (layerIndex / layers) * 1.5;
-    const layerOpacity = opacity * intensity * (1 - i / (layers + 1));
-    const layerScale = 1 + (intensity * 0.1 * layerIndex);
+  // Build drop-shadow filters for the glow layer
+  const dropShadows = Array.from({ length: layers }, (_, i) => {
+    const layerRadius = radius * ((i + 1) / layers);
+    const glowColor = color || "inherit";
+    return `drop-shadow(0 0 ${layerRadius}px ${glowColor})`;
+  }).join(" ");
 
-    const layerStyle: CSSProperties = {
-      position: "absolute",
-      inset: 0,
-      filter: `blur(${layerRadius}px)`,
-      opacity: layerOpacity,
-      transform: `scale(${layerScale})`,
-      mixBlendMode: "screen",
-      pointerEvents: "none",
-      zIndex: -1,
-      // Apply color filter if specified
-      ...(color && {
-        background: color,
-        WebkitMaskImage: "inherit",
-        maskImage: "inherit",
-      }),
-    };
-
-    return (
-      <div key={i} style={layerStyle} aria-hidden="true">
-        {!color && children}
-      </div>
-    );
-  });
+  const glowLayerStyle: CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    filter: dropShadows,
+    opacity: opacity * intensity,
+    pointerEvents: "none",
+    // Inherit color from children if not specified
+    color: color || "inherit",
+  };
 
   return (
     <div className={className} style={containerStyle}>
-      {glowLayers}
-      <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+      {/* Glow layer - duplicate of children with drop-shadow */}
+      <div style={glowLayerStyle} aria-hidden="true">
+        {children}
+      </div>
+      {/* Actual content on top */}
+      <div style={{ position: "relative" }}>{children}</div>
     </div>
   );
 };
