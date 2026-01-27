@@ -35,6 +35,7 @@ export const CircleReveal: Story = {
     startFrame: 10,
     durationInFrames: 30,
     invert: false,
+    style: { position: "absolute", inset: 0 },
   },
   render: (args: RevealMaskProps) => (
     <RemotionPreview durationInFrames={90} width={800} height={450}>
@@ -64,6 +65,7 @@ export const WipeReveal: Story = {
     direction: "left",
     startFrame: 10,
     durationInFrames: 25,
+    style: { position: "absolute", inset: 0 },
   },
   render: (args: RevealMaskProps) => (
     <RemotionPreview durationInFrames={90} width={800} height={450}>
@@ -88,6 +90,7 @@ export const DiagonalReveal: Story = {
     type: "diagonal",
     startFrame: 15,
     durationInFrames: 30,
+    style: { position: "absolute", inset: 0 },
   },
   render: (args: RevealMaskProps) => (
     <RemotionPreview durationInFrames={90} width={800} height={450}>
@@ -112,6 +115,7 @@ export const DiamondReveal: Story = {
     origin: { x: 0.5, y: 0.5 },
     startFrame: 10,
     durationInFrames: 40,
+    style: { position: "absolute", inset: 0 },
   },
   render: (args: RevealMaskProps) => (
     <RemotionPreview durationInFrames={90} width={800} height={450}>
@@ -134,6 +138,7 @@ export const CornerCircleReveal: Story = {
     origin: { x: 0, y: 0 },
     startFrame: 5,
     durationInFrames: 35,
+    style: { position: "absolute", inset: 0 },
   },
   render: (args: RevealMaskProps) => (
     <RemotionPreview durationInFrames={90} width={800} height={450}>

@@ -61,6 +61,14 @@ export type {
 } from "./components/TunnelBackground";
 
 // Effects & Animation
+export { Animate } from "./components/Animate";
+export type {
+  AnimateProps,
+  AnimatePreset,
+  AnimateMode,
+  AnimateCustomFn,
+} from "./components/Animate";
+
 export { Shimmer } from "./components/Shimmer";
 export type {
   ShimmerProps,

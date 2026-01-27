@@ -196,7 +196,7 @@ export const CinematicReveal: Story = {
                   duration: 1.2,
                   ease: "power2.inOut",
                 },
-                "-=0.3"
+                "-=0.3",
               );
           }}
         />
@@ -206,17 +206,15 @@ export const CinematicReveal: Story = {
           style={{ fontSize: "1.5rem" }}
           createTimeline={({ textRef, tl }) => {
             const split = new SplitText(textRef.current, { type: "chars" });
-            return tl
-              .set(split.chars, { opacity: 0 })
-              .to(
-                split.chars,
-                {
-                  opacity: 1,
-                  stagger: 0.03,
-                  duration: 0.01,
-                },
-                0.8
-              );
+            return tl.set(split.chars, { opacity: 0 }).to(
+              split.chars,
+              {
+                opacity: 1,
+                stagger: 0.03,
+                duration: 0.01,
+              },
+              0.8,
+            );
           }}
         />
       </div>
@@ -296,7 +294,7 @@ export const GlitchEffect: Story = {
                     yoyo: true,
                   },
                 },
-                0.2
+                0.2,
               )
               .to(split.chars, {
                 x: 0,
@@ -338,7 +336,7 @@ export const MaskReveal: Story = {
                   duration: 0.8,
                   ease: "power4.out",
                 },
-                0
+                0,
               );
           }}
         />
@@ -387,19 +385,27 @@ export const KineticTypography: Story = {
                   duration: 0.6,
                   ease: "back.out(1.2)",
                 },
-                0.3
+                0.3,
               )
               .to(
                 split.chars,
                 {
                   color: (i) =>
-                    ["#f43f5e", "#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ec4899", "#6366f1", "#14b8a6", "#f97316"][
-                      i % 9
-                    ],
+                    [
+                      "#f43f5e",
+                      "#8b5cf6",
+                      "#3b82f6",
+                      "#10b981",
+                      "#f59e0b",
+                      "#ec4899",
+                      "#6366f1",
+                      "#14b8a6",
+                      "#f97316",
+                    ][i % 9],
                   stagger: 0.03,
                   duration: 0.3,
                 },
-                "-=0.2"
+                "-=0.2",
               );
           }}
         />
@@ -441,7 +447,7 @@ export const SplitScreenReveal: Story = {
                   stagger: -0.08,
                   ease: "power4.out",
                 },
-                0
+                0,
               )
               .to(split.chars, {
                 opacity: 1,
@@ -541,25 +547,27 @@ export const InOutBasic: Story = {
         style={{ fontSize: "5rem", fontWeight: 700 }}
         createTimeline={({ textRef, tl }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          return tl
-            // IN: fade up
-            .from(split.chars, {
-              opacity: 0,
-              y: 50,
-              stagger: 0.04,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-            })
-            // HOLD
-            .to({}, { duration: 1 })
-            // OUT: fade down
-            .to(split.chars, {
-              opacity: 0,
-              y: -50,
-              stagger: 0.03,
-              duration: 0.4,
-              ease: "power2.in",
-            });
+          return (
+            tl
+              // IN: fade up
+              .from(split.chars, {
+                opacity: 0,
+                y: 50,
+                stagger: 0.04,
+                duration: 0.5,
+                ease: "back.out(1.7)",
+              })
+              // HOLD
+              .to({}, { duration: 1 })
+              // OUT: fade down
+              .to(split.chars, {
+                opacity: 0,
+                y: -50,
+                stagger: 0.03,
+                duration: 0.4,
+                ease: "power2.in",
+              })
+          );
         }}
       />
     </RemotionPreview>
@@ -576,31 +584,33 @@ export const InOutScale: Story = {
         style={{ fontSize: "7rem", fontWeight: 900 }}
         createTimeline={({ textRef, tl }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          return tl
-            // IN: scale from center
-            .from(split.chars, {
-              opacity: 0,
-              scale: 0,
-              stagger: {
-                each: 0.05,
-                from: "center",
-              },
-              duration: 0.6,
-              ease: "back.out(2)",
-            })
-            // HOLD
-            .to({}, { duration: 0.8 })
-            // OUT: explode outward
-            .to(split.chars, {
-              opacity: 0,
-              scale: 2,
-              stagger: {
-                each: 0.03,
-                from: "center",
-              },
-              duration: 0.4,
-              ease: "power2.in",
-            });
+          return (
+            tl
+              // IN: scale from center
+              .from(split.chars, {
+                opacity: 0,
+                scale: 0,
+                stagger: {
+                  each: 0.05,
+                  from: "center",
+                },
+                duration: 0.6,
+                ease: "back.out(2)",
+              })
+              // HOLD
+              .to({}, { duration: 0.8 })
+              // OUT: explode outward
+              .to(split.chars, {
+                opacity: 0,
+                scale: 2,
+                stagger: {
+                  each: 0.03,
+                  from: "center",
+                },
+                duration: 0.4,
+                ease: "power2.in",
+              })
+          );
         }}
       />
     </RemotionPreview>
@@ -618,25 +628,27 @@ export const InOutSlide: Story = {
           style={{ fontSize: "5rem", fontWeight: 800 }}
           createTimeline={({ textRef, tl }) => {
             const split = new SplitText(textRef.current, { type: "chars" });
-            return tl
-              // IN: slide from left
-              .from(split.chars, {
-                opacity: 0,
-                x: -100,
-                stagger: 0.03,
-                duration: 0.5,
-                ease: "power3.out",
-              })
-              // HOLD
-              .to({}, { duration: 0.8 })
-              // OUT: slide to right
-              .to(split.chars, {
-                opacity: 0,
-                x: 100,
-                stagger: 0.03,
-                duration: 0.5,
-                ease: "power3.in",
-              });
+            return (
+              tl
+                // IN: slide from left
+                .from(split.chars, {
+                  opacity: 0,
+                  x: -100,
+                  stagger: 0.03,
+                  duration: 0.5,
+                  ease: "power3.out",
+                })
+                // HOLD
+                .to({}, { duration: 0.8 })
+                // OUT: slide to right
+                .to(split.chars, {
+                  opacity: 0,
+                  x: 100,
+                  stagger: 0.03,
+                  duration: 0.5,
+                  ease: "power3.in",
+                })
+            );
           }}
         />
       </div>
@@ -656,27 +668,29 @@ export const InOutRotate: Story = {
           createTimeline={({ textRef, tl }) => {
             const split = new SplitText(textRef.current, { type: "chars" });
             gsap.set(split.chars, { transformPerspective: 1000 });
-            return tl
-              // IN: flip from top
-              .from(split.chars, {
-                opacity: 0,
-                rotationX: -90,
-                y: -50,
-                stagger: 0.06,
-                duration: 0.7,
-                ease: "power3.out",
-              })
-              // HOLD
-              .to({}, { duration: 0.8 })
-              // OUT: flip to bottom
-              .to(split.chars, {
-                opacity: 0,
-                rotationX: 90,
-                y: 50,
-                stagger: 0.04,
-                duration: 0.5,
-                ease: "power3.in",
-              });
+            return (
+              tl
+                // IN: flip from top
+                .from(split.chars, {
+                  opacity: 0,
+                  rotationX: -90,
+                  y: -50,
+                  stagger: 0.06,
+                  duration: 0.7,
+                  ease: "power3.out",
+                })
+                // HOLD
+                .to({}, { duration: 0.8 })
+                // OUT: flip to bottom
+                .to(split.chars, {
+                  opacity: 0,
+                  rotationX: 90,
+                  y: 50,
+                  stagger: 0.04,
+                  duration: 0.5,
+                  ease: "power3.in",
+                })
+            );
           }}
         />
       </div>
@@ -694,30 +708,32 @@ export const InOutBlur: Story = {
         style={{ fontSize: "7rem", fontWeight: 900 }}
         createTimeline={({ textRef, tl }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          return tl
-            // IN: blur in with scale
-            .from(split.chars, {
-              opacity: 0,
-              filter: "blur(20px)",
-              scale: 1.5,
-              stagger: 0.05,
-              duration: 0.6,
-              ease: "power2.out",
-            })
-            // HOLD
-            .to({}, { duration: 0.8 })
-            // OUT: blur out with scale
-            .to(split.chars, {
-              opacity: 0,
-              filter: "blur(20px)",
-              scale: 0.5,
-              stagger: {
-                each: 0.04,
-                from: "end",
-              },
-              duration: 0.5,
-              ease: "power2.in",
-            });
+          return (
+            tl
+              // IN: blur in with scale
+              .from(split.chars, {
+                opacity: 0,
+                filter: "blur(20px)",
+                scale: 1.5,
+                stagger: 0.05,
+                duration: 0.6,
+                ease: "power2.out",
+              })
+              // HOLD
+              .to({}, { duration: 0.8 })
+              // OUT: blur out with scale
+              .to(split.chars, {
+                opacity: 0,
+                filter: "blur(20px)",
+                scale: 0.5,
+                stagger: {
+                  each: 0.04,
+                  from: "end",
+                },
+                duration: 0.5,
+                ease: "power2.in",
+              })
+          );
         }}
       />
     </RemotionPreview>
@@ -810,22 +826,24 @@ export const InOutMask: Story = {
         className="text-white"
         style={{ fontSize: "8rem", fontWeight: 900, lineHeight: 1 }}
         createTimeline={({ textRef, tl }) => {
-          return tl
-            // IN: wipe from left
-            .set(textRef.current, { clipPath: "inset(0 100% 0 0)" })
-            .to(textRef.current, {
-              clipPath: "inset(0 0% 0 0)",
-              duration: 0.6,
-              ease: "power3.inOut",
-            })
-            // HOLD
-            .to({}, { duration: 1 })
-            // OUT: wipe to right
-            .to(textRef.current, {
-              clipPath: "inset(0 0 0 100%)",
-              duration: 0.5,
-              ease: "power3.inOut",
-            });
+          return (
+            tl
+              // IN: wipe from left
+              .set(textRef.current, { clipPath: "inset(0 100% 0 0)" })
+              .to(textRef.current, {
+                clipPath: "inset(0 0% 0 0)",
+                duration: 0.6,
+                ease: "power3.inOut",
+              })
+              // HOLD
+              .to({}, { duration: 1 })
+              // OUT: wipe to right
+              .to(textRef.current, {
+                clipPath: "inset(0 0 0 100%)",
+                duration: 0.5,
+                ease: "power3.inOut",
+              })
+          );
         }}
       />
     </RemotionPreview>
