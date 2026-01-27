@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { TextShimmer } from "../index";
 import type { TextShimmerProps } from "../index";
@@ -30,7 +30,7 @@ export const Basic: Story = {
     shimmerWidth: 20,
     repeat: 1,
   },
-  render: (args) => (
+  render: (args: TextShimmerProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-5xl font-bold">
         <TextShimmer {...args}>Shimmering Text</TextShimmer>
@@ -47,7 +47,7 @@ export const GoldShimmer: Story = {
     shimmerWidth: 25,
     repeat: 1,
   },
-  render: (args) => (
+  render: (args: TextShimmerProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-5xl font-bold">
         <TextShimmer {...args}>Premium</TextShimmer>
@@ -64,7 +64,7 @@ export const InfiniteLoop: Story = {
     shimmerWidth: 15,
     repeat: 0,
   },
-  render: (args) => (
+  render: (args: TextShimmerProps) => (
     <RemotionPreview durationInFrames={180}>
       <div className="text-4xl font-semibold">
         <TextShimmer {...args}>Loading...</TextShimmer>
@@ -81,7 +81,7 @@ export const LargeHeadline: Story = {
     shimmerWidth: 30,
     repeat: 1,
   },
-  render: (args) => (
+  render: (args: TextShimmerProps) => (
     <RemotionPreview durationInFrames={120}>
       <div className="text-7xl font-black tracking-tight">
         <TextShimmer {...args}>LAUNCH</TextShimmer>

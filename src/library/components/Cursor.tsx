@@ -82,6 +82,7 @@ export const Cursor = ({
   size = 1,
   rippleColor = "rgba(59, 130, 246, 0.5)",
   showRipple = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   showTrail = false,
   className,
   style,

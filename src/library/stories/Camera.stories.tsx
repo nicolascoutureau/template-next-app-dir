@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { Camera } from "../index";
 import type { CameraProps } from "../index";
@@ -56,7 +56,7 @@ export const Default: Story = {
     panY: 0,
     rotate: 0,
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={60}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -75,7 +75,7 @@ export const ZoomIn: Story = {
     animationDuration: 40,
     easing: "easeOut",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -94,7 +94,7 @@ export const PanAcross: Story = {
     animationDuration: 60,
     easing: "easeInOut",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -114,7 +114,7 @@ export const RotateEffect: Story = {
     animationDuration: 60,
     easing: "easeInOut",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -131,7 +131,7 @@ export const ShakeEffect: Story = {
     shakeFrequency: 12,
     shakeRotation: true,
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -149,7 +149,7 @@ export const Perspective3D: Story = {
     rotateX: 10,
     zoom: 1.1,
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={60}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -171,7 +171,7 @@ export const DramaticZoom: Story = {
     easing: "easeOut",
     origin: "top center",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -192,7 +192,7 @@ export const SpringAnimation: Story = {
     animationDuration: 50,
     easing: "spring",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>
@@ -217,7 +217,7 @@ export const CombinedEffects: Story = {
     animationDuration: 60,
     easing: "easeInOut",
   },
-  render: (args) => (
+  render: (args: CameraProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="h-80 w-[480px] overflow-hidden rounded-xl border border-white/10">
         <Camera {...args}>

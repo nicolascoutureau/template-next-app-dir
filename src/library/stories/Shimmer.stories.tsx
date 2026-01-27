@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { Shimmer } from "../index";
 import type { ShimmerProps } from "../index";
@@ -34,7 +34,7 @@ export const Basic: Story = {
     repeat: 1,
     borderRadius: 16,
   },
-  render: (args) => (
+  render: (args: ShimmerProps) => (
     <RemotionPreview durationInFrames={120}>
       <Shimmer {...args}>
         <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 px-8 py-6 text-center">
@@ -57,7 +57,7 @@ export const Repeating: Story = {
     angle: 135,
     borderRadius: 12,
   },
-  render: (args) => (
+  render: (args: ShimmerProps) => (
     <RemotionPreview durationInFrames={180}>
       <Shimmer {...args}>
         <div className="rounded-xl bg-slate-800 px-6 py-4 text-white">

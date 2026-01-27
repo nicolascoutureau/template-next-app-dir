@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { BrowserMockup } from "../index";
 import type { BrowserMockupProps } from "../index";
@@ -40,7 +40,7 @@ export const MacOSDark: Story = {
     borderRadius: 12,
     contentBackground: "#000",
   },
-  render: (args) => (
+  render: (args: BrowserMockupProps) => (
     <RemotionPreview width={900} height={550} durationInFrames={90}>
       <BrowserMockup {...args}>
         <div className="h-full bg-gradient-to-br from-slate-800 to-slate-900 p-6">
@@ -67,7 +67,7 @@ export const MacOSLight: Story = {
     shadowIntensity: 2,
     borderRadius: 12,
   },
-  render: (args) => (
+  render: (args: BrowserMockupProps) => (
     <RemotionPreview width={900} height={550} durationInFrames={90}>
       <BrowserMockup {...args}>
         <div className="h-full bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -94,7 +94,7 @@ export const Dark: Story = {
     shadowIntensity: 2,
     borderRadius: 8,
   },
-  render: (args) => (
+  render: (args: BrowserMockupProps) => (
     <RemotionPreview width={900} height={550} durationInFrames={90}>
       <BrowserMockup {...args}>
         <div className="h-full bg-zinc-900 p-6">
@@ -116,7 +116,7 @@ export const NoAddressBar: Story = {
     shadowIntensity: 2,
     borderRadius: 12,
   },
-  render: (args) => (
+  render: (args: BrowserMockupProps) => (
     <RemotionPreview width={800} height={500} durationInFrames={90}>
       <BrowserMockup {...args}>
         <div className="h-full bg-gradient-to-br from-indigo-600 to-purple-700 p-6">

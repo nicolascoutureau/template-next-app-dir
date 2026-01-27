@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { Cursor } from "../index";
 import type { CursorProps } from "../index";
@@ -12,8 +12,8 @@ const meta: Meta<CursorProps> = {
   argTypes: {
     showRipple: { control: "boolean" },
     rippleColor: { control: "color" },
-    cursorColor: { control: "color" },
-    cursorSize: { control: { type: "number", min: 10, max: 40 } },
+    color: { control: "color" },
+    size: { control: { type: "number", min: 0.5, max: 2, step: 0.1 } },
   },
 };
 
@@ -24,10 +24,10 @@ export const Default: Story = {
   args: {
     showRipple: true,
     rippleColor: "rgba(255, 255, 255, 0.3)",
-    cursorColor: "#ffffff",
-    cursorSize: 20,
+    color: "#ffffff",
+    size: 1,
   },
-  render: (args) => (
+  render: (args: CursorProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="relative h-64 w-96 rounded-xl bg-slate-800/50 border border-white/10">
         <div className="absolute left-8 top-8 rounded-lg bg-blue-500/20 border border-blue-500/40 px-4 py-2 text-sm text-blue-200">
@@ -53,10 +53,10 @@ export const Default: Story = {
 export const NoRipple: Story = {
   args: {
     showRipple: false,
-    cursorColor: "#ffffff",
-    cursorSize: 20,
+    color: "#ffffff",
+    size: 1,
   },
-  render: (args) => (
+  render: (args: CursorProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="relative h-64 w-96 rounded-xl bg-slate-800/50 border border-white/10">
         <div className="absolute inset-0 flex items-center justify-center">
@@ -81,10 +81,10 @@ export const ColoredCursor: Story = {
   args: {
     showRipple: true,
     rippleColor: "rgba(139, 92, 246, 0.4)",
-    cursorColor: "#8b5cf6",
-    cursorSize: 24,
+    color: "#8b5cf6",
+    size: 1.2,
   },
-  render: (args) => (
+  render: (args: CursorProps) => (
     <RemotionPreview durationInFrames={120}>
       <div className="relative h-64 w-96 rounded-xl bg-slate-900 border border-violet-500/20">
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/20 border border-violet-500/40 px-8 py-4 text-violet-200">

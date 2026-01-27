@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { DotGrid } from "../index";
 import type { DotGridProps } from "../index";
@@ -42,7 +42,7 @@ export const Wave: Story = {
     centerX: 0.5,
     centerY: 0.5,
   },
-  render: (args) => (
+  render: (args: DotGridProps) => (
     <RemotionPreview durationInFrames={120}>
       <DotGrid {...args} />
     </RemotionPreview>
@@ -63,7 +63,7 @@ export const Radial: Story = {
     centerX: 0.5,
     centerY: 0.5,
   },
-  render: (args) => (
+  render: (args: DotGridProps) => (
     <RemotionPreview durationInFrames={120}>
       <DotGrid {...args} />
     </RemotionPreview>
@@ -82,7 +82,7 @@ export const Rain: Story = {
     durationInFrames: 90,
     loop: true,
   },
-  render: (args) => (
+  render: (args: DotGridProps) => (
     <RemotionPreview durationInFrames={120}>
       <DotGrid {...args} />
     </RemotionPreview>

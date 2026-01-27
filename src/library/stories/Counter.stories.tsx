@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { Counter } from "../index";
 import type { CounterProps } from "../index";
@@ -36,7 +36,7 @@ export const Default: Story = {
     prefix: "",
     suffix: "",
   },
-  render: (args) => (
+  render: (args: CounterProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-center">
         <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -59,7 +59,7 @@ export const WithPrefixSuffix: Story = {
     suffix: "M",
     useGrouping: false,
   },
-  render: (args) => (
+  render: (args: CounterProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-center">
         <div className="text-5xl font-bold text-emerald-400">
@@ -79,7 +79,7 @@ export const Decimal: Story = {
     precision: 1,
     useGrouping: false,
   },
-  render: (args) => (
+  render: (args: CounterProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-center">
         <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
@@ -102,7 +102,7 @@ export const Percentage: Story = {
     precision: 0,
     suffix: "%",
   },
-  render: (args) => (
+  render: (args: CounterProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-center">
         <div className="text-6xl font-bold text-sky-400">
@@ -122,7 +122,7 @@ export const Countdown: Story = {
     precision: 0,
     padStart: 2,
   },
-  render: (args) => (
+  render: (args: CounterProps) => (
     <RemotionPreview durationInFrames={90}>
       <div className="text-center">
         <div className="text-xs uppercase tracking-[0.2em] text-slate-400">

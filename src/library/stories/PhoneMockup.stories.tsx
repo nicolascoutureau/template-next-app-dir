@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import type { Meta, StoryObj } from "@storybook/react";
 import { RemotionPreview } from "./RemotionPreview";
 import { PhoneMockup } from "../index";
 import type { PhoneMockupProps } from "../index";
@@ -43,7 +43,7 @@ export const Default: Story = {
     shadowIntensity: 3,
     perspective: 1200,
   },
-  render: (args) => (
+  render: (args: PhoneMockupProps) => (
     <RemotionPreview width={600} height={700} durationInFrames={90}>
       <PhoneMockup {...args}>
         <div className="h-full bg-gradient-to-b from-violet-600 to-indigo-700 p-4">
@@ -69,7 +69,7 @@ export const WhiteDevice: Story = {
     showNotch: true,
     shadowIntensity: 2,
   },
-  render: (args) => (
+  render: (args: PhoneMockupProps) => (
     <RemotionPreview width={600} height={700} durationInFrames={90}>
       <PhoneMockup {...args}>
         <div className="h-full bg-gradient-to-b from-rose-400 to-pink-600 p-4">
@@ -92,7 +92,7 @@ export const Pixel: Story = {
     rotateX: 0,
     shadowIntensity: 2,
   },
-  render: (args) => (
+  render: (args: PhoneMockupProps) => (
     <RemotionPreview width={600} height={700} durationInFrames={90}>
       <PhoneMockup {...args}>
         <div className="h-full bg-gradient-to-b from-emerald-500 to-teal-700 p-4">
