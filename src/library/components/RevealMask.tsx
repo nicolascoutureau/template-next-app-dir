@@ -123,11 +123,28 @@ function getClipPath(
  * The most fundamental transition in motion design — circle reveals,
  * wipe reveals, diagonal reveals are in every professional video.
  *
+ * By default, uses `position: "relative"` so it stays in document flow
+ * and sizes to its content. For full-screen overlays, pass absolute
+ * positioning via the `style` prop.
+ *
  * @example
  * ```tsx
- * // Circle reveal from center
+ * // Circle reveal from center (stays in flow)
  * <RevealMask type="circle" durationInFrames={30}>
  *   <Content />
+ * </RevealMask>
+ *
+ * // Works correctly in flex/grid layouts
+ * <div style={{ display: "flex", gap: 20 }}>
+ *   <RevealMask type="circle">
+ *     <Card />
+ *   </RevealMask>
+ *   <Card />
+ * </div>
+ *
+ * // Full-screen overlay (opt-in)
+ * <RevealMask type="circle" style={{ position: "absolute", inset: 0 }}>
+ *   <FullScreenContent />
  * </RevealMask>
  *
  * // Wipe from left
@@ -180,11 +197,7 @@ export const RevealMask = ({
   const clipPath = getClipPath(type, easedProgress, origin, direction, invert, customPath);
 
   const maskStyle: CSSProperties = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    position: "relative",
     clipPath,
     WebkitClipPath: clipPath,
     ...style,

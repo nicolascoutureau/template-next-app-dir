@@ -41,7 +41,7 @@ export const CurvedPath: Story = {
     <RemotionPreview durationInFrames={90} width={800} height={450}>
       <AbsoluteFill className="bg-slate-950">
         {/* Show the path for reference */}
-        <svg className="absolute inset-0" viewBox="0 0 800 450">
+        <svg className="absolute" width={800} height={450} viewBox="0 0 800 450">
           <path
             d={args.path}
             fill="none"
@@ -68,7 +68,7 @@ export const SWavePath: Story = {
   render: (args: MotionPathProps) => (
     <RemotionPreview durationInFrames={120} width={800} height={450}>
       <AbsoluteFill className="bg-slate-900">
-        <svg className="absolute inset-0" viewBox="0 0 800 450">
+        <svg className="absolute" width={800} height={450} viewBox="0 0 800 450">
           <path
             d={args.path}
             fill="none"
@@ -128,7 +128,7 @@ export const ArrowFollowingPath: Story = {
   render: (args: MotionPathProps) => (
     <RemotionPreview durationInFrames={120} width={800} height={450}>
       <AbsoluteFill className="bg-gradient-to-br from-slate-900 to-slate-800">
-        <svg className="absolute inset-0" viewBox="0 0 800 450">
+        <svg className="absolute" width={800} height={450} viewBox="0 0 800 450">
           <path
             d={args.path}
             fill="none"
@@ -152,7 +152,7 @@ export const MultipleObjects: Story = {
   render: () => (
     <RemotionPreview durationInFrames={120} width={800} height={450} loop>
       <AbsoluteFill className="bg-slate-950">
-        <svg className="absolute inset-0" viewBox="0 0 800 450">
+        <svg className="absolute" width={800} height={450} viewBox="0 0 800 450">
           <path
             d="M 100,225 Q 400,50 700,225"
             fill="none"

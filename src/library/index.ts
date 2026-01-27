@@ -24,6 +24,42 @@ export type {
   FloatingElement,
 } from "./components/FloatingElements";
 
+export { Particles } from "./components/Particles";
+export type {
+  ParticlesProps,
+  ParticleShape,
+  ParticleMotion,
+  EmissionArea,
+  Particle,
+} from "./components/Particles";
+
+// Shader Backgrounds
+export { ShaderPlane } from "./components/ShaderPlane";
+export type {
+  ShaderPlaneProps,
+  ShaderPlaneRef,
+  UniformValue,
+  Uniforms,
+} from "./components/ShaderPlane";
+
+export { PlasmaBackground } from "./components/PlasmaBackground";
+export type {
+  PlasmaBackgroundProps,
+  PlasmaStyle,
+} from "./components/PlasmaBackground";
+
+export { NoiseFlowBackground } from "./components/NoiseFlowBackground";
+export type {
+  NoiseFlowBackgroundProps,
+  NoisePattern,
+} from "./components/NoiseFlowBackground";
+
+export { TunnelBackground } from "./components/TunnelBackground";
+export type {
+  TunnelBackgroundProps,
+  TunnelStyle,
+} from "./components/TunnelBackground";
+
 // Effects & Animation
 export { Shimmer } from "./components/Shimmer";
 export type {
@@ -89,6 +125,18 @@ export type {
   BrowserSlotProps,
   BrowserMockupRef,
 } from "./components/BrowserMockup";
+
+export { Terminal } from "./components/Terminal";
+export type {
+  TerminalProps,
+  TerminalTheme,
+  TerminalLine,
+  TerminalSlotProps,
+  TerminalRef,
+} from "./components/Terminal";
+
+export { TypingBar, SearchIcon } from "./components/TypingBar";
+export type { TypingBarProps, TypingBarTheme } from "./components/TypingBar";
 
 // Camera & Cursor
 export { Camera } from "./components/Camera";

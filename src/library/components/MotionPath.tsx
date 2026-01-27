@@ -132,7 +132,7 @@ export const MotionPath = ({
   const point = getPointAtProgress(pathProgress);
   const angle = autoRotate ? getAngleAtProgress(pathProgress) + rotationOffset : rotationOffset;
 
-  const transformStyle: CSSProperties = {
+  const containerStyle: CSSProperties = {
     position: "absolute",
     left: 0,
     top: 0,
@@ -140,9 +140,17 @@ export const MotionPath = ({
     ...style,
   };
 
+  // Inner wrapper centers the children at the path point
+  const centerStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transform: "translate(-50%, -50%)",
+  };
+
   return (
-    <div className={className} style={transformStyle}>
-      {children}
+    <div className={className} style={containerStyle}>
+      <div style={centerStyle}>{children}</div>
     </div>
   );
 };
