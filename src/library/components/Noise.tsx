@@ -1,11 +1,5 @@
-import type { CSSProperties } from "react";
-import { useMemo } from "react";
+import { type CSSProperties, useRef, useEffect, useCallback } from "react";
 import { useCurrentFrame } from "remotion";
-
-/**
- * Noise pattern type.
- */
-export type NoiseType = "grain" | "static" | "film" | "subtle";
 
 /**
  * Blend mode for the noise overlay.
@@ -21,26 +15,22 @@ export type NoiseBlendMode =
  * Props for the `Noise` component.
  */
 export type NoiseProps = {
-  /** Type of noise pattern. Defaults to "grain". */
-  type?: NoiseType;
-  /** Opacity of the noise overlay (0..1). Defaults to 0.15. */
+  /** Opacity of the noise overlay (0..1). Defaults to 0.04 (4%). */
   opacity?: number;
+  /** How often noise regenerates (1 = every frame, 2 = every other frame). Defaults to 1. */
+  speed?: number;
+  /** Grain size in pixels. Defaults to 1. */
+  size?: number;
+  /** Whether noise is monochrome (true) or colored (false). Defaults to true. */
+  monochrome?: boolean;
   /** Blend mode for the overlay. Defaults to "overlay". */
   blendMode?: NoiseBlendMode;
-  /** Whether the noise animates (changes each frame). Defaults to true. */
-  animate?: boolean;
-  /** Animation speed (frames between changes). Lower = faster. Defaults to 1. */
-  animationSpeed?: number;
-  /** Base color for the noise. Defaults to "#000000". */
-  baseColor?: string;
-  /** Scale of the noise pattern (1 = 100%). Defaults to 1. */
-  scale?: number;
-  /** Density of the noise (0..1). Higher = more visible noise. Defaults to 0.5. */
-  density?: number;
-  /** Width. Defaults to "100%". */
-  width?: number | string;
-  /** Height. Defaults to "100%". */
-  height?: number | string;
+  /** Width in pixels. Required for canvas sizing. */
+  width?: number;
+  /** Height in pixels. Required for canvas sizing. */
+  height?: number;
+  /** Seed for deterministic noise (for consistent renders). */
+  seed?: number;
   /** Optional className. */
   className?: string;
   /** Additional styles. */
@@ -48,148 +38,124 @@ export type NoiseProps = {
 };
 
 /**
- * Generates a unique seed based on frame for animation.
+ * Seeded random number generator for deterministic noise.
  */
-function frameToSeed(frame: number, speed: number): number {
-  return Math.floor(frame / speed);
+function seededRandom(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1103515245 + 12345) & 0x7fffffff;
+    return state / 0x7fffffff;
+  };
 }
 
 /**
- * `Noise` creates film grain and static noise overlays for cinematic video effects.
- * Essential for adding texture and a professional film look to compositions.
+ * `Noise` creates film grain overlays for cinematic video effects.
+ * Canvas-based for performance at video resolution. Regenerates each frame
+ * for authentic film grain texture.
+ *
+ * The single biggest tell between "made in code" and "made professionally"
+ * is texture. Adding 2-4% noise instantly adds film-quality texture.
  *
  * @example
  * ```tsx
- * // Subtle film grain
- * <Noise type="film" opacity={0.08} />
+ * // Standard film grain (recommended for most videos)
+ * <Noise opacity={0.04} />
  *
  * // Heavier grain for vintage look
- * <Noise type="grain" opacity={0.2} density={0.7} />
+ * <Noise opacity={0.08} size={2} />
  *
- * // Static TV noise
- * <Noise type="static" opacity={0.3} animate />
+ * // Colored noise for stylized effect
+ * <Noise opacity={0.05} monochrome={false} />
  *
- * // Non-animated subtle texture
- * <Noise type="subtle" opacity={0.05} animate={false} />
+ * // Slower refresh for performance (every 2 frames)
+ * <Noise opacity={0.04} speed={2} />
  * ```
  */
 export const Noise = ({
-  type = "grain",
-  opacity = 0.15,
+  opacity = 0.04,
+  speed = 1,
+  size = 1,
+  monochrome = true,
   blendMode = "overlay",
-  animate = true,
-  animationSpeed = 1,
-  baseColor = "#000000",
-  scale = 1,
-  density = 0.5,
-  width = "100%",
-  height = "100%",
+  width = 1920,
+  height = 1080,
+  seed: seedProp,
   className,
   style,
 }: NoiseProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const frame = useCurrentFrame();
-  const seed = animate ? frameToSeed(frame, animationSpeed) : 0;
+  
+  // Only regenerate noise based on speed setting
+  const noiseSeed = seedProp !== undefined 
+    ? seedProp + Math.floor(frame / speed)
+    : frame * 12345 + Math.floor(frame / speed);
 
-  // Generate noise pattern based on type
-  const noisePattern = useMemo(() => {
-    // Create a deterministic random function based on seed
-    const seededRandom = (i: number): number => {
-      const x = Math.sin(seed * 9999 + i * 1234.5678) * 10000;
-      return x - Math.floor(x);
-    };
+  const renderNoise = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    // Generate SVG-based noise patterns
-    switch (type) {
-      case "grain":
-      case "film": {
-        // Film grain: small, dense, subtle variations
-        const grainSize = type === "film" ? 1 : 2;
-        const grainCount = Math.floor(200 * density);
-        const grains: string[] = [];
-        
-        for (let i = 0; i < grainCount; i++) {
-          const x = seededRandom(i * 2) * 100;
-          const y = seededRandom(i * 2 + 1) * 100;
-          const size = grainSize * (0.5 + seededRandom(i * 3) * 0.5);
-          const grainOpacity = 0.3 + seededRandom(i * 4) * 0.7;
-          grains.push(
-            `<circle cx="${x}" cy="${y}" r="${size}" fill="${baseColor}" opacity="${grainOpacity}"/>`
-          );
-        }
-        
-        return `url("data:image/svg+xml,${encodeURIComponent(
-          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>${grains.join("")}</svg>`
-        )}")`;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Scale canvas for grain size
+    const scaledWidth = Math.ceil(width / size);
+    const scaledHeight = Math.ceil(height / size);
+    
+    canvas.width = scaledWidth;
+    canvas.height = scaledHeight;
+
+    const imageData = ctx.createImageData(scaledWidth, scaledHeight);
+    const data = imageData.data;
+    const random = seededRandom(noiseSeed);
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (monochrome) {
+        // Grayscale noise
+        const value = Math.floor(random() * 256);
+        data[i] = value;     // R
+        data[i + 1] = value; // G
+        data[i + 2] = value; // B
+      } else {
+        // Colored noise
+        data[i] = Math.floor(random() * 256);     // R
+        data[i + 1] = Math.floor(random() * 256); // G
+        data[i + 2] = Math.floor(random() * 256); // B
       }
-
-      case "static": {
-        // TV static: larger, more blocky noise
-        const cellSize = 4;
-        const cols = Math.ceil(100 / cellSize);
-        const rows = Math.ceil(100 / cellSize);
-        const cells: string[] = [];
-        
-        for (let row = 0; row < rows; row++) {
-          for (let col = 0; col < cols; col++) {
-            const i = row * cols + col;
-            if (seededRandom(i) < density) {
-              const cellOpacity = seededRandom(i + 1000);
-              cells.push(
-                `<rect x="${col * cellSize}" y="${row * cellSize}" width="${cellSize}" height="${cellSize}" fill="${baseColor}" opacity="${cellOpacity}"/>`
-              );
-            }
-          }
-        }
-        
-        return `url("data:image/svg+xml,${encodeURIComponent(
-          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>${cells.join("")}</svg>`
-        )}")`;
-      }
-
-      case "subtle": {
-        // Very subtle, fine noise
-        const dotCount = Math.floor(100 * density);
-        const dots: string[] = [];
-        
-        for (let i = 0; i < dotCount; i++) {
-          const x = seededRandom(i * 2) * 100;
-          const y = seededRandom(i * 2 + 1) * 100;
-          const dotOpacity = 0.1 + seededRandom(i * 3) * 0.2;
-          dots.push(
-            `<circle cx="${x}" cy="${y}" r="0.5" fill="${baseColor}" opacity="${dotOpacity}"/>`
-          );
-        }
-        
-        return `url("data:image/svg+xml,${encodeURIComponent(
-          `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>${dots.join("")}</svg>`
-        )}")`;
-      }
-
-      default:
-        return "none";
+      data[i + 3] = 255; // Alpha (fully opaque, we control opacity via CSS)
     }
-  }, [type, seed, density, baseColor]);
 
-  const noiseStyle: CSSProperties = {
+    ctx.putImageData(imageData, 0, 0);
+  }, [width, height, size, monochrome, noiseSeed]);
+
+  useEffect(() => {
+    renderNoise();
+  }, [renderNoise]);
+
+  const canvasStyle: CSSProperties = {
     position: "absolute",
     inset: 0,
-    width,
-    height,
-    backgroundImage: noisePattern,
-    backgroundSize: `${100 / scale}% ${100 / scale}%`,
-    backgroundRepeat: "repeat",
+    width: "100%",
+    height: "100%",
     opacity,
     mixBlendMode: blendMode,
     pointerEvents: "none",
     zIndex: 1000,
+    imageRendering: size > 1 ? "pixelated" : "auto",
     ...style,
   };
 
-  return <div className={className} style={noiseStyle} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className={className}
+      style={canvasStyle}
+    />
+  );
 };
 
 /**
- * Alias for Noise with grain preset.
- * @deprecated Use `<Noise type="grain" />` instead.
+ * Alias for Noise.
+ * @deprecated Use `<Noise />` directly.
  */
 export const GrainOverlay = Noise;

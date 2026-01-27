@@ -1,4 +1,8 @@
-// Components
+// ============================================================================
+// COMPONENTS
+// ============================================================================
+
+// Background & Texture
 export { GradientBackground } from "./components/GradientBackground";
 export type {
   GradientBackgroundProps,
@@ -8,12 +12,19 @@ export type {
 } from "./components/GradientBackground";
 
 export { Noise, GrainOverlay } from "./components/Noise";
-export type {
-  NoiseProps,
-  NoiseType,
-  NoiseBlendMode,
-} from "./components/Noise";
+export type { NoiseProps, NoiseBlendMode } from "./components/Noise";
 
+export { DotGrid } from "./components/DotGrid";
+export type { DotGridProps, DotAnimation, SpotlightConfig } from "./components/DotGrid";
+
+export { FloatingElements } from "./components/FloatingElements";
+export type {
+  FloatingElementsProps,
+  FloatingShape,
+  FloatingElement,
+} from "./components/FloatingElements";
+
+// Effects & Animation
 export { Shimmer } from "./components/Shimmer";
 export type {
   ShimmerProps,
@@ -21,11 +32,46 @@ export type {
   ShimmerDirection,
 } from "./components/Shimmer";
 
+export { Glow } from "./components/Glow";
+export type { GlowProps } from "./components/Glow";
+
+export { RevealMask } from "./components/RevealMask";
+export type {
+  RevealMaskProps,
+  RevealType,
+  RevealDirection,
+} from "./components/RevealMask";
+
+export { Stagger } from "./components/Stagger";
+export type {
+  StaggerProps,
+  StaggerDirection,
+  StaggerPreset,
+  StaggerAnimationParams,
+} from "./components/Stagger";
+
+export { MotionPath } from "./components/MotionPath";
+export type { MotionPathProps } from "./components/MotionPath";
+
+// Text
+export { TextAnimation } from "./components/TextAnimation";
+export type {
+  TextAnimationProps,
+  TextAnimationPreset,
+  SplitType,
+  AnimationDirection,
+} from "./components/TextAnimation";
+
 /** @deprecated Use `<Shimmer mode="text">` instead */
 export { TextShimmer } from "./components/TextShimmer";
 /** @deprecated Use ShimmerProps with mode="text" instead */
 export type { TextShimmerProps } from "./components/TextShimmer";
 
+// Data Display
+export { Counter } from "./components/Counter";
+export type { CounterProps, CounterMode, CounterEasing } from "./components/Counter";
+
+// Device Mockups
 export { PhoneMockup } from "./components/PhoneMockup";
 export type {
   PhoneMockupProps,
@@ -44,23 +90,7 @@ export type {
   BrowserMockupRef,
 } from "./components/BrowserMockup";
 
-export { DotGrid } from "./components/DotGrid";
-export type { DotGridProps, DotAnimation, SpotlightConfig } from "./components/DotGrid";
-
-export { Cursor } from "./components/Cursor";
-export type { CursorProps, CursorAction, CursorVariant } from "./components/Cursor";
-
-export { Counter } from "./components/Counter";
-export type { CounterProps, CounterMode, CounterEasing } from "./components/Counter";
-
-export { TextAnimation } from "./components/TextAnimation";
-export type {
-  TextAnimationProps,
-  TextAnimationPreset,
-  SplitType,
-  AnimationDirection,
-} from "./components/TextAnimation";
-
+// Camera & Cursor
 export { Camera } from "./components/Camera";
 export type {
   CameraProps,
@@ -70,9 +100,36 @@ export type {
   EasingPreset,
 } from "./components/Camera";
 
-// Hooks
+export { Cursor } from "./components/Cursor";
+export type { CursorProps, CursorAction, CursorVariant } from "./components/Cursor";
+
+// ============================================================================
+// HOOKS
+// ============================================================================
+
 export { useFrameProgress } from "./hooks/useFrameProgress";
 export type { FrameProgressOptions } from "./hooks/useFrameProgress";
 
 export { useGsapTimeline } from "./hooks/useGsapTimeline";
 export type { GsapTimelineOptions } from "./hooks/useGsapTimeline";
+
+export { useWiggle } from "./hooks/useWiggle";
+export type { WiggleConfig } from "./hooks/useWiggle";
+
+export { useStagger } from "./hooks/useStagger";
+export type { UseStaggerConfig, UseStaggerResult } from "./hooks/useStagger";
+
+export { useChain } from "./hooks/useChain";
+export type { UseChainConfig, UseChainResult, ChainSegment } from "./hooks/useChain";
+
+export { useLoopProgress, useLoop } from "./hooks/useLoopProgress";
+export type { UseLoopProgressConfig } from "./hooks/useLoopProgress";
+
+// ============================================================================
+// UTILITIES
+// ============================================================================
+
+export { easing } from "./utils/easing";
+export { color } from "./utils/color";
+export { layout } from "./utils/layout";
+export type { Point, GridConfig, CircleConfig, DistributeConfig } from "./utils/layout";
