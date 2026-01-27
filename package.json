@@ -14,7 +14,9 @@
     "fix:all": "prettier --write . && eslint . --fix --fix-type problem,suggestion,layout",
     "format": "prettier --write src",
     "type-check": "tsc --noEmit 2>&1 || echo 'Typescript check failed'",
-    "lint": "eslint src 2>&1 || echo 'Lint check failed'"
+    "lint": "eslint src 2>&1 || echo 'Lint check failed'",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@remotion/animation-utils": "^4.0.408",
@@ -51,7 +53,7 @@
     "@remotion/eslint-plugin": "^4.0.408",
     "@remotion/tailwind-v4": "^4.0.408",
     "@tailwindcss/postcss": "^4.1.11",
-    "@types/node": "20.12.14",
+    "@types/node": "^20.19.0",
     "css-loader": "^7.1.2",
     "postcss": "^8.5.0",
     "postcss-loader": "^8.1.1",
@@ -64,6 +66,18 @@
     "eslint-config-next": "^16.1.4",
     "prettier": "3.6.0",
     "tailwindcss": "^4.1.11",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "storybook": "^10.2.0",
+    "@storybook/nextjs-vite": "^10.2.0",
+    "@chromatic-com/storybook": "^5.0.0",
+    "@storybook/addon-vitest": "^10.2.0",
+    "@storybook/addon-a11y": "^10.2.0",
+    "@storybook/addon-docs": "^10.2.0",
+    "@storybook/addon-onboarding": "^10.2.0",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "playwright": "^1.58.0",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-v8": "^4.0.18"
   }
 }
