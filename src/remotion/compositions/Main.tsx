@@ -1,7 +1,7 @@
 import { AbsoluteFill, Artifact, useCurrentFrame } from "remotion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { TextAnimation } from "../base/components/TextAnimation";
+import { TextAnimation } from "../../library";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 // This re-runs on every HMR update of this file

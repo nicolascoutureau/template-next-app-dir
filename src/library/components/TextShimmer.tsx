@@ -1,8 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useFrameProgress } from "../hooks/useFrameProgress";
+import { Shimmer } from "./Shimmer";
 
 /**
  * Props for the `TextShimmer` component.
+ * @deprecated Use `<Shimmer mode="text">` instead.
  */
 export type TextShimmerProps = {
   /** Text content to apply the shimmer effect to. */
@@ -29,59 +30,45 @@ export type TextShimmerProps = {
  * `TextShimmer` creates a shimmering text effect where the text color itself animates.
  * Uses background-clip: text for a true text gradient shimmer.
  *
+ * @deprecated Use `<Shimmer mode="text">` instead for the unified API.
+ *
  * @example
  * ```tsx
- * <TextShimmer
- *   durationInFrames={45}
- *   baseColor="#666"
- *   shimmerColor="#fff"
- * >
+ * // Deprecated:
+ * <TextShimmer baseColor="#666" shimmerColor="#fff">
  *   Shimmering Text
  * </TextShimmer>
+ *
+ * // Recommended:
+ * <Shimmer mode="text" baseColor="#666" shimmerColor="#fff">
+ *   Shimmering Text
+ * </Shimmer>
  * ```
  */
 export const TextShimmer = ({
   children,
-  startFrame = 0,
-  durationInFrames = 40,
-  repeat = 1,
-  baseColor = "currentColor",
-  shimmerColor = "#ffffff",
-  shimmerWidth = 20,
+  startFrame,
+  durationInFrames,
+  repeat,
+  baseColor,
+  shimmerColor,
+  shimmerWidth,
   className,
   style,
 }: TextShimmerProps) => {
-  const totalDuration = repeat === 0 ? durationInFrames : durationInFrames * repeat;
-
-  const progress = useFrameProgress({
-    startFrame,
-    durationInFrames: totalDuration,
-    clamp: repeat !== 0,
-  });
-
-  const cycleProgress =
-    repeat === 0 ? progress % 1 : repeat === 1 ? progress : (progress * repeat) % 1;
-
-  // Calculate gradient position (-100% to 200% for full sweep)
-  const position = -100 + cycleProgress * 300;
-
-  const gradientStyle: CSSProperties = {
-    ...style,
-    backgroundImage: `linear-gradient(
-      90deg,
-      ${baseColor} ${position}%,
-      ${shimmerColor} ${position + shimmerWidth / 2}%,
-      ${baseColor} ${position + shimmerWidth}%
-    )`,
-    backgroundClip: "text",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
-    display: "inline-block",
-  };
-
   return (
-    <span className={className} style={gradientStyle}>
+    <Shimmer
+      mode="text"
+      startFrame={startFrame}
+      durationInFrames={durationInFrames}
+      repeat={repeat}
+      baseColor={baseColor}
+      shimmerColor={shimmerColor}
+      shimmerWidth={shimmerWidth}
+      className={className}
+      style={style}
+    >
       {children}
-    </span>
+    </Shimmer>
   );
 };

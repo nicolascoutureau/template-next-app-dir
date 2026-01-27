@@ -13,6 +13,7 @@ export type PhoneDevice =
   | "iphone-14"
   | "iphone-14-pro"
   | "iphone-15-pro"
+  | "iphone-16-pro"
   | "pixel"
   | "generic"
   | "custom";
@@ -138,6 +139,16 @@ const devicePresets: Record<Exclude<PhoneDevice, "custom">, DeviceSpecs> = {
     notchWidth: 95,
     notchHeight: 30,
     notchRadius: 15,
+  },
+  "iphone-16-pro": {
+    width: 282,
+    height: 590,
+    borderRadius: 54,
+    bezel: 6,
+    dynamicIsland: true,
+    notchWidth: 98,
+    notchHeight: 32,
+    notchRadius: 16,
   },
   pixel: { width: 276, height: 580, borderRadius: 36, bezel: 10 },
   generic: { width: 280, height: 560, borderRadius: 32, bezel: 14 },

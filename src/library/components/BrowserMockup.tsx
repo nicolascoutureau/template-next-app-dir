@@ -28,6 +28,8 @@ export type BrowserMockupProps = {
   theme?: BrowserTheme;
   /** URL to display in the address bar. */
   url?: string;
+  /** Convenience prop: URL of a screenshot image to display. */
+  screenshotUrl?: string;
   /** Browser window width. */
   width?: number | string;
   /** Browser window height. */
@@ -161,6 +163,7 @@ export const BrowserMockup = forwardRef<HTMLDivElement, BrowserMockupProps>(
       children,
       theme = "dark",
       url = "https://example.com",
+      screenshotUrl,
       width = 1000,
       height = 640,
       showAddressBar = true,
@@ -323,7 +326,21 @@ export const BrowserMockup = forwardRef<HTMLDivElement, BrowserMockupProps>(
             background: contentBackground,
           }}
         >
-          {children}
+          {screenshotUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={screenshotUrl}
+              alt="Screenshot"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          ) : (
+            children
+          )}
         </div>
       </div>
     );

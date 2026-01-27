@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, interpolate } from "remotion";
 import { useFrameProgress } from "../hooks/useFrameProgress";
 
 /**
@@ -25,6 +25,8 @@ export type CursorAction = {
   doubleClick?: boolean;
   /** Cursor style at this position. */
   cursor?: CursorVariant;
+  /** Optional bezier control point offset for curved movement. */
+  curve?: { x: number; y: number };
 };
 
 /**
@@ -43,8 +45,6 @@ export type CursorProps = {
   rippleColor?: string;
   /** Whether to show click ripple effect. */
   showRipple?: boolean;
-  /** Whether to show cursor trail. */
-  showTrail?: boolean;
   /** Optional className on the wrapper div. */
   className?: string;
   /** Inline styles for the wrapper div. */
@@ -75,6 +75,22 @@ const cursorPaths: Record<CursorVariant, string> = {
  * />
  * ```
  */
+/**
+ * Quadratic bezier interpolation for curved cursor movement.
+ */
+function bezierPoint(
+  t: number,
+  p0: { x: number; y: number },
+  p1: { x: number; y: number },
+  p2: { x: number; y: number }
+): { x: number; y: number } {
+  const mt = 1 - t;
+  return {
+    x: mt * mt * p0.x + 2 * mt * t * p1.x + t * t * p2.x,
+    y: mt * mt * p0.y + 2 * mt * t * p1.y + t * t * p2.y,
+  };
+}
+
 export const Cursor = ({
   actions,
   easing,
@@ -82,23 +98,21 @@ export const Cursor = ({
   size = 1,
   rippleColor = "rgba(59, 130, 246, 0.5)",
   showRipple = true,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  showTrail = false,
   className,
   style,
 }: CursorProps) => {
   const frame = useCurrentFrame();
 
-  // Find current and next action based on frame
-  let currentAction = actions[0];
-  let prevAction = actions[0];
-
+  // Find current and previous action based on frame
+  let currentActionIndex = 0;
   for (let i = 0; i < actions.length; i++) {
     if (frame >= actions[i].frame) {
-      prevAction = i > 0 ? actions[i - 1] : actions[i];
-      currentAction = actions[i];
+      currentActionIndex = i;
     }
   }
+  
+  const currentAction = actions[currentActionIndex];
+  const prevAction = currentActionIndex > 0 ? actions[currentActionIndex - 1] : currentAction;
 
   // Calculate interpolated position
   const actionDuration = currentAction.duration ?? 15;
@@ -108,22 +122,48 @@ export const Cursor = ({
   );
   const easedProgress = easing ? easing(actionProgress) : actionProgress;
 
-  // Interpolate from previous position to current
-  const startX = frame <= currentAction.frame ? prevAction.x : prevAction.x;
-  const startY = frame <= currentAction.frame ? prevAction.y : prevAction.y;
-  const x = startX + (currentAction.x - startX) * easedProgress;
-  const y = startY + (currentAction.y - startY) * easedProgress;
+  // Interpolate from previous position to current (with optional curve)
+  let x: number;
+  let y: number;
 
-  // Check if clicking at current frame
-  const isClicking = currentAction.click && 
-    frame >= currentAction.frame + actionDuration && 
-    frame < currentAction.frame + actionDuration + 8;
+  if (currentAction.curve && currentActionIndex > 0) {
+    // Curved movement using quadratic bezier
+    const startPoint = { x: prevAction.x, y: prevAction.y };
+    const endPoint = { x: currentAction.x, y: currentAction.y };
+    const midX = (startPoint.x + endPoint.x) / 2 + currentAction.curve.x;
+    const midY = (startPoint.y + endPoint.y) / 2 + currentAction.curve.y;
+    const controlPoint = { x: midX, y: midY };
+    
+    const point = bezierPoint(easedProgress, startPoint, controlPoint, endPoint);
+    x = point.x;
+    y = point.y;
+  } else {
+    // Linear interpolation
+    const startX = prevAction.x;
+    const startY = prevAction.y;
+    x = startX + (currentAction.x - startX) * easedProgress;
+    y = startY + (currentAction.y - startY) * easedProgress;
+  }
+
+  // Click animation using frame-based interpolation (not CSS transition)
+  const clickStartFrame = currentAction.frame + actionDuration;
+  const clickDuration = 8; // frames
+  const clickProgress = interpolate(
+    frame,
+    [clickStartFrame, clickStartFrame + clickDuration / 2, clickStartFrame + clickDuration],
+    [1, 0.85, 1],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+  
+  const isInClickWindow = currentAction.click && 
+    frame >= clickStartFrame && 
+    frame < clickStartFrame + clickDuration;
 
   const cursorVariant = currentAction.cursor ?? "pointer";
 
   // Ripple animation for clicks
   const rippleProgress = useFrameProgress({
-    startFrame: currentAction.frame + actionDuration,
+    startFrame: clickStartFrame,
     durationInFrames: 20,
     clamp: true,
   });
@@ -140,14 +180,16 @@ export const Cursor = ({
     zIndex: 1000,
   };
 
+  // Use frame-based scale instead of CSS transition
+  const cursorScale = isInClickWindow ? clickProgress : 1;
+
   const cursorStyle: CSSProperties = {
     position: "absolute",
     left: x,
     top: y,
     width: 24 * size,
     height: 24 * size,
-    transform: `scale(${isClicking ? 0.85 : 1})`,
-    transition: "transform 0.05s ease-out",
+    transform: `scale(${cursorScale})`,
     filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))",
   };
 
