@@ -14,9 +14,16 @@ interface TextAnimationProps {
     textRef: React.RefObject<HTMLDivElement | null>;
     tl: gsap.core.Timeline;
   }) => gsap.core.Timeline;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const TextAnimation = ({ text, createTimeline }: TextAnimationProps) => {
+export const TextAnimation = ({
+  text,
+  createTimeline,
+  className,
+  style,
+}: TextAnimationProps) => {
   const textRef = useRef<HTMLDivElement>(null);
 
   const animationContainerRef = useGsapTimeline<HTMLDivElement>(() => {
@@ -28,10 +35,7 @@ export const TextAnimation = ({ text, createTimeline }: TextAnimationProps) => {
   });
 
   return (
-    <div
-      ref={animationContainerRef}
-      className="text-5xl font-bold text-center p-8 font-sans"
-    >
+    <div ref={animationContainerRef} className={className} style={style}>
       <div ref={textRef}>{text}</div>
     </div>
   );
