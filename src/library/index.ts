@@ -29,6 +29,11 @@ export type { CursorProps, CursorAction, CursorVariant } from "./components/Curs
 export { Counter } from "./components/Counter";
 export type { CounterProps } from "./components/Counter";
 
+export { TextAnimation } from "./components/TextAnimation";
+export type { TextAnimationProps } from "./components/TextAnimation";
+
 // Hooks
 export { useFrameProgress } from "./hooks/useFrameProgress";
 export type { FrameProgressOptions } from "./hooks/useFrameProgress";
+
+export { useGsapTimeline } from "./hooks/useGsapTimeline";

@@ -21,6 +21,8 @@ export type ShimmerProps = {
   shimmerColor?: string;
   /** Opacity of the shimmer highlight (0..1). Defaults to 0.3. */
   shimmerOpacity?: number;
+  /** Border radius to clip the shimmer effect. Defaults to 0. */
+  borderRadius?: number | string;
   /** Optional className on the wrapper div. */
   className?: string;
   /** Inline styles for the wrapper div. */
@@ -51,6 +53,7 @@ export const Shimmer = ({
   shimmerWidth = 100,
   shimmerColor = "#ffffff",
   shimmerOpacity = 0.3,
+  borderRadius = 0,
   className,
   style,
 }: ShimmerProps) => {
@@ -89,6 +92,7 @@ export const Shimmer = ({
     position: "relative",
     display: "inline-block",
     overflow: "hidden",
+    borderRadius,
   };
 
   const shimmerOverlayStyle: CSSProperties = {
