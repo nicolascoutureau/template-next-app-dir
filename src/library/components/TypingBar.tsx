@@ -223,7 +223,8 @@ export const TypingBar = ({
     flex: 1,
     display: "flex",
     alignItems: "center",
-    minHeight: "1.2em",
+    height: `${fontSize * 1.2}px`,
+    lineHeight: `${fontSize * 1.2}px`,
     whiteSpace: "nowrap",
     overflow: "hidden",
   };
@@ -231,11 +232,11 @@ export const TypingBar = ({
   const cursorStyle: CSSProperties = {
     display: "inline-block",
     width: "2px",
-    height: "1.1em",
+    height: `${fontSize}px`,
     backgroundColor: "currentColor",
     opacity: cursorOpacity,
     marginLeft: "1px",
-    verticalAlign: "middle",
+    flexShrink: 0,
   };
 
   const placeholderStyle: CSSProperties = {
@@ -258,7 +259,9 @@ export const TypingBar = ({
           <span style={placeholderStyle}>{placeholder}</span>
         ) : (
           <>
-            {displayText}
+            <span style={{ display: "inline", verticalAlign: "middle" }}>
+              {displayText}
+            </span>
             {showCursor && <span style={cursorStyle} />}
           </>
         )}

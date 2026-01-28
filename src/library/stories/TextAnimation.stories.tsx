@@ -37,6 +37,30 @@ export const CharacterBounce: Story = {
   ),
 };
 
+export const SlideLoop: Story = {
+  render: () => (
+    <RemotionPreview durationInFrames={180} width={800} height={200}>
+      <TextAnimation
+        text="Break apart text into characters, words, and/or lines for easy animation."
+        className="text-white"
+        style={{ fontSize: "4rem", fontWeight: 700 }}
+        createTimeline={({ textRef, tl }) => {
+          const split = new SplitText(textRef.current, { type: "chars" });
+          return tl.from(split.chars, {
+            x: 150,
+            opacity: 0,
+            duration: 0.7,
+            ease: "power4",
+            stagger: 0.04,
+            repeat: -1,
+            yoyo: true,
+          });
+        }}
+      />
+    </RemotionPreview>
+  ),
+};
+
 export const FadeInWords: Story = {
   render: () => (
     <RemotionPreview durationInFrames={90}>

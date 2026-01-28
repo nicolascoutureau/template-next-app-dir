@@ -1,15 +1,43 @@
 "use client";
 
 import type { NextPage } from "next";
-import React, { useState, useEffect } from "react";
-import { Player } from "@remotion/player";
+import React, { useState, useEffect, useRef } from "react";
+import { Player, type PlayerRef } from "@remotion/player";
 import { composition } from "../remotion/compositions";
 
+/**
+ * Parses the URL hash for a frame parameter.
+ * Supports formats: #frame=30 or #f=30
+ */
+const getFrameFromHash = (): number | null => {
+  if (typeof window === "undefined") return null;
+
+  const hash = window.location.hash.slice(1); // Remove the #
+  if (!hash) return null;
+
+  const params = new URLSearchParams(hash);
+  const frameValue = params.get("frame") ?? params.get("f");
+
+  if (frameValue) {
+    const frame = parseInt(frameValue, 10);
+    if (!isNaN(frame) && frame >= 0) {
+      return frame;
+    }
+  }
+
+  return null;
+};
+
 const Home: NextPage = () => {
+  const playerRef = useRef<PlayerRef>(null);
   const [playerSize, setPlayerSize] = useState<React.CSSProperties>({
     width: "100%",
     height: "100%",
   });
+
+  // Check if we should autoPlay (only if no frame hash is present)
+  const initialFrame = getFrameFromHash();
+  const shouldAutoPlay = initialFrame === null;
 
   // Calculate the player size based on composition aspect ratio
   const calculatePlayerSize = () => {
@@ -50,18 +78,42 @@ const Home: NextPage = () => {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  // Handle URL hash parameter for seeking to a specific frame
+  useEffect(() => {
+    const seekToHashFrame = () => {
+      const targetFrame = getFrameFromHash();
+      if (targetFrame !== null && playerRef.current) {
+        // Clamp frame to valid range
+        const clampedFrame = Math.min(
+          targetFrame,
+          composition.durationInFrames - 1
+        );
+        playerRef.current.seekTo(clampedFrame);
+        playerRef.current.pause();
+      }
+    };
+
+    // Seek on initial load
+    seekToHashFrame();
+
+    // Listen for hash changes
+    window.addEventListener("hashchange", seekToHashFrame);
+    return () => window.removeEventListener("hashchange", seekToHashFrame);
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center h-screen w-screen p-2">
       <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="w-full h-full flex items-center justify-center">
           <Player
+            ref={playerRef}
             component={composition.component}
             durationInFrames={composition.durationInFrames}
             fps={composition.fps}
             compositionHeight={composition.height}
             compositionWidth={composition.width}
             controls
-            autoPlay
+            autoPlay={shouldAutoPlay}
             loop
             style={playerSize}
             allowFullscreen

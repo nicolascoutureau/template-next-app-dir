@@ -78,6 +78,36 @@ export type {
   RevealDirection,
 } from "./components/RevealMask";
 
+export { BlurTransition } from "./components/BlurTransition";
+export type { BlurTransitionProps, BlurType } from "./components/BlurTransition";
+
+export { RackFocus } from "./components/RackFocus";
+export type { RackFocusProps } from "./components/RackFocus";
+
+export { GlitchTransition } from "./components/GlitchTransition";
+export type { GlitchTransitionProps, GlitchIntensity } from "./components/GlitchTransition";
+
+export { ZoomBlur } from "./components/ZoomBlur";
+export type { ZoomBlurProps, ZoomDirection } from "./components/ZoomBlur";
+
+export { LightLeak } from "./components/LightLeak";
+export type { LightLeakProps, LightLeakStyle } from "./components/LightLeak";
+
+export { LiquidWarp } from "./components/LiquidWarp";
+export type { LiquidWarpProps, LiquidStyle } from "./components/LiquidWarp";
+
+export { MaskTransition } from "./components/MaskTransition";
+export type { MaskTransitionProps, MaskShape } from "./components/MaskTransition";
+
+export { WaveTransition } from "./components/WaveTransition";
+export type { WaveTransitionProps, WaveStyle, WaveDirection } from "./components/WaveTransition";
+
+export { SlideTransition } from "./components/SlideTransition";
+export type { SlideTransitionProps, SlideEffect, SlideDirection } from "./components/SlideTransition";
+
+export { ParticleDissolve } from "./components/ParticleDissolve";
+export type { ParticleDissolveProps, DissolvePattern } from "./components/ParticleDissolve";
+
 export { Stagger } from "./components/Stagger";
 export type {
   StaggerProps,
