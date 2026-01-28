@@ -161,6 +161,7 @@ function useMultipleFonts(fontUrls: string[]): (opentype.Font | null)[] {
 // HELPER: Create initial animation state
 // ============================================================================
 
+// Initialize with opacity 0 to prevent flash before timeline applies initial state
 const createCharState = (): CharAnimationState => ({
   x: 0,
   y: 0,
@@ -169,7 +170,7 @@ const createCharState = (): CharAnimationState => ({
   rotationY: 0,
   rotationZ: 0,
   scale: 1,
-  opacity: 1,
+  opacity: 0, // Start hidden - timeline will control visibility
 });
 
 const createWordState = (): WordAnimationState => ({
@@ -180,7 +181,7 @@ const createWordState = (): WordAnimationState => ({
   rotationY: 0,
   rotationZ: 0,
   scale: 1,
-  opacity: 1,
+  opacity: 1, // Words default to visible, chars control visibility
 });
 
 const createSegmentState = (): SegmentAnimationState => ({
@@ -191,7 +192,7 @@ const createSegmentState = (): SegmentAnimationState => ({
   rotationY: 0,
   rotationZ: 0,
   scale: 1,
-  opacity: 1,
+  opacity: 1, // Segments default to visible, chars control visibility
 });
 
 // ============================================================================
@@ -473,8 +474,8 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     }
   }, [frame, fps, timelineVersion]);
 
-  // Don't render until all fonts are loaded
-  if (!allFontsLoaded || segmentDataList.length === 0) {
+  // Don't render until all fonts loaded, layout calculated, and timeline ready
+  if (!allFontsLoaded || segmentDataList.length === 0 || timelineVersion === 0) {
     return null;
   }
 

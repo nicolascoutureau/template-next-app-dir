@@ -7,7 +7,7 @@ import {
   spring,
 } from "remotion";
 import React from "react";
-import { SplitText3DGsap } from "../three/text";
+import { SplitText3DGsap, RichText3DGsap } from "../three/text";
 import { getFontUrl } from "../fonts";
 
 // Local fonts (downloaded via: npm run download-fonts)
@@ -183,13 +183,56 @@ export const Main: React.FC = () => {
             }}
           />
 
+          {/* Rich text example - multiple fonts/styles in one text block! */}
+          <RichText3DGsap
+            segments={[
+              { text: "Build ", fontUrl: interFontUrl, color: "#94a3b8" },
+              { text: "amazing ", fontUrl: poppinsFontUrl, color: "#60a5fa" },
+              { text: "videos", fontUrl: playfairFontUrl, color: "#f472b6" },
+            ]}
+            position={[0, -1.8, 0]}
+            fontSize={0.4}
+            createTimeline={({ tl, segments }) => {
+              // Set initial hidden state for all segments
+              segments.forEach((seg) => {
+                tl.set(seg.state, { opacity: 0, y: 0.2 }, 0);
+                tl.set(seg.chars, { y: 0.15, opacity: 0, scale: 0.8 }, 0);
+              });
+
+              // Animate each segment with different timing
+              segments.forEach((seg, i) => {
+                const startTime = 1.5 + i * 0.3;
+                // Segment-level entrance
+                tl.to(
+                  seg.state,
+                  { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+                  startTime,
+                );
+                // Character-level wave within each segment
+                tl.to(
+                  seg.chars,
+                  {
+                    y: 0,
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.4,
+                    stagger: 0.03,
+                    ease: "back.out(1.7)",
+                  },
+                  startTime,
+                );
+              });
+              return tl;
+            }}
+          />
+
           {/* Multi-line text example - animate by lines! */}
           <SplitText3DGsap
             text={"Create stunning\nvideos with\ncode"}
             fontUrl={interFontUrl}
-            position={[0, -2, 0]}
-            color="#94a3b8"
-            fontSize={0.35}
+            position={[0, -3, 0]}
+            color="#64748b"
+            fontSize={0.3}
             lineHeight={1.4}
             createTimeline={({ tl, lines }) => {
               // Set initial hidden state for all lines
@@ -200,7 +243,7 @@ export const Main: React.FC = () => {
 
               // Animate each line sliding in from left with stagger
               lines.forEach((line, i) => {
-                const startTime = 2.5 + i * 0.25;
+                const startTime = 2.8 + i * 0.25;
 
                 // Line slides in
                 tl.to(
