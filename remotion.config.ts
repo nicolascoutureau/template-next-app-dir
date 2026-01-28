@@ -6,7 +6,10 @@
 import { Config } from "@remotion/cli/config";
 import { enableTailwind } from "@remotion/tailwind-v4";
 
+// Use ANGLE for WebGL rendering (required for R3F)
+Config.setChromiumOpenGlRenderer("angle");
 Config.setVideoImageFormat("jpeg");
+
 Config.overrideWebpackConfig((currentConfiguration) => {
   return enableTailwind(currentConfiguration);
 });

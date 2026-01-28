@@ -142,13 +142,84 @@ const composition = getCompositionById("HelloWorld");
 ```
 src/remotion/
 ├── compositions.ts          # Auto-import configuration
-├── Root.tsx               # Auto-registers all compositions
-├── HelloWorld.tsx         # Example composition
-├── SimpleText.tsx         # Example composition
-├── CustomizableText.tsx   # Example composition with props
-└── base/                  # Shared components and hooks
-    ├── components/
-    └── hooks/
+├── Root.tsx                 # Auto-registers all compositions
+├── HelloWorld.tsx           # Example composition
+├── SimpleText.tsx           # Example composition
+├── CustomizableText.tsx     # Example composition with props
+├── base/                    # Shared components and hooks
+│   ├── components/
+│   └── hooks/
+└── three/                   # React Three Fiber (R3F) compositions
+    ├── Scene.tsx            # Basic R3F scene with rotating box
+    ├── AdvancedScene.tsx    # Advanced scene with orbiting objects
+    ├── index.ts             # Exports all R3F components
+    └── components/
+        ├── RotatingBox.tsx      # Animated rotating box
+        ├── AnimatedSphere.tsx   # Pulsing animated sphere
+        ├── OrbitingObjects.tsx  # Multiple orbiting spheres
+        ├── Lights.tsx           # Scene lighting setup
+        └── FloatingText.tsx     # Animated floating text
 ```
 
 This system makes it easy to add new compositions without touching multiple files or worrying about registration. Just create your component and add it to the array!
+
+---
+
+## React Three Fiber (R3F) Compositions
+
+This project includes R3F support for creating 3D animations with Remotion.
+
+### Available 3D Compositions
+
+1. **ThreeBasic** - A simple scene with a rotating box
+2. **ThreeAdvanced** - A complex scene with orbiting objects and starfield
+
+### Creating R3F Compositions
+
+To create a new R3F composition:
+
+```tsx
+// src/remotion/three/MyScene.tsx
+import { ThreeCanvas } from "@remotion/three";
+import { AbsoluteFill, useVideoConfig } from "remotion";
+
+export const MyScene: React.FC = () => {
+  const { width, height } = useVideoConfig();
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#1a1a2e" }}>
+      <ThreeCanvas
+        width={width}
+        height={height}
+        camera={{ fov: 75, position: [0, 0, 5] }}
+      >
+        <ambientLight intensity={0.5} />
+        <mesh>
+          <boxGeometry args={[1, 1, 1]} />
+          <meshStandardMaterial color="hotpink" />
+        </mesh>
+      </ThreeCanvas>
+    </AbsoluteFill>
+  );
+};
+```
+
+### Key Packages
+
+- `@remotion/three` - Integration between Remotion and R3F
+- `@react-three/fiber` - React renderer for Three.js
+- `@react-three/drei` - Useful helpers and components
+- `three` - The 3D library
+
+### R3F Tips for Remotion
+
+1. **Use Remotion's timing**: Always use `useCurrentFrame()` and `useVideoConfig()` for animations
+2. **Spring animations**: Use Remotion's `spring()` for smooth easing
+3. **Interpolate values**: Use `interpolate()` for frame-based value mapping
+4. **WebGL Config**: The `remotion.config.ts` sets `Config.setChromiumOpenGlRenderer("angle")` for proper WebGL rendering
+
+### Documentation
+
+- [Remotion Docs](https://remotion.dev/docs)
+- [@remotion/three Docs](https://remotion.dev/docs/three)
+- [React Three Fiber Docs](https://docs.pmnd.rs/react-three-fiber)
