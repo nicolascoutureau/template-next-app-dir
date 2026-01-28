@@ -7,7 +7,7 @@ import {
   continueRender,
 } from "remotion";
 import { Text } from "@react-three/drei";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import opentype from "opentype.js";
 
 // ============================================================================
@@ -20,34 +20,59 @@ const fontCache: Map<string, opentype.Font> = new Map();
 /**
  * Hook to load a font with opentype.js for accurate text metrics
  * Uses Remotion's delayRender/continueRender to wait for font loading
+ * 
+ * Fixed: Properly handles fontUrl changes by creating new delayRender handles
  */
 export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
   const [font, setFont] = useState<opentype.Font | null>(
     () => fontCache.get(fontUrl) || null
   );
-  const [handle] = useState(() => delayRender("Loading font with opentype.js"));
+  
+  // Track if we've already continued render for this font URL
+  const continuedRef = useRef<string | null>(null);
+  const handleRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // If already cached, use it
+    // If already have this font loaded, no need to delay
     if (fontCache.has(fontUrl)) {
       setFont(fontCache.get(fontUrl)!);
-      continueRender(handle);
       return;
     }
 
+    // Create a new delay handle for this font URL
+    const handle = delayRender(`Loading font: ${fontUrl}`);
+    handleRef.current = handle;
+    continuedRef.current = null;
+
     // Load the font
     opentype.load(fontUrl, (err, loadedFont) => {
+      // Check if this is still the current request (fontUrl might have changed)
+      if (handleRef.current !== handle) {
+        // A newer request superseded this one, just continue the old handle
+        continueRender(handle);
+        return;
+      }
+
       if (err || !loadedFont) {
         console.error("Failed to load font:", err);
         continueRender(handle);
+        continuedRef.current = fontUrl;
         return;
       }
 
       fontCache.set(fontUrl, loadedFont);
       setFont(loadedFont);
       continueRender(handle);
+      continuedRef.current = fontUrl;
     });
-  }, [fontUrl, handle]);
+
+    // Cleanup: if effect re-runs before load completes, continue the old handle
+    return () => {
+      if (handleRef.current === handle && continuedRef.current !== fontUrl) {
+        continueRender(handle);
+      }
+    };
+  }, [fontUrl]);
 
   return font;
 };
