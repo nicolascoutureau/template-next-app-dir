@@ -11,17 +11,197 @@ import React, { useMemo, useState, useEffect, useRef } from "react";
 import opentype from "opentype.js";
 
 // ============================================================================
-// FONT LOADING WITH OPENTYPE.JS
+// FONT LOADING WITH OPENTYPE.JS + GOOGLE FONTS SUPPORT
 // ============================================================================
 
 // Global font cache to avoid reloading
 const fontCache: Map<string, opentype.Font> = new Map();
 
+// Cache for resolved Google Font URLs
+const googleFontUrlCache: Map<string, string> = new Map();
+
+/**
+ * Google Font weight mapping
+ */
+export type GoogleFontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
+/**
+ * Google Font configuration
+ */
+export interface GoogleFontConfig {
+  family: string;
+  weight?: GoogleFontWeight;
+  italic?: boolean;
+}
+
+/**
+ * Fetches the TTF URL for a Google Font
+ * Google Fonts serves TTF when requested with an older user-agent
+ * 
+ * @example
+ * const url = await getGoogleFontTTFUrl({ family: "Inter", weight: 700 });
+ * // Returns: "https://fonts.gstatic.com/s/inter/v13/..."
+ */
+export const getGoogleFontTTFUrl = async (
+  config: GoogleFontConfig
+): Promise<string> => {
+  const { family, weight = 400, italic = false } = config;
+  const cacheKey = `${family}:${weight}:${italic}`;
+  
+  // Check cache first
+  if (googleFontUrlCache.has(cacheKey)) {
+    return googleFontUrlCache.get(cacheKey)!;
+  }
+  
+  // Build the Google Fonts CSS API URL
+  // Format: family=Inter:wght@700 or family=Inter:ital,wght@1,700 for italic
+  const weightSpec = italic ? `ital,wght@1,${weight}` : `wght@${weight}`;
+  const apiUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${weightSpec}&display=swap`;
+  
+  // Fetch with a user-agent that triggers TTF response
+  // Using an older Safari user-agent that doesn't support WOFF2
+  const response = await fetch(apiUrl, {
+    headers: {
+      "User-Agent": "Safari/537.36",
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Google Font CSS: ${response.statusText}`);
+  }
+  
+  const css = await response.text();
+  
+  // Extract the font URL from the CSS
+  // The CSS contains: src: url(...) format('truetype')
+  const ttfMatch = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"]truetype['"]\)/);
+  
+  if (ttfMatch && ttfMatch[1]) {
+    const url = ttfMatch[1];
+    googleFontUrlCache.set(cacheKey, url);
+    return url;
+  }
+  
+  // Fallback: try to find any font URL (might be woff2, which won't work with opentype.js)
+  const anyUrlMatch = css.match(/src:\s*url\(([^)]+)\)/);
+  if (anyUrlMatch && anyUrlMatch[1]) {
+    console.warn(
+      `Google Font "${family}" TTF not available, got different format. ` +
+      `Consider using a local TTF file for accurate metrics.`
+    );
+    const url = anyUrlMatch[1];
+    googleFontUrlCache.set(cacheKey, url);
+    return url;
+  }
+  
+  throw new Error(`Could not extract font URL from Google Fonts CSS for "${family}"`);
+};
+
+/**
+ * Hook to load a Google Font with opentype.js
+ * Automatically fetches the TTF version for accurate metrics
+ * 
+ * @example
+ * const font = useGoogleFont({ family: "Inter", weight: 700 });
+ */
+export const useGoogleFont = (config: GoogleFontConfig): {
+  font: opentype.Font | null;
+  fontUrl: string | null;
+  loading: boolean;
+  error: string | null;
+} => {
+  const [fontUrl, setFontUrl] = useState<string | null>(null);
+  const [font, setFont] = useState<opentype.Font | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const configKey = `${config.family}:${config.weight || 400}:${config.italic || false}`;
+  const handleRef = useRef<number | null>(null);
+  const currentConfigRef = useRef<string>(configKey);
+
+  useEffect(() => {
+    currentConfigRef.current = configKey;
+    setLoading(true);
+    setError(null);
+    
+    const handle = delayRender(`Loading Google Font: ${config.family}`);
+    handleRef.current = handle;
+    
+    const loadFont = async () => {
+      try {
+        // Get TTF URL from Google Fonts
+        const url = await getGoogleFontTTFUrl(config);
+        
+        // Check if config changed while fetching
+        if (currentConfigRef.current !== configKey) {
+          continueRender(handle);
+          return;
+        }
+        
+        setFontUrl(url);
+        
+        // Check if already in cache
+        if (fontCache.has(url)) {
+          setFont(fontCache.get(url)!);
+          setLoading(false);
+          continueRender(handle);
+          return;
+        }
+        
+        // Load with opentype.js
+        opentype.load(url, (err, loadedFont) => {
+          if (currentConfigRef.current !== configKey) {
+            continueRender(handle);
+            return;
+          }
+          
+          if (err || !loadedFont) {
+            setError(`Failed to parse font: ${err?.message || "Unknown error"}`);
+            setLoading(false);
+            continueRender(handle);
+            return;
+          }
+          
+          fontCache.set(url, loadedFont);
+          setFont(loadedFont);
+          setLoading(false);
+          continueRender(handle);
+        });
+      } catch (err) {
+        if (currentConfigRef.current !== configKey) {
+          continueRender(handle);
+          return;
+        }
+        
+        setError(err instanceof Error ? err.message : "Failed to load font");
+        setLoading(false);
+        continueRender(handle);
+      }
+    };
+    
+    loadFont();
+    
+    return () => {
+      if (handleRef.current === handle) {
+        continueRender(handle);
+      }
+    };
+  }, [configKey, config.family, config.weight, config.italic]);
+  
+  return { font, fontUrl, loading, error };
+};
+
 /**
  * Hook to load a font with opentype.js for accurate text metrics
+ * Supports both local TTF files and URLs
  * Uses Remotion's delayRender/continueRender to wait for font loading
  * 
- * Fixed: Properly handles fontUrl changes by creating new delayRender handles
+ * @example
+ * // Local file
+ * const font = useOpenTypeFont(staticFile("fonts/Inter-Bold.ttf"));
+ * 
+ * // Remote URL (must be TTF/OTF - WOFF2 not supported by opentype.js)
+ * const font = useOpenTypeFont("https://example.com/font.ttf");
  */
 export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
   const [font, setFont] = useState<opentype.Font | null>(

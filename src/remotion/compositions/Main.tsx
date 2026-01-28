@@ -10,8 +10,9 @@ import {
 import React from "react";
 import { SplitText3DGsap } from "../three/text";
 
-// Inter Bold font from public folder
-const interFontUrl = staticFile("fonts/Inter-Bold.ttf");
+// Local fonts (downloaded via: npm run download-font "FontName" weight)
+const poppinsFontUrl = staticFile("fonts/Poppins-SemiBold.ttf");
+const playfairFontUrl = staticFile("fonts/PlayfairDisplay-Bold.ttf");
 
 // ============================================================================
 // DECORATIVE COMPONENTS
@@ -112,10 +113,10 @@ export const Main: React.FC = () => {
           <directionalLight position={[-10, -10, -5]} intensity={0.4} />
           <pointLight position={[0, 5, 5]} intensity={0.6} color="#60a5fa" />
 
-          {/* Main text - GSAP SplitText style: words + chars */}
+          {/* Main text - Poppins font, GSAP word animation */}
           <SplitText3DGsap
             text="welcome to"
-            fontUrl={interFontUrl}
+            fontUrl={poppinsFontUrl}
             position={[0, 1.2, 0]}
             color="#ffffff"
             fontSize={0.7}
@@ -147,10 +148,10 @@ export const Main: React.FC = () => {
             }}
           />
 
-          {/* Brand name with GSAP elastic char animation + rainbow */}
+          {/* Brand name - Playfair Display font, elastic char animation + rainbow */}
           <SplitText3DGsap
             text="Motionabl"
-            fontUrl={interFontUrl}
+            fontUrl={playfairFontUrl}
             position={[0, -0.3, 0]}
             fontSize={1.2}
             charColor={rainbowColor}

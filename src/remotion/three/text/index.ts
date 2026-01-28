@@ -4,8 +4,14 @@ export {
   type AnimationPreset,
   type AnimationConfig,
   ANIMATION_PRESETS,
+  // Font loading utilities
   useOpenTypeFont,
+  useGoogleFont,
+  getGoogleFontTTFUrl,
   getTextMetrics,
+  // Google Font types
+  type GoogleFontConfig,
+  type GoogleFontWeight,
 } from "./SplitText3D";
 
 export {
