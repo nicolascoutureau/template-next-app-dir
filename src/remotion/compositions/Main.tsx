@@ -8,7 +8,6 @@ import {
   staticFile,
 } from "remotion";
 import React from "react";
-import gsap from "gsap";
 import { SplitText3DGsap } from "../three/text";
 
 // Inter Bold font from public folder
@@ -113,38 +112,34 @@ export const Main: React.FC = () => {
           <directionalLight position={[-10, -10, -5]} intensity={0.4} />
           <pointLight position={[0, 5, 5]} intensity={0.6} color="#60a5fa" />
 
-          {/* Main text with GSAP word-by-word animation */}
+          {/* Main text - GSAP SplitText style: words + chars */}
           <SplitText3DGsap
             text="welcome to"
             fontUrl={interFontUrl}
             position={[0, 1.2, 0]}
             color="#ffffff"
             fontSize={0.7}
-            splitType="chars,words"
-            createTimeline={({ tl, charsByWord }) => {
-              // Animate word by word, then chars within each word
-              charsByWord.forEach((wordData, wordIndex) => {
-                // Set initial state for this word's chars
-                gsap.set(wordData.chars, {
-                  y: -1,
-                  opacity: 0,
-                  rotationX: Math.PI / 4,
-                  scale: 0.5,
-                });
-
-                // Animate this word's chars
-                tl.to(
-                  wordData.chars,
+            createTimeline={({ tl, words }) => {
+              // GSAP SplitText pattern with fromTo for proper animation
+              words.forEach((word) => {
+                // Animate word (moves all chars together)
+                tl.fromTo(
+                  word.state,
+                  { y: 0.5, opacity: 0 },
+                  { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }
+                )
+                // Animate chars within word (starts at same time!)
+                .fromTo(
+                  word.chars,
+                  { y: 0.3, opacity: 0 },
                   {
                     y: 0,
                     opacity: 1,
-                    rotationX: 0,
-                    scale: 1,
-                    duration: 0.6,
-                    stagger: 0.04,
-                    ease: "back.out(1.7)",
+                    duration: 0.3,
+                    stagger: 0.03,
+                    ease: "power2.out",
                   },
-                  wordIndex * 0.3 // Delay between words
+                  "<" // Start at same time as word animation
                 );
               });
 
@@ -160,24 +155,26 @@ export const Main: React.FC = () => {
             fontSize={1.2}
             charColor={rainbowColor}
             createTimeline={({ tl, chars }) => {
-              // Set initial state
-              gsap.set(chars, {
-                scale: 0,
-                opacity: 0,
-                rotationZ: Math.PI / 3,
-                y: -0.5,
-              });
-
-              // Elastic entrance with stagger
-              tl.to(chars, {
-                scale: 1,
-                opacity: 1,
-                rotationZ: 0,
-                y: 0,
-                duration: 1.2,
-                stagger: 0.05,
-                ease: "elastic.out(1, 0.4)",
-              }, 0.8); // Start after first text
+              // Elastic entrance with stagger using fromTo
+              tl.fromTo(
+                chars,
+                {
+                  scale: 0,
+                  opacity: 0,
+                  rotationZ: Math.PI / 3,
+                  y: -0.5,
+                },
+                {
+                  scale: 1,
+                  opacity: 1,
+                  rotationZ: 0,
+                  y: 0,
+                  duration: 1.2,
+                  stagger: 0.05,
+                  ease: "elastic.out(1, 0.4)",
+                },
+                0.8 // Start after first text
+              );
 
               return tl;
             }}

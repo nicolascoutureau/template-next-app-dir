@@ -10,6 +10,7 @@ import { useOpenTypeFont, getTextMetrics } from "./SplitText3D";
 
 export type SplitType = "chars" | "words" | "lines" | "chars,words";
 
+/** Animation state for individual characters */
 export interface CharAnimationState {
   x: number;
   y: number;
@@ -19,6 +20,27 @@ export interface CharAnimationState {
   rotationZ: number;
   scale: number;
   opacity: number;
+}
+
+/** Animation state for words (applies to all chars in the word) */
+export interface WordAnimationState {
+  x: number;
+  y: number;
+  z: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+  scale: number;
+  opacity: number;
+}
+
+/** Word data with animation state and its characters */
+export interface WordData {
+  word: string;
+  /** Word-level animation state (applies to all chars) */
+  state: WordAnimationState;
+  /** Character-level animation states */
+  chars: CharAnimationState[];
 }
 
 export interface SplitText3DGsapProps {
@@ -40,13 +62,14 @@ export interface SplitText3DGsapProps {
   charColor?: (char: string, index: number, total: number) => string;
   /** 
    * Function to create the GSAP timeline
-   * Receives refs to character animation states and word groups
+   * Similar to GSAP SplitText - animate words and chars independently!
    */
   createTimeline: (params: {
     tl: gsap.core.Timeline;
+    /** All character animation states (flat array) */
     chars: CharAnimationState[];
-    words: CharAnimationState[][];
-    charsByWord: { word: string; chars: CharAnimationState[] }[];
+    /** Word animation states (animate these to move entire words) */
+    words: WordData[];
     text: string;
   }) => gsap.core.Timeline;
 }
@@ -62,28 +85,39 @@ const AnimatedChar: React.FC<{
   fontSize: number;
   color: string;
   fontUrl: string;
-  animState: CharAnimationState;
-}> = ({ char, xPosition, basePosition, fontSize, color, fontUrl, animState }) => {
+  charState: CharAnimationState;
+  wordState: WordAnimationState;
+}> = ({ char, xPosition, basePosition, fontSize, color, fontUrl, charState, wordState }) => {
   // Skip rendering spaces as 3D text
   if (char === " ") {
     return null;
   }
 
+  // Combine word-level and char-level transforms
+  const combinedX = charState.x + wordState.x;
+  const combinedY = charState.y + wordState.y;
+  const combinedZ = charState.z + wordState.z;
+  const combinedRotX = charState.rotationX + wordState.rotationX;
+  const combinedRotY = charState.rotationY + wordState.rotationY;
+  const combinedRotZ = charState.rotationZ + wordState.rotationZ;
+  const combinedScale = charState.scale * wordState.scale;
+  const combinedOpacity = charState.opacity * wordState.opacity;
+
   return (
     <Text
       position={[
-        basePosition[0] + xPosition + animState.x,
-        basePosition[1] + animState.y,
-        basePosition[2] + animState.z,
+        basePosition[0] + xPosition + combinedX,
+        basePosition[1] + combinedY,
+        basePosition[2] + combinedZ,
       ]}
-      rotation={[animState.rotationX, animState.rotationY, animState.rotationZ]}
+      rotation={[combinedRotX, combinedRotY, combinedRotZ]}
       fontSize={fontSize}
       color={color}
       anchorX="center"
       anchorY="middle"
-      fillOpacity={animState.opacity}
+      fillOpacity={combinedOpacity}
       font={fontUrl}
-      scale={animState.scale}
+      scale={combinedScale}
     >
       {char}
     </Text>
@@ -98,28 +132,32 @@ const AnimatedChar: React.FC<{
  * SplitText3DGsap - Professional 3D text animation with GSAP
  *
  * Uses GSAP timelines for complex, professional animations.
- * Supports splitting by chars, words, or both.
+ * Animate words AND chars independently, just like GSAP SplitText!
  *
  * @example
  * ```tsx
  * <SplitText3DGsap
  *   text="Hello World"
  *   fontUrl={staticFile("fonts/Inter-Bold.ttf")}
- *   splitType="chars,words"
- *   createTimeline={({ tl, chars, words }) => {
- *     // Set initial state
- *     gsap.set(chars, { y: -1, opacity: 0, rotationX: Math.PI / 4 });
- *     
- *     // Animate chars with stagger
- *     tl.to(chars, {
- *       y: 0,
- *       opacity: 1,
- *       rotationX: 0,
- *       duration: 0.8,
- *       stagger: 0.05,
- *       ease: "back.out(1.7)",
+ *   createTimeline={({ tl, words }) => {
+ *     // Animate like GSAP SplitText!
+ *     words.forEach((word) => {
+ *       // Animate word (affects all chars in word)
+ *       tl.from(word.state, {
+ *         y: 0.5,
+ *         opacity: 0,
+ *         duration: 0.4,
+ *         ease: "power3.out",
+ *       })
+ *       // Animate chars within word
+ *       .from(word.chars, {
+ *         y: 0.3,
+ *         opacity: 0,
+ *         duration: 0.3,
+ *         stagger: 0.03,
+ *         ease: "power2.out",
+ *       }, "<"); // Start at same time as word
  *     });
- *     
  *     return tl;
  *   }}
  * />
@@ -132,7 +170,6 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   color = "#ffffff",
   fontSize = 1,
   letterSpacing = 0,
-  splitType = "chars",
   charColor,
   createTimeline,
 }) => {
@@ -149,9 +186,9 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   const [, forceUpdate] = useState(0);
 
   // Calculate character positions and create animation states
-  const { characters, charStates, wordGroups, charsByWord } = useMemo(() => {
+  const { characters, charStates, wordDataList, charToWordIndex } = useMemo(() => {
     if (!font) {
-      return { characters: [], charStates: [], wordGroups: [], charsByWord: [] };
+      return { characters: [], charStates: [], wordDataList: [], charToWordIndex: [] };
     }
 
     const { chars } = getTextMetrics(font, text, fontSize);
@@ -160,7 +197,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     let processedChars = chars;
     if (letterSpacing !== 0) {
       let offset = 0;
-      processedChars = chars.map((c, index) => {
+      processedChars = chars.map((c) => {
         const adjustedX = c.xPosition + offset;
         offset += letterSpacing * fontSize;
         return {
@@ -182,31 +219,61 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
       opacity: 1,
     }));
 
-    // Group by words
-    const wordGroups: CharAnimationState[][] = [];
-    const charsByWord: { word: string; chars: CharAnimationState[] }[] = [];
+    // Map each char index to its word index
+    const charToWordIndex: number[] = [];
+
+    // Group by words with word-level animation state
+    const wordDataList: WordData[] = [];
     
-    let currentWord: CharAnimationState[] = [];
+    let currentWordChars: CharAnimationState[] = [];
     let currentWordStr = "";
+    let wordIndex = 0;
     
     processedChars.forEach((c, index) => {
       if (c.char === " ") {
-        if (currentWord.length > 0) {
-          wordGroups.push([...currentWord]);
-          charsByWord.push({ word: currentWordStr, chars: [...currentWord] });
-          currentWord = [];
+        if (currentWordChars.length > 0) {
+          wordDataList.push({
+            word: currentWordStr,
+            state: {
+              x: 0,
+              y: 0,
+              z: 0,
+              rotationX: 0,
+              rotationY: 0,
+              rotationZ: 0,
+              scale: 1,
+              opacity: 1,
+            },
+            chars: [...currentWordChars],
+          });
+          currentWordChars = [];
           currentWordStr = "";
+          wordIndex++;
         }
+        charToWordIndex.push(-1); // Space doesn't belong to a word
       } else {
-        currentWord.push(charStates[index]);
+        currentWordChars.push(charStates[index]);
         currentWordStr += c.char;
+        charToWordIndex.push(wordIndex);
       }
     });
     
     // Don't forget the last word
-    if (currentWord.length > 0) {
-      wordGroups.push(currentWord);
-      charsByWord.push({ word: currentWordStr, chars: currentWord });
+    if (currentWordChars.length > 0) {
+      wordDataList.push({
+        word: currentWordStr,
+        state: {
+          x: 0,
+          y: 0,
+          z: 0,
+          rotationX: 0,
+          rotationY: 0,
+          rotationZ: 0,
+          scale: 1,
+          opacity: 1,
+        },
+        chars: currentWordChars,
+      });
     }
 
     return {
@@ -215,8 +282,8 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
         index,
       })),
       charStates,
-      wordGroups,
-      charsByWord,
+      wordDataList,
+      charToWordIndex,
     };
   }, [font, text, fontSize, letterSpacing]);
 
@@ -238,8 +305,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     timelineRef.current = memoizedCreateTimeline({
       tl,
       chars: charStates,
-      words: wordGroups,
-      charsByWord,
+      words: wordDataList,
       text,
     });
 
@@ -249,7 +315,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
         timelineRef.current.kill();
       }
     };
-  }, [font, charStates, wordGroups, charsByWord, text, memoizedCreateTimeline]);
+  }, [font, charStates, wordDataList, text, memoizedCreateTimeline]);
 
   // Seek timeline on each frame
   useEffect(() => {
@@ -265,20 +331,33 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     return null;
   }
 
+  // Default word state for spaces
+  const defaultWordState: WordAnimationState = {
+    x: 0, y: 0, z: 0,
+    rotationX: 0, rotationY: 0, rotationZ: 0,
+    scale: 1, opacity: 1,
+  };
+
   return (
     <group>
-      {characters.map(({ char, index, xPosition }) => (
-        <AnimatedChar
-          key={`${index}-${char}`}
-          char={char}
-          xPosition={xPosition}
-          basePosition={position}
-          fontSize={fontSize}
-          fontUrl={fontUrl}
-          color={charColor ? charColor(char, index, characters.length) : color}
-          animState={charStates[index]}
-        />
-      ))}
+      {characters.map(({ char, index, xPosition }) => {
+        const wordIdx = charToWordIndex[index];
+        const wordState = wordIdx >= 0 ? wordDataList[wordIdx].state : defaultWordState;
+        
+        return (
+          <AnimatedChar
+            key={`${index}-${char}`}
+            char={char}
+            xPosition={xPosition}
+            basePosition={position}
+            fontSize={fontSize}
+            fontUrl={fontUrl}
+            color={charColor ? charColor(char, index, characters.length) : color}
+            charState={charStates[index]}
+            wordState={wordState}
+          />
+        );
+      })}
     </group>
   );
 };
@@ -293,15 +372,11 @@ export const gsapPresetFadeUp = (
   duration = 0.8
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { y: -1, opacity: 0, rotationX: Math.PI / 6 });
-    tl.to(chars, {
-      y: 0,
-      opacity: 1,
-      rotationX: 0,
-      duration,
-      stagger,
-      ease: "back.out(1.7)",
-    });
+    tl.fromTo(
+      chars,
+      { y: -1, opacity: 0, rotationX: Math.PI / 6 },
+      { y: 0, opacity: 1, rotationX: 0, duration, stagger, ease: "back.out(1.7)" }
+    );
     return tl;
   };
 };
@@ -312,39 +387,38 @@ export const gsapPresetElastic = (
   duration = 1
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { scale: 0, opacity: 0, rotationZ: Math.PI / 4 });
-    tl.to(chars, {
-      scale: 1,
-      opacity: 1,
-      rotationZ: 0,
-      duration,
-      stagger,
-      ease: "elastic.out(1, 0.5)",
-    });
+    tl.fromTo(
+      chars,
+      { scale: 0, opacity: 0, rotationZ: Math.PI / 4 },
+      { scale: 1, opacity: 1, rotationZ: 0, duration, stagger, ease: "elastic.out(1, 0.5)" }
+    );
     return tl;
   };
 };
 
-/** Preset: Words animate in sequence */
+/** 
+ * Preset: Word-by-word animation with chars (like GSAP SplitText)
+ * Animates words first, then chars within each word
+ */
 export const gsapPresetWordByWord = (
-  wordDelay = 0.3,
-  charStagger = 0.02,
-  duration = 0.6
+  wordDuration = 0.4,
+  charDuration = 0.3,
+  charStagger = 0.03
 ): SplitText3DGsapProps["createTimeline"] => {
-  return ({ tl, charsByWord }) => {
-    charsByWord.forEach((wordData, wordIndex) => {
-      gsap.set(wordData.chars, { y: -0.5, opacity: 0, scale: 0.8 });
-      tl.to(
-        wordData.chars,
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration,
-          stagger: charStagger,
-          ease: "power3.out",
-        },
-        wordIndex * wordDelay
+  return ({ tl, words }) => {
+    words.forEach((word) => {
+      // Animate word (affects all chars)
+      tl.fromTo(
+        word.state,
+        { y: 0.5, opacity: 0 },
+        { y: 0, opacity: 1, duration: wordDuration, ease: "power3.out" }
+      )
+      // Animate chars within word (starts at same time with "<")
+      .fromTo(
+        word.chars,
+        { y: 0.3, opacity: 0 },
+        { y: 0, opacity: 1, duration: charDuration, stagger: charStagger, ease: "power2.out" },
+        "<"
       );
     });
     return tl;
@@ -357,16 +431,11 @@ export const gsapPresetCascade = (
   duration = 1
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { y: 2, z: -2, opacity: 0, rotationX: -Math.PI / 3 });
-    tl.to(chars, {
-      y: 0,
-      z: 0,
-      opacity: 1,
-      rotationX: 0,
-      duration,
-      stagger,
-      ease: "power2.out",
-    });
+    tl.fromTo(
+      chars,
+      { y: 2, z: -2, opacity: 0, rotationX: -Math.PI / 3 },
+      { y: 0, z: 0, opacity: 1, rotationX: 0, duration, stagger, ease: "power2.out" }
+    );
     return tl;
   };
 };
@@ -377,14 +446,11 @@ export const gsapPresetTypewriter = (
   duration = 0.1
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { opacity: 0, scale: 1.3 });
-    tl.to(chars, {
-      opacity: 1,
-      scale: 1,
-      duration,
-      stagger,
-      ease: "power4.out",
-    });
+    tl.fromTo(
+      chars,
+      { opacity: 0, scale: 1.3 },
+      { opacity: 1, scale: 1, duration, stagger, ease: "power4.out" }
+    );
     return tl;
   };
 };
@@ -395,77 +461,43 @@ export const gsapPreset3DReveal = (
   duration = 0.8
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { 
-      opacity: 0, 
-      rotationY: Math.PI / 2,
-      rotationZ: Math.PI / 8,
-      scale: 0.5,
-      z: -1,
-    });
-    tl.to(chars, {
-      opacity: 1,
-      rotationY: 0,
-      rotationZ: 0,
-      scale: 1,
-      z: 0,
-      duration,
-      stagger,
-      ease: "power3.out",
-    });
+    tl.fromTo(
+      chars,
+      { opacity: 0, rotationY: Math.PI / 2, rotationZ: Math.PI / 8, scale: 0.5, z: -1 },
+      { opacity: 1, rotationY: 0, rotationZ: 0, scale: 1, z: 0, duration, stagger, ease: "power3.out" }
+    );
     return tl;
   };
 };
 
-/** Preset: Wave animation (continuous) */
+/** Preset: Wave animation */
 export const gsapPresetWave = (
   stagger = 0.03,
   duration = 0.6,
   waveHeight = 0.3
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { y: -waveHeight, opacity: 0 });
-    
-    // Entrance animation
-    tl.to(chars, {
-      y: 0,
-      opacity: 1,
-      duration,
-      stagger,
-      ease: "power2.out",
-    });
-    
-    // Continuous wave
-    tl.to(chars, {
-      y: waveHeight * 0.5,
-      duration: 0.4,
-      stagger: {
-        each: 0.05,
-        repeat: -1,
-        yoyo: true,
-      },
-      ease: "sine.inOut",
-    }, ">");
-    
+    tl.fromTo(
+      chars,
+      { y: -waveHeight, opacity: 0 },
+      { y: 0, opacity: 1, duration, stagger, ease: "power2.out" }
+    );
     return tl;
   };
 };
 
 /** Preset: Glitch effect */
 export const gsapPresetGlitch = (
-  stagger = 0.02,
-  duration = 0.3
+  stagger = 0.02
 ): SplitText3DGsapProps["createTimeline"] => {
   return ({ tl, chars }) => {
-    gsap.set(chars, { opacity: 0, x: 0.5 });
-    
-    // Quick glitch in
+    // Quick glitch in using fromTo for each step
     chars.forEach((char, i) => {
       const delay = i * stagger;
-      tl.to(char, { opacity: 1, x: -0.2, duration: 0.05 }, delay);
+      tl.fromTo(char, { opacity: 0, x: 0.5 }, { opacity: 1, x: -0.2, duration: 0.05 }, delay);
       tl.to(char, { x: 0.1, duration: 0.05 }, delay + 0.05);
       tl.to(char, { x: 0, duration: 0.1, ease: "power2.out" }, delay + 0.1);
     });
-    
     return tl;
   };
 };

@@ -13,6 +13,8 @@ export {
   type SplitText3DGsapProps,
   type SplitType,
   type CharAnimationState,
+  type WordAnimationState,
+  type WordData,
   // Preset timeline factories
   gsapPresetFadeUp,
   gsapPresetElastic,
