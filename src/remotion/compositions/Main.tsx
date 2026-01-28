@@ -5,14 +5,15 @@ import {
   useCurrentFrame,
   useVideoConfig,
   spring,
-  staticFile,
 } from "remotion";
 import React from "react";
 import { SplitText3DGsap } from "../three/text";
+import { getFontUrl } from "../fonts";
 
-// Local fonts (downloaded via: npm run download-font "FontName" weight)
-const poppinsFontUrl = staticFile("fonts/Poppins-SemiBold.ttf");
-const playfairFontUrl = staticFile("fonts/PlayfairDisplay-Bold.ttf");
+// Local fonts (downloaded via: npm run download-fonts)
+// TypeScript ensures only valid font/weight combinations are allowed!
+const poppinsFontUrl = getFontUrl("Poppins", 600);
+const playfairFontUrl = getFontUrl("Playfair Display", 700);
 
 // ============================================================================
 // DECORATIVE COMPONENTS
@@ -127,21 +128,21 @@ export const Main: React.FC = () => {
                 tl.fromTo(
                   word.state,
                   { y: 0.5, opacity: 0 },
-                  { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }
+                  { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" },
                 )
-                // Animate chars within word (starts at same time!)
-                .fromTo(
-                  word.chars,
-                  { y: 0.3, opacity: 0 },
-                  {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.3,
-                    stagger: 0.03,
-                    ease: "power2.out",
-                  },
-                  "<" // Start at same time as word animation
-                );
+                  // Animate chars within word (starts at same time!)
+                  .fromTo(
+                    word.chars,
+                    { y: 0.3, opacity: 0 },
+                    {
+                      y: 0,
+                      opacity: 1,
+                      duration: 0.3,
+                      stagger: 0.03,
+                      ease: "power2.out",
+                    },
+                    "<", // Start at same time as word animation
+                  );
               });
 
               return tl;
@@ -174,7 +175,7 @@ export const Main: React.FC = () => {
                   stagger: 0.05,
                   ease: "elastic.out(1, 0.4)",
                 },
-                0.8 // Start after first text
+                0.8, // Start after first text
               );
 
               return tl;
