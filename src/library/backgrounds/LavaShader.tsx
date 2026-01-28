@@ -4,22 +4,25 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 /**
- * Props for the `LavaShader` component.
+ * Props for the `FluidGradient` component.
  */
-export type LavaShaderProps = {
-  /** Primary color of the lava. */
+export type FluidGradientProps = {
+  /** Primary color. */
   primaryColor?: string;
-  /** Secondary color for the lava flow. */
+  /** Secondary color. */
   secondaryColor?: string;
-  /** Background/dark color. */
+  /** Background/base color. */
   backgroundColor?: string;
-  /** Speed of the animation (1 = normal). */
+  /** Speed of the animation (0.1-0.5 recommended for premium feel). */
   speed?: number;
-  /** Scale of the noise pattern. */
+  /** Scale of the noise pattern (1-2 for subtle). */
   scale?: number;
-  /** Intensity of the glow effect (0-1). */
-  glowIntensity?: number;
+  /** Intensity of color blending (0-1, lower is more subtle). */
+  intensity?: number;
 };
+
+/** @deprecated Use FluidGradientProps instead */
+export type LavaShaderProps = FluidGradientProps;
 
 const vertexShader = `
   varying vec2 vUv;
@@ -35,7 +38,7 @@ const fragmentShader = `
   uniform vec3 uSecondaryColor;
   uniform vec3 uBackgroundColor;
   uniform float uScale;
-  uniform float uGlowIntensity;
+  uniform float uIntensity;
   varying vec2 vUv;
 
   // Simplex noise functions
@@ -108,7 +111,8 @@ const fragmentShader = `
     float value = 0.0;
     float amplitude = 0.5;
     float frequency = 1.0;
-    for (int i = 0; i < 6; i++) {
+    // Reduced iterations for smoother, less complex result
+    for (int i = 0; i < 4; i++) {
       value += amplitude * snoise(p * frequency);
       amplitude *= 0.5;
       frequency *= 2.0;
@@ -119,66 +123,79 @@ const fragmentShader = `
   void main() {
     vec2 uv = vUv;
     
-    // Create flowing lava effect
-    float time = uTime * 0.3;
+    // Flowing animation
+    float time = uTime * 0.2;
     
-    // Multiple layers of noise for organic flow
+    // Rich noise layers
     vec3 pos = vec3(uv * uScale, time);
     float noise1 = fbm(pos);
-    float noise2 = fbm(pos + vec3(5.2, 1.3, time * 0.5));
-    float noise3 = fbm(pos + vec3(noise1 * 2.0, noise2 * 2.0, time * 0.3));
+    float noise2 = fbm(pos + vec3(3.2, 1.1, time * 0.6));
+    float noise3 = fbm(pos * 0.5 + vec3(time * 0.3, 0.0, 0.0));
     
-    // Combine noise layers
-    float finalNoise = noise1 + noise2 * 0.5 + noise3 * 0.25;
+    // Combine noises for rich variation
+    float finalNoise = noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2;
     finalNoise = finalNoise * 0.5 + 0.5; // Normalize to 0-1
     
-    // Create temperature zones
-    float temp = smoothstep(0.2, 0.8, finalNoise);
+    // Strong color transitions
+    float blend1 = smoothstep(0.15, 0.85, finalNoise);
+    float blend2 = smoothstep(0.3, 0.95, finalNoise);
     
-    // Color mixing
-    vec3 color = mix(uBackgroundColor, uSecondaryColor, smoothstep(0.3, 0.5, temp));
-    color = mix(color, uPrimaryColor, smoothstep(0.5, 0.8, temp));
+    // Rich color mixing
+    vec3 color = mix(uBackgroundColor, uSecondaryColor, blend1 * uIntensity * 1.2);
+    color = mix(color, uPrimaryColor, blend2 * uIntensity);
     
-    // Add glow for hot spots
-    float glow = smoothstep(0.7, 1.0, temp) * uGlowIntensity;
-    color += vec3(1.0, 0.8, 0.3) * glow * 0.5;
+    // Subtle film grain
+    float grain = fract(sin(dot(uv * 400.0, vec2(12.9898, 78.233))) * 43758.5453);
+    color += (grain - 0.5) * 0.01;
     
-    // Add subtle vignette
-    float vignette = 1.0 - smoothstep(0.3, 1.5, length(uv - 0.5) * 1.5);
-    color *= vignette * 0.3 + 0.7;
+    // Vignette
+    float vignette = 1.0 - smoothstep(0.5, 1.5, length(uv - 0.5) * 1.2);
+    color *= 0.92 + vignette * 0.08;
     
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
 /**
- * `LavaShader` creates a realistic flowing lava/magma background effect.
- * Uses GLSL shaders with fractal Brownian motion for organic movement.
+ * `FluidGradient` creates a subtle, flowing gradient background with organic movement.
+ * Perfect for premium motion design with gentle, breathing animation.
  * 
  * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
  *
  * @example
  * ```tsx
  * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
- *   <LavaShader
- *     primaryColor="#ff4500"
- *     secondaryColor="#ff8c00"
- *     backgroundColor="#1a0000"
+ *   <FluidGradient
+ *     primaryColor="#4a5568"
+ *     secondaryColor="#2d3748"
+ *     backgroundColor="#1a202c"
+ *     speed={0.3}
  *   />
  * </ThreeCanvas>
  * ```
  */
-export const LavaShader = ({
-  primaryColor = "#ff4500",
-  secondaryColor = "#ff8c00",
-  backgroundColor = "#1a0000",
-  speed = 1,
-  scale = 3,
-  glowIntensity = 0.8,
-}: LavaShaderProps) => {
+export const FluidGradient = ({
+  primaryColor = "#5a6a80",
+  secondaryColor = "#3a4a60",
+  backgroundColor = "#1a202c",
+  speed = 0.3,
+  scale = 1.5,
+  intensity = 0.9,
+}: FluidGradientProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+
+  // Use ref to pass current frame to useFrame callback (avoids stale closure)
+  const frameRef = useRef(frame);
+  frameRef.current = frame;
+
+  // Calculate plane dimensions to fill viewport at fov=90, z=1
+  // Visible height = 2 * tan(45°) * 1 = 2
+  // Visible width = visible height * aspect ratio
+  const aspect = width / height;
+  const planeHeight = 2;
+  const planeWidth = planeHeight * aspect;
 
   const primary = useMemo(() => new THREE.Color(primaryColor), [primaryColor]);
   const secondary = useMemo(() => new THREE.Color(secondaryColor), [secondaryColor]);
@@ -191,21 +208,21 @@ export const LavaShader = ({
       uSecondaryColor: { value: secondary },
       uBackgroundColor: { value: background },
       uScale: { value: scale },
-      uGlowIntensity: { value: glowIntensity },
+      uIntensity: { value: intensity },
     }),
-    [primary, secondary, background, scale, glowIntensity],
+    [primary, secondary, background, scale, intensity],
   );
 
   useFrame(() => {
     if (meshRef.current) {
       const material = meshRef.current.material as THREE.ShaderMaterial;
-      material.uniforms.uTime.value = (frame / fps) * speed;
+      material.uniforms.uTime.value = (frameRef.current / fps) * speed;
     }
   });
 
   return (
     <mesh ref={meshRef}>
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[planeWidth, planeHeight]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
@@ -214,3 +231,6 @@ export const LavaShader = ({
     </mesh>
   );
 };
+
+/** @deprecated Use FluidGradient instead */
+export const LavaShader = FluidGradient;

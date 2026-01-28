@@ -7,15 +7,15 @@ import { useFrame } from "@react-three/fiber";
  * Props for the `GradientOrbs` component.
  */
 export type GradientOrbsProps = {
-  /** Array of orb colors. */
+  /** Array of orb colors (2-3 recommended for subtlety). */
   colors?: string[];
   /** Background color. */
   backgroundColor?: string;
-  /** Speed of the animation. */
+  /** Speed of the animation (0.1-0.5 recommended for premium feel). */
   speed?: number;
-  /** Blur/softness of the orbs (0-1). */
+  /** Blur/softness of the orbs (0.7-1.0 recommended). */
   blur?: number;
-  /** Size of the orbs. */
+  /** Size of the orbs (0.4-0.6 recommended). */
   orbSize?: number;
 };
 
@@ -32,8 +32,6 @@ const fragmentShader = `
   uniform vec3 uColor1;
   uniform vec3 uColor2;
   uniform vec3 uColor3;
-  uniform vec3 uColor4;
-  uniform vec3 uColor5;
   uniform vec3 uBackgroundColor;
   uniform float uBlur;
   uniform float uOrbSize;
@@ -41,39 +39,38 @@ const fragmentShader = `
 
   vec2 getOrbPosition(int index, float time) {
     float i = float(index);
-    float baseSpeed = 0.2 + i * 0.05;
-    float angle = time * baseSpeed + i * 1.2566; // 2*PI/5
+    // Very slow, breathing motion
+    float baseSpeed = 0.03 + i * 0.01;
+    float angle = time * baseSpeed + i * 2.094; // 2*PI/3
     
-    // Different orbit patterns for each orb
     vec2 center = vec2(0.5, 0.5);
-    float radiusX = 0.2 + sin(time * 0.1 + i) * 0.1;
-    float radiusY = 0.15 + cos(time * 0.15 + i) * 0.08;
+    // Gentle elliptical motion
+    float radiusX = 0.12 + sin(time * 0.02 + i) * 0.04;
+    float radiusY = 0.10 + cos(time * 0.025 + i) * 0.03;
     
     if (index == 0) {
-      return center + vec2(cos(angle) * radiusX * 1.2, sin(angle) * radiusY * 1.2);
+      // Top-left area
+      return vec2(0.35, 0.4) + vec2(cos(angle) * radiusX, sin(angle) * radiusY);
     } else if (index == 1) {
-      return center + vec2(sin(angle * 0.8) * radiusX, cos(angle * 0.8) * radiusY * 1.5);
-    } else if (index == 2) {
-      return center + vec2(cos(angle * 0.6 + 1.0) * radiusX * 0.8, sin(angle * 0.6 + 1.0) * radiusY * 0.8);
-    } else if (index == 3) {
-      return vec2(0.3, 0.3) + vec2(sin(time * 0.3) * 0.15, cos(time * 0.25) * 0.15);
+      // Center-right area
+      return vec2(0.6, 0.55) + vec2(sin(angle * 0.8) * radiusX, cos(angle * 0.8) * radiusY);
     } else {
-      return vec2(0.7, 0.7) + vec2(cos(time * 0.35) * 0.15, sin(time * 0.3) * 0.15);
+      // Bottom area
+      return vec2(0.45, 0.65) + vec2(cos(angle * 0.6 + 1.0) * radiusX * 0.9, sin(angle * 0.6 + 1.0) * radiusY * 0.9);
     }
   }
 
   vec3 getOrbColor(int index) {
     if (index == 0) return uColor1;
     if (index == 1) return uColor2;
-    if (index == 2) return uColor3;
-    if (index == 3) return uColor4;
-    return uColor5;
+    return uColor3;
   }
 
   float getOrbSize(int index, float time) {
     float i = float(index);
-    float base = uOrbSize * (0.8 + i * 0.1);
-    float pulse = sin(time * (0.5 + i * 0.2)) * 0.1 + 1.0;
+    float base = uOrbSize * (0.9 + i * 0.05);
+    // Very subtle breathing
+    float pulse = sin(time * (0.08 + i * 0.02)) * 0.03 + 1.0;
     return base * pulse;
   }
 
@@ -84,8 +81,8 @@ const fragmentShader = `
     // Start with background
     vec3 color = uBackgroundColor;
     
-    // Add each orb with soft blending
-    for (int i = 0; i < 5; i++) {
+    // Add each orb with visible blending
+    for (int i = 0; i < 3; i++) {
       vec2 orbPos = getOrbPosition(i, time);
       vec3 orbColor = getOrbColor(i);
       float orbSize = getOrbSize(i, time);
@@ -93,20 +90,20 @@ const fragmentShader = `
       // Distance from orb center
       float dist = length(uv - orbPos);
       
-      // Soft falloff based on blur
-      float falloff = 1.0 - smoothstep(0.0, orbSize * (1.0 + uBlur), dist);
-      falloff = pow(falloff, 2.0 - uBlur);
+      // Soft but visible falloff
+      float falloff = 1.0 - smoothstep(0.0, orbSize * (1.0 + uBlur * 0.5), dist);
+      falloff = pow(falloff, 1.1);
       
-      // Blend orb color
-      color = mix(color, orbColor, falloff * 0.7);
+      // Strong blend
+      color = mix(color, orbColor, falloff * 0.85);
     }
     
-    // Add subtle noise for texture
-    float noise = fract(sin(dot(uv * 1000.0, vec2(12.9898, 78.233))) * 43758.5453);
-    color += (noise - 0.5) * 0.02;
+    // Subtle film grain
+    float noise = fract(sin(dot(uv * 500.0, vec2(12.9898, 78.233))) * 43758.5453);
+    color += (noise - 0.5) * 0.012;
     
-    // Subtle vignette
-    float vignette = 1.0 - smoothstep(0.3, 1.2, length(uv - 0.5) * 1.2);
+    // Vignette
+    float vignette = 1.0 - smoothstep(0.5, 1.4, length(uv - 0.5) * 1.1);
     color *= 0.9 + vignette * 0.1;
     
     gl_FragColor = vec4(color, 1.0);
@@ -114,8 +111,8 @@ const fragmentShader = `
 `;
 
 /**
- * `GradientOrbs` creates soft, floating gradient orbs that move organically.
- * Similar to iOS/macOS dynamic wallpapers with beautiful color blending.
+ * `GradientOrbs` creates soft, floating gradient orbs with slow, breathing motion.
+ * Designed for premium, subtle backgrounds that don't distract from content.
  * 
  * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
  *
@@ -123,29 +120,39 @@ const fragmentShader = `
  * ```tsx
  * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
  *   <GradientOrbs
- *     colors={["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"]}
- *     backgroundColor="#1e1b4b"
+ *     colors={["#3b4a6b", "#5a4a6b", "#4a5a6b"]}
+ *     backgroundColor="#1a1a2e"
+ *     speed={0.3}
  *   />
  * </ThreeCanvas>
  * ```
  */
 export const GradientOrbs = ({
-  colors = ["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"],
-  backgroundColor = "#1e1b4b",
-  speed = 1,
+  colors = ["#4a6090", "#6a5090", "#5a7090"],
+  backgroundColor = "#1a1a2e",
+  speed = 0.3,
   blur = 0.6,
-  orbSize = 0.3,
+  orbSize = 0.55,
 }: GradientOrbsProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+
+  // Use ref to pass current frame to useFrame callback (avoids stale closure)
+  const frameRef = useRef(frame);
+  frameRef.current = frame;
+
+  // Calculate plane dimensions to fill viewport at fov=90, z=1
+  const aspect = width / height;
+  const planeHeight = 2;
+  const planeWidth = planeHeight * aspect;
 
   const threeColors = useMemo(() => {
     const normalizedColors = [...colors];
-    while (normalizedColors.length < 5) {
+    while (normalizedColors.length < 3) {
       normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
     }
-    return normalizedColors.slice(0, 5).map((c) => new THREE.Color(c));
+    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
   }, [colors]);
 
   const bgColor = useMemo(
@@ -159,8 +166,6 @@ export const GradientOrbs = ({
       uColor1: { value: threeColors[0] },
       uColor2: { value: threeColors[1] },
       uColor3: { value: threeColors[2] },
-      uColor4: { value: threeColors[3] },
-      uColor5: { value: threeColors[4] },
       uBackgroundColor: { value: bgColor },
       uBlur: { value: blur },
       uOrbSize: { value: orbSize },
@@ -171,13 +176,13 @@ export const GradientOrbs = ({
   useFrame(() => {
     if (meshRef.current) {
       const material = meshRef.current.material as THREE.ShaderMaterial;
-      material.uniforms.uTime.value = (frame / fps) * speed;
+      material.uniforms.uTime.value = (frameRef.current / fps) * speed;
     }
   });
 
   return (
     <mesh ref={meshRef}>
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[planeWidth, planeHeight]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}

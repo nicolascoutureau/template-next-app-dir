@@ -88,3 +88,21 @@ export {
 
 // Utilities
 export { FPSMonitor, useFPS, type FPSMonitorProps } from "./utils";
+
+// Media components
+export {
+  MediaFrame,
+  type MediaFrameProps,
+  Image3D,
+  type Image3DProps,
+  type ImageFit,
+} from "./media";
+
+// Decorative components
+export { ColorBarHeader, type ColorBarHeaderProps } from "./decorative";
+
+// Layout components
+export { AsymmetricLayout, type AsymmetricLayoutProps } from "./layouts";
+
+// Transition components
+export { VerticalStripReveal, type VerticalStripRevealProps } from "./transitions";

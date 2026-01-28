@@ -4,24 +4,25 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 /**
- * Props for the `WaveGridBackground` component.
+ * Props for the `SubtleGrid` component.
  */
-export type WaveGridBackgroundProps = {
+export type SubtleGridProps = {
   /** Grid line color. */
   lineColor?: string;
-  /** Glow color for the lines. */
-  glowColor?: string;
   /** Background color. */
   backgroundColor?: string;
-  /** Speed of the wave animation. */
+  /** Speed of the subtle animation (0.1-0.3 recommended). */
   speed?: number;
-  /** Grid density (lines per unit). */
+  /** Grid density (8-15 for subtle). */
   gridDensity?: number;
-  /** Wave amplitude. */
-  amplitude?: number;
-  /** Perspective tilt (0-1). */
-  perspective?: number;
+  /** Line opacity (0.05-0.2 for subtle). */
+  lineOpacity?: number;
+  /** Enable gentle breathing animation. */
+  breathing?: boolean;
 };
+
+/** @deprecated Use SubtleGridProps instead */
+export type WaveGridBackgroundProps = SubtleGridProps;
 
 const vertexShader = `
   varying vec2 vUv;
@@ -34,132 +35,121 @@ const vertexShader = `
 const fragmentShader = `
   uniform float uTime;
   uniform vec3 uLineColor;
-  uniform vec3 uGlowColor;
   uniform vec3 uBackgroundColor;
   uniform float uGridDensity;
-  uniform float uAmplitude;
-  uniform float uPerspective;
+  uniform float uLineOpacity;
+  uniform bool uBreathing;
   varying vec2 vUv;
-
-  float wave(vec2 p, float time) {
-    return sin(p.x * 3.0 + time) * sin(p.y * 2.0 + time * 0.7) * uAmplitude;
-  }
-
-  float grid(vec2 p, float width) {
-    vec2 grid = abs(fract(p - 0.5) - 0.5) / fwidth(p);
-    return min(grid.x, grid.y);
-  }
 
   void main() {
     vec2 uv = vUv;
     float time = uTime;
     
-    // Apply perspective transformation
-    vec2 perspUv = uv;
-    perspUv.y = pow(perspUv.y, 1.0 + uPerspective);
-    
-    // Scale based on perspective (further = denser grid)
-    float perspScale = 1.0 + (1.0 - uv.y) * uPerspective * 3.0;
-    
-    // Create wave distortion
-    float waveOffset = wave(perspUv * 5.0, time);
-    vec2 distortedUv = perspUv + vec2(waveOffset * 0.1, waveOffset * 0.05);
-    
     // Grid coordinates
-    vec2 gridCoord = distortedUv * uGridDensity * perspScale;
+    vec2 gridCoord = uv * uGridDensity;
     
-    // Calculate grid lines
-    float gridLine = grid(gridCoord, 1.0);
-    float line = 1.0 - smoothstep(0.0, 1.5, gridLine);
+    // Calculate grid lines using smoothstep for consistent rendering
+    float lineWidth = 0.04; // Line thickness
+    vec2 gridFract = fract(gridCoord);
     
-    // Add glowing effect based on wave height
-    float glowIntensity = (waveOffset + uAmplitude) / (2.0 * uAmplitude);
-    glowIntensity = smoothstep(0.3, 0.8, glowIntensity);
+    // Create lines at grid edges
+    float lineX = smoothstep(0.0, lineWidth, gridFract.x) * smoothstep(0.0, lineWidth, 1.0 - gridFract.x);
+    float lineY = smoothstep(0.0, lineWidth, gridFract.y) * smoothstep(0.0, lineWidth, 1.0 - gridFract.y);
     
-    // Color the grid
-    vec3 gridColor = mix(uLineColor, uGlowColor, glowIntensity);
+    // Combine for grid pattern (1 = no line, 0 = line)
+    float gridMask = lineX * lineY;
+    float line = 1.0 - gridMask;
     
-    // Add horizon glow
-    float horizonGlow = smoothstep(0.0, 0.3, uv.y) * 0.3;
-    vec3 horizonColor = uGlowColor * horizonGlow;
+    // Breathing effect on opacity
+    float breathingFactor = 1.0;
+    if (uBreathing) {
+      breathingFactor = 0.7 + sin(time * 0.2) * 0.3;
+    }
     
-    // Fade grid with distance (perspective)
-    float distanceFade = smoothstep(0.0, 0.5, uv.y);
-    line *= distanceFade;
+    // Position-based variation (slightly brighter at center)
+    float posVariation = 1.0 - length(uv - 0.5) * 0.3;
     
-    // Add scanline effect
-    float scanline = sin(uv.y * 200.0 + time * 10.0) * 0.02 + 0.98;
+    // Final line intensity
+    float lineIntensity = line * uLineOpacity * breathingFactor * posVariation;
     
-    // Final color
-    vec3 color = uBackgroundColor + horizonColor;
-    color = mix(color, gridColor, line * 0.8);
-    color *= scanline;
+    // Color blend
+    vec3 color = mix(uBackgroundColor, uLineColor, lineIntensity);
     
-    // Add subtle bloom on lines
-    float bloom = line * glowIntensity * 0.3;
-    color += uGlowColor * bloom;
+    // Subtle film grain
+    float grain = fract(sin(dot(uv * 300.0, vec2(12.9898, 78.233))) * 43758.5453);
+    color += (grain - 0.5) * 0.008;
+    
+    // Vignette
+    float vignette = 1.0 - smoothstep(0.6, 1.5, length(uv - 0.5) * 1.0);
+    color *= 0.95 + vignette * 0.05;
     
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
 /**
- * `WaveGridBackground` creates a retro-futuristic grid with wave animation.
- * Perfect for synthwave, vaporwave, or sci-fi aesthetics.
+ * `SubtleGrid` creates a minimal, elegant grid pattern with optional breathing animation.
+ * Designed for premium backgrounds that add structure without distraction.
  * 
  * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
  *
  * @example
  * ```tsx
  * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
- *   <WaveGridBackground
- *     lineColor="#ff00ff"
- *     glowColor="#00ffff"
- *     backgroundColor="#0a0015"
+ *   <SubtleGrid
+ *     lineColor="#3a3a4a"
+ *     backgroundColor="#1a1a2e"
+ *     lineOpacity={0.12}
  *   />
  * </ThreeCanvas>
  * ```
  */
-export const WaveGridBackground = ({
-  lineColor = "#ff00ff",
-  glowColor = "#00ffff",
-  backgroundColor = "#0a0015",
-  speed = 1,
-  gridDensity = 20,
-  amplitude = 0.2,
-  perspective = 0.5,
-}: WaveGridBackgroundProps) => {
+export const SubtleGrid = ({
+  lineColor = "#6a6a8a",
+  backgroundColor = "#1a1a2e",
+  speed = 0.2,
+  gridDensity = 10,
+  lineOpacity = 0.5,
+  breathing = true,
+}: SubtleGridProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+
+  // Use ref to pass current frame to useFrame callback (avoids stale closure)
+  const frameRef = useRef(frame);
+  frameRef.current = frame;
+
+  // Calculate plane dimensions to fill viewport at fov=90, z=1
+  const aspect = width / height;
+  const planeHeight = 2;
+  const planeWidth = planeHeight * aspect;
 
   const line = useMemo(() => new THREE.Color(lineColor), [lineColor]);
-  const glow = useMemo(() => new THREE.Color(glowColor), [glowColor]);
   const background = useMemo(() => new THREE.Color(backgroundColor), [backgroundColor]);
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uLineColor: { value: line },
-      uGlowColor: { value: glow },
       uBackgroundColor: { value: background },
       uGridDensity: { value: gridDensity },
-      uAmplitude: { value: amplitude },
-      uPerspective: { value: perspective },
+      uLineOpacity: { value: lineOpacity },
+      uBreathing: { value: breathing },
     }),
-    [line, glow, background, gridDensity, amplitude, perspective],
+    [line, background, gridDensity, lineOpacity, breathing],
   );
 
   useFrame(() => {
     if (meshRef.current) {
       const material = meshRef.current.material as THREE.ShaderMaterial;
-      material.uniforms.uTime.value = (frame / fps) * speed;
+      material.uniforms.uTime.value = (frameRef.current / fps) * speed;
     }
   });
 
   return (
     <mesh ref={meshRef}>
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[planeWidth, planeHeight]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
@@ -168,3 +158,6 @@ export const WaveGridBackground = ({
     </mesh>
   );
 };
+
+/** @deprecated Use SubtleGrid instead */
+export const WaveGridBackground = SubtleGrid;

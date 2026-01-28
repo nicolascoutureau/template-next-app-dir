@@ -6,6 +6,8 @@ import {
   useVideoConfig,
   spring,
   Sequence,
+  interpolate,
+  random,
 } from "remotion";
 import React from "react";
 import * as THREE from "three";
@@ -13,13 +15,9 @@ import {
   SplitText3DGsap,
   RichText3DGsap,
   ExtrudedText3DGsap,
-  // Fast shader backgrounds from the library
   GradientOrbs,
-  PlasmaBackground,
   MetaballsBackground,
   WaveGridBackground,
-  // FPS Monitor
-  FPSMonitor,
 } from "../../library";
 import { getFontUrl } from "../fonts";
 
@@ -34,46 +32,177 @@ const interBold = getFontUrl("Inter", 700);
 const spaceGrotesk = getFontUrl("Space Grotesk", 700);
 
 // ============================================================================
-// COLOR PALETTE
+// COLOR PALETTE - Refined for cinematic look
 // ============================================================================
 
 const colors = {
   background: "#030014",
-  primary: "#a855f7", // Purple
-  secondary: "#06b6d4", // Cyan
-  accent: "#f472b6", // Pink
+  primary: "#a855f7",
+  secondary: "#06b6d4",
+  accent: "#f472b6",
   gold: "#fbbf24",
   white: "#ffffff",
+  offWhite: "#f0f0f5",
   gray: "#94a3b8",
+  darkGray: "#475569",
 };
 
 // ============================================================================
-// FLOATING PARTICLES
+// PROFESSIONAL EASING FUNCTIONS
 // ============================================================================
 
-const FloatingParticles: React.FC<{ count?: number; startDelay?: number }> = ({
-  count = 30,
-  startDelay = 0,
+// Custom bezier curves for refined motion
+const easeInOutQuart = (t: number) =>
+  t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
+const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+// ============================================================================
+// SCENE TRANSITION OVERLAY - Crossfade between scenes
+// ============================================================================
+
+const SceneTransition: React.FC<{
+  startFrame: number;
+  duration: number;
+  type?: "fadeOut" | "fadeIn" | "lightLeak";
+  color?: string;
+}> = ({ startFrame, duration, type = "fadeOut", color = colors.background }) => {
+  const frame = useCurrentFrame();
+
+  const localFrame = frame - startFrame;
+  if (localFrame < 0 || localFrame > duration) return null;
+
+  const progress = localFrame / duration;
+
+  if (type === "lightLeak") {
+    // Subtle cinematic light leak transition
+    const intensity = Math.sin(progress * Math.PI);
+    return (
+      <mesh position={[0, 0, 10]}>
+        <planeGeometry args={[30, 20]} />
+        <meshBasicMaterial
+          color={colors.primary}
+          transparent
+          opacity={intensity * 0.12}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+    );
+  }
+
+  const opacity =
+    type === "fadeOut" ? easeInOutQuart(progress) : 1 - easeInOutQuart(progress);
+
+  return (
+    <mesh position={[0, 0, 10]}>
+      <planeGeometry args={[30, 20]} />
+      <meshBasicMaterial color={color} transparent opacity={opacity} />
+    </mesh>
+  );
+};
+
+// ============================================================================
+// CINEMATIC VIGNETTE - Subtle edge darkening
+// ============================================================================
+
+const CinematicVignette: React.FC<{ intensity?: number }> = ({
+  intensity = 0.4,
 }) => {
+  const vignetteTexture = React.useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d")!;
+
+    const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 362);
+    gradient.addColorStop(0, "rgba(0,0,0,0)");
+    gradient.addColorStop(0.5, "rgba(0,0,0,0)");
+    gradient.addColorStop(0.8, `rgba(0,0,0,${intensity * 0.5})`);
+    gradient.addColorStop(1, `rgba(0,0,0,${intensity})`);
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 512, 512);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+  }, [intensity]);
+
+  return (
+    <mesh position={[0, 0, 9]}>
+      <planeGeometry args={[25, 15]} />
+      <meshBasicMaterial map={vignetteTexture} transparent blending={THREE.MultiplyBlending} premultipliedAlpha />
+    </mesh>
+  );
+};
+
+// ============================================================================
+// LIGHT STREAK - Cinematic anamorphic flare effect
+// ============================================================================
+
+const LightStreak: React.FC<{
+  position: [number, number, number];
+  color: string;
+  delay?: number;
+  duration?: number;
+}> = ({ position, color, delay = 0, duration = 60 }) => {
+  const frame = useCurrentFrame();
+
+  const localFrame = frame - delay;
+  if (localFrame < 0 || localFrame > duration) return null;
+
+  const progress = localFrame / duration;
+  const opacity = Math.sin(progress * Math.PI) * 0.25;
+  const scaleX = 4 + easeOutExpo(progress) * 10;
+
+  return (
+    <mesh position={position} scale={[scaleX, 0.02, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial
+        color={color}
+        transparent
+        opacity={opacity}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+};
+
+// ============================================================================
+// FLOATING PARTICLES - Refined with depth layers
+// ============================================================================
+
+const FloatingParticles: React.FC<{
+  count?: number;
+  startDelay?: number;
+  layer?: "front" | "mid" | "back";
+}> = ({ count = 20, startDelay = 0, layer = "mid" }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Generate particle positions deterministically
+  const layerConfig = {
+    front: { zRange: [-1, 2], sizeMultiplier: 0.8, opacity: 0.4 },
+    mid: { zRange: [-4, -1], sizeMultiplier: 0.7, opacity: 0.25 },
+    back: { zRange: [-8, -4], sizeMultiplier: 0.5, opacity: 0.12 },
+  };
+
+  const config = layerConfig[layer];
+
   const particles = React.useMemo(() => {
     const result = [];
     for (let i = 0; i < count; i++) {
-      const seed = i * 137.5;
+      const seed = i * 137.5 + (layer === "front" ? 100 : layer === "back" ? 200 : 0);
+      const zSeed = `particle-z-${layer}-${i}`;
       result.push({
-        x: Math.sin(seed) * 12,
-        y: Math.cos(seed * 0.7) * 6,
-        z: Math.sin(seed * 1.3) * 5 - 5,
-        size: 0.02 + (i % 5) * 0.01,
-        speed: 0.5 + (i % 3) * 0.3,
+        x: (Math.sin(seed) * 0.5 + 0.5) * 20 - 10,
+        y: (Math.cos(seed * 0.7) * 0.5 + 0.5) * 10 - 5,
+        z: config.zRange[0] + random(zSeed) * (config.zRange[1] - config.zRange[0]),
+        size: (0.015 + (i % 5) * 0.008) * config.sizeMultiplier,
+        speed: 0.3 + (i % 4) * 0.15,
         phase: (i / count) * Math.PI * 2,
+        color: i % 4 === 0 ? colors.primary : i % 4 === 1 ? colors.secondary : i % 4 === 2 ? colors.accent : colors.white,
       });
     }
     return result;
-  }, [count]);
+  }, [count, layer, config]);
 
   return (
     <group>
@@ -81,30 +210,26 @@ const FloatingParticles: React.FC<{ count?: number; startDelay?: number }> = ({
         const entrance = spring({
           fps,
           frame,
-          config: { damping: 100, stiffness: 100, mass: 1 },
-          delay: startDelay + i * 2,
+          config: { damping: 200, stiffness: 50, mass: 1.5 },
+          delay: startDelay + i * 3,
         });
 
-        const floatY = Math.sin((frame / fps) * p.speed + p.phase) * 0.3;
-        const floatX = Math.cos((frame / fps) * p.speed * 0.5 + p.phase) * 0.2;
+        const time = frame / fps;
+        const floatY = Math.sin(time * p.speed + p.phase) * 0.15;
+        const floatX = Math.cos(time * p.speed * 0.7 + p.phase) * 0.1;
+        const drift = time * 0.05;
 
         return (
           <mesh
             key={i}
-            position={[p.x + floatX, p.y + floatY, p.z]}
+            position={[p.x + floatX, p.y + floatY + drift, p.z]}
             scale={entrance}
           >
-            <sphereGeometry args={[p.size, 8, 8]} />
+            <sphereGeometry args={[p.size, 6, 6]} />
             <meshBasicMaterial
-              color={
-                i % 3 === 0
-                  ? colors.primary
-                  : i % 3 === 1
-                    ? colors.secondary
-                    : colors.accent
-              }
+              color={p.color}
               transparent
-              opacity={0.6}
+              opacity={config.opacity * entrance}
             />
           </mesh>
         );
@@ -114,7 +239,7 @@ const FloatingParticles: React.FC<{ count?: number; startDelay?: number }> = ({
 };
 
 // ============================================================================
-// GLOWING ORB
+// GLOWING ORB - Refined with subtle motion
 // ============================================================================
 
 const GlowingOrb: React.FC<{
@@ -122,56 +247,59 @@ const GlowingOrb: React.FC<{
   color: string;
   size?: number;
   delay?: number;
-  pulseSpeed?: number;
-}> = ({ position, color, size = 0.5, delay = 0, pulseSpeed = 1 }) => {
+  exitDelay?: number;
+}> = ({ position, color, size = 0.5, delay = 0, exitDelay }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // Entrance
   const entrance = spring({
     fps,
     frame,
-    config: { damping: 50, stiffness: 100, mass: 0.8 },
+    config: { damping: 80, stiffness: 60, mass: 1 },
     delay,
   });
 
-  const pulse = 1 + Math.sin((frame / fps) * Math.PI * pulseSpeed) * 0.15;
-  const floatY = Math.sin((frame / fps) * Math.PI * 0.5) * 0.2;
+  // Exit (if specified)
+  let exit = 1;
+  if (exitDelay !== undefined) {
+    exit = interpolate(
+      frame,
+      [exitDelay, exitDelay + 20],
+      [1, 0],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+  }
+
+  const scale = entrance * exit;
+  if (scale < 0.01) return null;
+
+  const time = frame / fps;
+  const pulse = 1 + Math.sin(time * Math.PI * 0.8) * 0.08;
+  const floatY = Math.sin(time * Math.PI * 0.4) * 0.12;
+  const floatX = Math.cos(time * Math.PI * 0.3) * 0.08;
 
   return (
     <group
-      position={[position[0], position[1] + floatY, position[2]]}
-      scale={entrance}
+      position={[position[0] + floatX, position[1] + floatY, position[2]]}
+      scale={scale}
     >
-      {/* Core */}
       <mesh scale={pulse}>
-        <sphereGeometry args={[size * 0.6, 32, 32]} />
+        <sphereGeometry args={[size * 0.5, 24, 24]} />
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={1}
-          metalness={0.2}
-          roughness={0.3}
+          emissiveIntensity={0.5}
+          metalness={0.3}
+          roughness={0.4}
         />
       </mesh>
-
-      {/* Outer glow */}
-      <mesh scale={pulse * 1.2}>
-        <sphereGeometry args={[size, 32, 32]} />
+      <mesh scale={pulse * 1.3}>
+        <sphereGeometry args={[size * 0.8, 24, 24]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.2}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Halo ring */}
-      <mesh rotation={[Math.PI / 2, 0, (frame / fps) * 0.5]}>
-        <torusGeometry args={[size * 1.3, 0.02, 16, 64]} />
-        <meshBasicMaterial
-          color={color}
-          transparent
-          opacity={0.4 * pulse}
+          opacity={0.08}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -180,46 +308,61 @@ const GlowingOrb: React.FC<{
 };
 
 // ============================================================================
-// ANIMATED RING
+// ANIMATED RING - More refined motion
 // ============================================================================
 
 const AnimatedRing: React.FC<{
   delay?: number;
+  exitDelay?: number;
   color?: string;
   size?: number;
-}> = ({ delay = 0, color = colors.primary, size = 3 }) => {
+}> = ({ delay = 0, exitDelay, color = colors.primary, size = 3 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
   const entrance = spring({
     fps,
     frame,
-    config: { damping: 100, stiffness: 80, mass: 1.2 },
+    config: { damping: 120, stiffness: 40, mass: 1.5 },
     delay,
   });
 
-  const rotation = (frame / fps) * 0.3;
+  let exit = 1;
+  if (exitDelay !== undefined) {
+    exit = interpolate(
+      frame,
+      [exitDelay, exitDelay + 25],
+      [1, 0],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
+  }
+
+  const scale = entrance * exit;
+  if (scale < 0.01) return null;
+
+  const time = frame / fps;
+  const rotation = time * 0.15;
 
   return (
-    <group scale={entrance}>
-      <mesh rotation={[Math.PI / 6, rotation, 0]} position={[0, 0, -3]}>
-        <torusGeometry args={[size, 0.015, 16, 100]} />
+    <group scale={scale}>
+      <mesh rotation={[Math.PI / 8, rotation, 0]} position={[0, 0, -3]}>
+        <torusGeometry args={[size, 0.008, 16, 128]} />
         <meshBasicMaterial
           color={color}
           transparent
-          opacity={0.6}
+          opacity={0.25}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
       <mesh
-        rotation={[-Math.PI / 8, -rotation * 0.7, Math.PI / 4]}
+        rotation={[-Math.PI / 10, -rotation * 0.6, Math.PI / 6]}
         position={[0, 0, -3]}
       >
-        <torusGeometry args={[size * 0.85, 0.01, 16, 100]} />
+        <torusGeometry args={[size * 0.88, 0.006, 16, 128]} />
         <meshBasicMaterial
           color={colors.secondary}
           transparent
-          opacity={0.4}
+          opacity={0.15}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -228,50 +371,54 @@ const AnimatedRing: React.FC<{
 };
 
 // ============================================================================
-// SCENE 1: OPENING - "THE FUTURE IS HERE"
+// SCENE 1: OPENING - Refined professional animation
 // ============================================================================
 
-const Scene1Opening: React.FC = () => {
+const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
   return (
     <group>
       <SplitText3DGsap
         text="THE FUTURE"
         fontUrl={montserratBold}
-        position={[0, 0.8, 0]}
-        fontSize={1.1}
-        color={colors.white}
+        position={[0, 1, 0]}
+        fontSize={1.0}
+        color={colors.offWhite}
         createTimeline={({ tl, chars }) => {
+          // Professional reveal: staggered fade with subtle position offset
           tl.set(chars, {
             opacity: 0,
-            z: -2,
-            rotationX: Math.PI / 3,
-            scale: 0.5,
+            y: 0.3,
+            rotationX: Math.PI / 8,
           });
-          tl.to(
-            chars,
-            {
-              opacity: 1,
-              z: 0,
-              rotationX: 0,
-              scale: 1,
-              duration: 1.0,
-              stagger: 0.04,
-              ease: "power4.out",
-            },
-            0,
-          );
-          // Subtle float
-          tl.to(
-            chars,
-            {
-              y: 0.05,
-              duration: 1.5,
-              ease: "sine.inOut",
-              yoyo: true,
-              repeat: -1,
-            },
-            1.0,
-          );
+          
+          // Main entrance with refined easing
+          tl.to(chars, {
+            opacity: 1,
+            y: 0,
+            rotationX: 0,
+            duration: 0.8,
+            stagger: 0.035,
+            ease: "power3.out",
+          }, 0.2);
+          
+          // Subtle breathing - very gentle
+          tl.to(chars, {
+            y: 0.02,
+            duration: 2.5,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          }, 1.2);
+          
+          // Exit animation
+          tl.to(chars, {
+            opacity: 0,
+            y: -0.2,
+            duration: 0.5,
+            stagger: 0.02,
+            ease: "power2.in",
+          }, 3.5);
+          
           return tl;
         }}
       />
@@ -279,516 +426,555 @@ const Scene1Opening: React.FC = () => {
       <SplitText3DGsap
         text="IS HERE"
         fontUrl={montserratBold}
-        position={[0, -0.5, 0]}
-        fontSize={1.1}
+        position={[0, -0.4, 0]}
+        fontSize={1.0}
         charColor={(_, i, total) => {
-          const t = i / total;
-          return t < 0.5 ? colors.primary : colors.secondary;
+          const t = i / (total - 1);
+          // Smooth gradient from primary to secondary
+          const h1 = 270, h2 = 185;
+          const hue = h1 + (h2 - h1) * t;
+          return `hsl(${hue}, 75%, 65%)`;
         }}
         createTimeline={({ tl, chars }) => {
-          tl.set(chars, { opacity: 0, y: 1, scale: 0 });
-          tl.to(
-            chars,
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.9,
-              stagger: 0.05,
-              ease: "elastic.out(1, 0.5)",
-            },
-            0.6,
-          );
+          tl.set(chars, { opacity: 0, scale: 0.8, y: 0.4 });
+          
+          // Elegant scale-up entrance
+          tl.to(chars, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.04,
+            ease: "power2.out",
+          }, 0.6);
+          
+          // Exit
+          tl.to(chars, {
+            opacity: 0,
+            scale: 0.9,
+            y: -0.15,
+            duration: 0.4,
+            stagger: 0.015,
+            ease: "power2.in",
+          }, 3.5);
+          
           return tl;
         }}
       />
 
-      <AnimatedRing delay={30} />
+      {/* Decorative elements with exit animations */}
+      <AnimatedRing delay={25} exitDelay={exitFrame - 30} />
       <GlowingOrb
         position={[-5, 2, -2]}
         color={colors.primary}
-        delay={40}
-        size={0.4}
-      />
-      <GlowingOrb
-        position={[5, -1.5, -1]}
-        color={colors.secondary}
-        delay={50}
+        delay={35}
+        exitDelay={exitFrame - 25}
         size={0.35}
       />
+      <GlowingOrb
+        position={[5, -1.5, -1.5]}
+        color={colors.secondary}
+        delay={45}
+        exitDelay={exitFrame - 20}
+        size={0.3}
+      />
+      
+      {/* Light streak for dramatic effect */}
+      <LightStreak position={[0, 0.3, 1]} color={colors.primary} delay={15} duration={40} />
     </group>
   );
 };
 
 // ============================================================================
-// SCENE 2: PRODUCT NAME REVEAL
+// SCENE 2: PRODUCT NAME REVEAL - Cinematic reveal
 // ============================================================================
 
-const Scene2ProductReveal: React.FC = () => {
-  // Gradient color function for product name
+const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
   const gradientColor = (_: string, index: number, total: number): string => {
-    const hue = 270 + (index / total) * 60; // Purple to magenta
-    return `hsl(${hue}, 85%, 65%)`;
+    const t = index / (total - 1);
+    const hue = 275 + t * 50;
+    return `hsl(${hue}, 80%, 62%)`;
   };
 
   return (
     <group>
-      {/* Pre-text */}
+      {/* Pre-text with subtle tracking animation */}
       <SplitText3DGsap
         text="Introducing"
         fontUrl={interRegular}
-        position={[0, 2.2, 0]}
-        fontSize={0.45}
+        position={[0, 2.3, 0]}
+        fontSize={0.4}
         color={colors.gray}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, y: 0.3 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.02,
-              ease: "power2.out",
-            },
-            0,
-          );
+          tl.set(chars, { opacity: 0, x: -0.1 });
+          
+          tl.to(chars, {
+            opacity: 0.8,
+            x: 0,
+            duration: 0.5,
+            stagger: 0.015,
+            ease: "power2.out",
+          }, 0);
+          
+          // Exit
+          tl.to(chars, {
+            opacity: 0,
+            y: -0.1,
+            duration: 0.3,
+            ease: "power2.in",
+          }, 4.5);
+          
           return tl;
         }}
       />
 
-      {/* Main Product Name - Extruded 3D */}
+      {/* Main Product Name - Dramatic 3D reveal */}
       <ExtrudedText3DGsap
         text="AURORA"
         fontUrl={spaceGrotesk}
-        position={[0, 0.3, 0]}
-        fontSize={1.8}
-        depth={0.25}
+        position={[0, 0.4, 0]}
+        fontSize={1.7}
+        depth={0.22}
         bevelEnabled={true}
-        bevelThickness={0.04}
-        bevelSize={0.03}
-        bevelSegments={5}
-        metalness={0.7}
-        roughness={0.2}
+        bevelThickness={0.035}
+        bevelSize={0.025}
+        bevelSegments={4}
+        metalness={0.6}
+        roughness={0.25}
         charColor={gradientColor}
         createTimeline={({ tl, chars }) => {
-          // Dramatic entrance
-          tl.set(chars, { opacity: 0, z: -5, rotationY: Math.PI, scale: 0 });
-          tl.to(
-            chars,
-            {
-              opacity: 1,
-              z: 0,
-              rotationY: 0,
-              scale: 1,
-              duration: 1.4,
-              stagger: 0.1,
-              ease: "expo.out",
-            },
-            0.3,
-          );
-          // Gentle breathe
-          tl.to(
-            chars,
-            {
-              z: 0.1,
-              duration: 2,
-              ease: "sine.inOut",
-              yoyo: true,
-              repeat: -1,
-            },
-            1.7,
-          );
+          // Start hidden and far
+          tl.set(chars, { opacity: 0, z: -3, rotationY: Math.PI * 0.6, scale: 0.3 });
+          
+          // Cinematic reveal - each letter emerges
+          tl.to(chars, {
+            opacity: 1,
+            z: 0,
+            rotationY: 0,
+            scale: 1,
+            duration: 1.2,
+            stagger: 0.08,
+            ease: "expo.out",
+          }, 0.4);
+          
+          // Very subtle depth breathing
+          tl.to(chars, {
+            z: 0.05,
+            duration: 3,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          }, 1.8);
+          
+          // Exit with elegance
+          tl.to(chars, {
+            opacity: 0,
+            z: 0.5,
+            rotationY: -Math.PI * 0.1,
+            duration: 0.6,
+            stagger: 0.03,
+            ease: "power3.in",
+          }, 4.5);
+          
           return tl;
         }}
       />
 
-      {/* Tagline */}
+      {/* Tagline with word-by-word reveal */}
       <RichText3DGsap
         segments={[
-          { text: "Where ", fontUrl: interRegular, color: colors.gray },
+          { text: "Where ", fontUrl: interRegular, color: colors.darkGray },
           { text: "Dreams ", fontUrl: interBold, color: colors.primary },
-          { text: "Meet ", fontUrl: interRegular, color: colors.gray },
+          { text: "Meet ", fontUrl: interRegular, color: colors.darkGray },
           { text: "Reality", fontUrl: interBold, color: colors.secondary },
         ]}
-        position={[0, -1.5, 0]}
-        fontSize={0.5}
+        position={[0, -1.4, 0]}
+        fontSize={0.45}
         createTimeline={({ tl, segments }) => {
+          // Initialize all segments hidden
           segments.forEach((seg) => {
-            tl.set(seg.state, { opacity: 0, y: 0.3 }, 0);
-            tl.set(seg.chars, { opacity: 0, scale: 0.5 }, 0);
+            tl.set(seg.state, { opacity: 0, y: 0.15 }, 0);
+            tl.set(seg.chars, { opacity: 0 }, 0);
           });
 
+          // Reveal each word with timing
           segments.forEach((seg, i) => {
-            const startTime = 1.2 + i * 0.25;
-            tl.to(
-              seg.state,
-              { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-              startTime,
-            );
-            tl.to(
-              seg.chars,
-              {
-                opacity: 1,
-                scale: 1,
-                duration: 0.4,
-                stagger: 0.03,
-                ease: "back.out(1.7)",
-              },
-              startTime,
-            );
+            const startTime = 1.4 + i * 0.2;
+            tl.to(seg.state, { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.4, 
+              ease: "power2.out" 
+            }, startTime);
+            tl.to(seg.chars, {
+              opacity: 1,
+              duration: 0.3,
+              stagger: 0.02,
+              ease: "power2.out",
+            }, startTime);
           });
+          
+          // Exit all segments
+          segments.forEach((seg, i) => {
+            tl.to(seg.state, { 
+              opacity: 0, 
+              y: -0.1, 
+              duration: 0.3, 
+              ease: "power2.in" 
+            }, 4.5 + i * 0.05);
+          });
+          
           return tl;
         }}
       />
 
       {/* Decorative elements */}
-      <AnimatedRing delay={20} color={colors.primary} size={4} />
+      <AnimatedRing delay={15} exitDelay={exitFrame - 35} color={colors.primary} size={3.8} />
       <GlowingOrb
-        position={[-6, 1, -3]}
+        position={[-6, 1.5, -2.5]}
         color={colors.accent}
-        delay={60}
-        size={0.5}
-        pulseSpeed={0.8}
+        delay={50}
+        exitDelay={exitFrame - 25}
+        size={0.45}
       />
       <GlowingOrb
-        position={[6, -1, -2]}
+        position={[6, -0.5, -2]}
         color={colors.gold}
-        delay={70}
-        size={0.4}
-        pulseSpeed={1.2}
+        delay={60}
+        exitDelay={exitFrame - 20}
+        size={0.35}
       />
+      
+      {/* Light effects for product name emphasis */}
+      <LightStreak position={[0, 0.4, 2]} color={colors.secondary} delay={30} duration={50} />
     </group>
   );
 };
 
 // ============================================================================
-// SCENE 3: FEATURES
+// SCENE 3: FEATURES - Clean, professional layout
 // ============================================================================
 
-const Scene3Features: React.FC = () => {
+const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
   return (
     <group>
-      {/* Section title */}
+      {/* Section title - clean fade in */}
       <SplitText3DGsap
         text="EXPERIENCE THE DIFFERENCE"
         fontUrl={montserratMedium}
-        position={[0, 2.5, 0]}
-        fontSize={0.55}
-        color={colors.white}
+        position={[0, 2.8, 0]}
+        fontSize={0.48}
+        color={colors.offWhite}
         createTimeline={({ tl, words }) => {
-          words.forEach((word, i) => {
-            tl.fromTo(
-              word.state,
-              { opacity: 0, x: -1 },
-              { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
-              i * 0.15,
-            );
-            tl.fromTo(
-              word.chars,
-              { opacity: 0, y: 0.2 },
-              {
-                opacity: 1,
-                y: 0,
-                duration: 0.3,
-                stagger: 0.02,
-                ease: "power2.out",
-              },
-              i * 0.15,
-            );
+          words.forEach((word) => {
+            tl.set(word.state, { opacity: 0, y: 0.2 }, 0);
+            tl.set(word.chars, { opacity: 0 }, 0);
           });
+          
+          words.forEach((word, i) => {
+            const startTime = i * 0.12;
+            tl.to(word.state, { 
+              opacity: 1, 
+              y: 0, 
+              duration: 0.4, 
+              ease: "power2.out" 
+            }, startTime);
+            tl.to(word.chars, {
+              opacity: 1,
+              duration: 0.25,
+              stagger: 0.015,
+              ease: "power2.out",
+            }, startTime);
+          });
+          
+          // Exit
+          words.forEach((word, i) => {
+            tl.to(word.state, { 
+              opacity: 0, 
+              duration: 0.3, 
+              ease: "power2.in" 
+            }, 3.5 + i * 0.03);
+          });
+          
           return tl;
         }}
       />
 
-      {/* Feature 1 */}
+      {/* Feature 1 - Left aligned */}
       <SplitText3DGsap
         text="Intelligent Design"
         fontUrl={interBold}
-        position={[-4, 0.5, 0]}
-        fontSize={0.6}
+        position={[-3.5, 0.8, 0]}
+        fontSize={0.55}
         color={colors.primary}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, rotationY: Math.PI / 2, x: -0.5 },
-            {
-              opacity: 1,
-              rotationY: 0,
-              x: 0,
-              duration: 0.8,
-              stagger: 0.03,
-              ease: "power3.out",
-            },
-            0.5,
-          );
+          tl.set(chars, { opacity: 0, x: -0.3 });
+          
+          tl.to(chars, {
+            opacity: 1,
+            x: 0,
+            duration: 0.6,
+            stagger: 0.025,
+            ease: "power3.out",
+          }, 0.4);
+          
+          tl.to(chars, {
+            opacity: 0,
+            x: 0.1,
+            duration: 0.3,
+            stagger: 0.01,
+            ease: "power2.in",
+          }, 3.5);
+          
           return tl;
         }}
       />
 
-      {/* Feature 2 */}
+      {/* Feature 2 - Center */}
       <SplitText3DGsap
         text="Blazing Performance"
         fontUrl={interBold}
-        position={[0, -0.3, 0]}
-        fontSize={0.6}
+        position={[0, -0.1, 0]}
+        fontSize={0.55}
         color={colors.secondary}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, scale: 0, rotationZ: Math.PI / 4 },
-            {
-              opacity: 1,
-              scale: 1,
-              rotationZ: 0,
-              duration: 0.9,
-              stagger: 0.025,
-              ease: "elastic.out(1, 0.6)",
-            },
-            0.9,
-          );
+          tl.set(chars, { opacity: 0, scale: 0.9, y: 0.15 });
+          
+          tl.to(chars, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.02,
+            ease: "power2.out",
+          }, 0.8);
+          
+          tl.to(chars, {
+            opacity: 0,
+            y: -0.1,
+            duration: 0.3,
+            stagger: 0.01,
+            ease: "power2.in",
+          }, 3.6);
+          
           return tl;
         }}
       />
 
-      {/* Feature 3 */}
+      {/* Feature 3 - Right aligned */}
       <SplitText3DGsap
         text="Unmatched Security"
         fontUrl={interBold}
-        position={[4, -1.1, 0]}
-        fontSize={0.6}
+        position={[3.5, -1, 0]}
+        fontSize={0.55}
         color={colors.accent}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, y: 1, z: -1 },
-            {
-              opacity: 1,
-              y: 0,
-              z: 0,
-              duration: 0.7,
-              stagger: 0.03,
-              ease: "power4.out",
-            },
-            1.3,
-          );
+          tl.set(chars, { opacity: 0, x: 0.3 });
+          
+          tl.to(chars, {
+            opacity: 1,
+            x: 0,
+            duration: 0.6,
+            stagger: 0.025,
+            ease: "power3.out",
+          }, 1.2);
+          
+          tl.to(chars, {
+            opacity: 0,
+            x: -0.1,
+            duration: 0.3,
+            stagger: 0.01,
+            ease: "power2.in",
+          }, 3.7);
+          
           return tl;
         }}
       />
 
-      {/* Decorative orbs */}
+      {/* Accent orbs for each feature */}
       <GlowingOrb
-        position={[-4, 1.2, -1]}
+        position={[-5.5, 0.8, -1]}
         color={colors.primary}
-        delay={20}
-        size={0.3}
+        delay={15}
+        exitDelay={exitFrame - 30}
+        size={0.25}
       />
       <GlowingOrb
-        position={[0, 0.4, -1]}
+        position={[-2, -0.1, -1]}
         color={colors.secondary}
-        delay={35}
-        size={0.3}
+        delay={30}
+        exitDelay={exitFrame - 25}
+        size={0.25}
       />
       <GlowingOrb
-        position={[4, -0.4, -1]}
+        position={[5.5, -1, -1]}
         color={colors.accent}
-        delay={50}
-        size={0.3}
+        delay={45}
+        exitDelay={exitFrame - 20}
+        size={0.25}
       />
     </group>
   );
 };
 
 // ============================================================================
-// SCENE 4: CALL TO ACTION
+// SCENE 4: CALL TO ACTION - Impactful finale
 // ============================================================================
 
 const Scene4CTA: React.FC = () => {
   return (
     <group>
-      {/* Main CTA */}
+      {/* Main CTA - Bold statement */}
       <ExtrudedText3DGsap
         text="GET STARTED"
         fontUrl={montserratBold}
-        position={[0, 0.5, 0]}
-        fontSize={1.2}
-        depth={0.2}
+        position={[0, 0.6, 0]}
+        fontSize={1.1}
+        depth={0.18}
         bevelEnabled={true}
-        bevelThickness={0.03}
-        bevelSize={0.02}
-        metalness={0.5}
+        bevelThickness={0.025}
+        bevelSize={0.018}
+        metalness={0.55}
         roughness={0.3}
         charColor={(_, i, total) => {
-          const t = i / total;
-          // Cyan to purple gradient
-          const hue = 180 + t * 90;
-          return `hsl(${hue}, 80%, 60%)`;
+          const t = i / (total - 1);
+          const hue = 190 + t * 80;
+          return `hsl(${hue}, 75%, 58%)`;
         }}
         createTimeline={({ tl, chars }) => {
-          tl.set(chars, { opacity: 0, scale: 0, y: 2, rotationX: Math.PI / 2 });
-          tl.to(
-            chars,
-            {
-              opacity: 1,
-              scale: 1,
-              y: 0,
-              rotationX: 0,
-              duration: 1.2,
-              stagger: 0.06,
-              ease: "elastic.out(1, 0.4)",
-            },
-            0,
-          );
-          // Pulse effect
-          tl.to(
-            chars,
-            {
-              scale: 1.05,
-              duration: 0.8,
-              ease: "sine.inOut",
-              yoyo: true,
-              repeat: -1,
-            },
-            1.5,
-          );
+          tl.set(chars, { opacity: 0, y: 1, scale: 0.5, rotationX: Math.PI / 4 });
+          
+          // Powerful entrance
+          tl.to(chars, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 1.0,
+            stagger: 0.05,
+            ease: "power3.out",
+          }, 0);
+          
+          // Subtle scale pulse - very refined
+          tl.to(chars, {
+            scale: 1.02,
+            duration: 1.5,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+          }, 1.2);
+          
           return tl;
         }}
       />
 
-      {/* Subtext */}
+      {/* Availability text */}
       <SplitText3DGsap
         text="Available Now"
         fontUrl={interRegular}
-        position={[0, -1.2, 0]}
-        fontSize={0.5}
+        position={[0, -1, 0]}
+        fontSize={0.45}
         color={colors.gray}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, y: -0.5 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              stagger: 0.04,
-              ease: "power2.out",
-            },
-            0.8,
-          );
+          tl.set(chars, { opacity: 0, y: -0.2 });
+          
+          tl.to(chars, {
+            opacity: 0.85,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.03,
+            ease: "power2.out",
+          }, 0.7);
+          
           return tl;
         }}
       />
 
-      {/* Website */}
+      {/* Website URL - Brand emphasis */}
       <SplitText3DGsap
         text="aurora.io"
         fontUrl={spaceGrotesk}
-        position={[0, -2.2, 0]}
-        fontSize={0.7}
+        position={[0, -2, 0]}
+        fontSize={0.65}
         charColor={(_, i, total) => {
-          const t = i / total;
+          const t = i / (total - 1);
           return t < 0.5 ? colors.secondary : colors.primary;
         }}
         createTimeline={({ tl, chars }) => {
-          tl.fromTo(
-            chars,
-            { opacity: 0, scale: 1.5, rotationY: -Math.PI / 4 },
-            {
-              opacity: 1,
-              scale: 1,
-              rotationY: 0,
-              duration: 0.8,
-              stagger: 0.05,
-              ease: "back.out(1.7)",
-            },
-            1.2,
-          );
+          tl.set(chars, { opacity: 0, scale: 1.2 });
+          
+          tl.to(chars, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            stagger: 0.04,
+            ease: "power2.out",
+          }, 1.0);
+          
           return tl;
         }}
       />
 
-      {/* Multiple decorative rings */}
-      <AnimatedRing delay={10} color={colors.secondary} size={3.5} />
-      <AnimatedRing delay={25} color={colors.primary} size={4.5} />
+      {/* Decorative rings - layered */}
+      <AnimatedRing delay={8} color={colors.secondary} size={3.2} />
+      <AnimatedRing delay={20} color={colors.primary} size={4.2} />
 
       {/* Celebration orbs */}
-      <GlowingOrb
-        position={[-5, 2.5, -2]}
-        color={colors.primary}
-        delay={30}
-        size={0.4}
-      />
-      <GlowingOrb
-        position={[5, 2, -2]}
-        color={colors.secondary}
-        delay={40}
-        size={0.45}
-      />
-      <GlowingOrb
-        position={[-4, -2, -1]}
-        color={colors.accent}
-        delay={50}
-        size={0.35}
-      />
-      <GlowingOrb
-        position={[4, -2.5, -1.5]}
-        color={colors.gold}
-        delay={60}
-        size={0.4}
-      />
+      <GlowingOrb position={[-5.5, 2.5, -2]} color={colors.primary} delay={25} size={0.38} />
+      <GlowingOrb position={[5.5, 2, -2]} color={colors.secondary} delay={35} size={0.42} />
+      <GlowingOrb position={[-4.5, -2.2, -1.5]} color={colors.accent} delay={45} size={0.32} />
+      <GlowingOrb position={[4.5, -2.5, -1.5]} color={colors.gold} delay={55} size={0.36} />
+      
+      {/* Final light effects */}
+      <LightStreak position={[0, 0.6, 1.5]} color={colors.primary} delay={10} duration={45} />
+      <LightStreak position={[0, -2, 1]} color={colors.secondary} delay={65} duration={35} />
     </group>
   );
 };
 
 // ============================================================================
-// LIGHTS SETUP
+// REFINED LIGHTING SETUP
 // ============================================================================
 
 const Lights: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const time = frame / fps;
+
+  // Subtle light intensity variation for organic feel
+  const breathe = 1 + Math.sin(time * 0.5) * 0.05;
+
   return (
     <>
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.35 * breathe} />
       <directionalLight
-        position={[10, 10, 5]}
-        intensity={1.0}
+        position={[10, 10, 8]}
+        intensity={0.9 * breathe}
         color="#ffffff"
       />
       <directionalLight
-        position={[-5, -5, 3]}
-        intensity={0.3}
-        color="#a855f7"
+        position={[-8, -5, 5]}
+        intensity={0.25}
+        color={colors.primary}
       />
-      <pointLight position={[0, 5, 8]} intensity={0.6} color="#06b6d4" />
-      <pointLight position={[-8, 0, 5]} intensity={0.4} color="#a855f7" />
-      <pointLight position={[8, 0, 5]} intensity={0.4} color="#f472b6" />
+      <pointLight position={[0, 6, 10]} intensity={0.5 * breathe} color={colors.secondary} />
+      <pointLight position={[-10, 0, 6]} intensity={0.3} color={colors.primary} />
+      <pointLight position={[10, 0, 6]} intensity={0.3} color={colors.accent} />
     </>
   );
 };
 
 // ============================================================================
-// MAIN COMPOSITION
+// BACKGROUND WRAPPER
 // ============================================================================
 
-// ============================================================================
-// BACKGROUND WRAPPER - Scales shader backgrounds to fill the view
-// ============================================================================
-
-const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { width, height } = useVideoConfig();
-  // Orthographic camera: visible area is fixed regardless of distance
-  // Camera frustum: top/bottom = ±6 (height=12), left/right = ±6*(aspect)
-  // Shader backgrounds use a 2x2 plane
-  // Scale to fill the orthographic view
   const aspect = width / height;
-  const frustumHeight = 12; // top - bottom = 6 - (-6)
+  const frustumHeight = 12;
   const frustumWidth = frustumHeight * aspect;
   return (
-    <group
-      position={[0, 0, -5]}
-      scale={[frustumWidth / 2, frustumHeight / 2, 1]}
-    >
+    <group position={[0, 0, -5]} scale={[frustumWidth / 2, frustumHeight / 2, 1]}>
       {children}
     </group>
   );
@@ -802,17 +988,22 @@ export const Main: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
 
-  // Scene timing (in frames)
+  // Scene timing with proper transition overlap
+  const transitionDuration = 20; // frames for crossfade
+  
   const scene1Start = 0;
-  const scene1Duration = 120; // 4 seconds
+  const scene1Duration = 120;
+  const scene1Exit = scene1Start + scene1Duration - transitionDuration;
 
-  const scene2Start = scene1Duration;
-  const scene2Duration = 150; // 5 seconds
+  const scene2Start = scene1Duration - transitionDuration;
+  const scene2Duration = 150;
+  const scene2Exit = scene2Start + scene2Duration - transitionDuration;
 
-  const scene3Start = scene2Start + scene2Duration;
-  const scene3Duration = 120; // 4 seconds
+  const scene3Start = scene2Start + scene2Duration - transitionDuration;
+  const scene3Duration = 120;
+  const scene3Exit = scene3Start + scene3Duration - transitionDuration;
 
-  const scene4Start = scene3Start + scene3Duration;
+  const scene4Start = scene3Start + scene3Duration - transitionDuration;
   const scene4Duration = durationInFrames - scene4Start;
 
   return (
@@ -837,78 +1028,79 @@ export const Main: React.FC = () => {
           }}
         >
           {/* ============================================================== */}
-          {/* SHADER BACKGROUNDS - Positioned behind 3D content              */}
+          {/* SHADER BACKGROUNDS                                             */}
           {/* ============================================================== */}
 
-          {/* Scene 1: Plasma - Cosmic, dramatic opening */}
-          <Sequence
-            from={scene1Start}
-            durationInFrames={scene1Duration}
-            layout="none"
-          >
-            <BackgroundLayer>
-              <PlasmaBackground
-                style="neon"
-                colors={["#7c3aed", "#a855f7", "#06b6d4", "#ec4899"]}
-                speed={0.6}
-                complexity={0.8}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* Scene 2: Wave Grid - Ethereal product reveal */}
-          <Sequence
-            from={scene2Start}
-            durationInFrames={scene2Duration}
-            layout="none"
-          >
-            <BackgroundLayer>
-              <WaveGridBackground
-                lineColor="#8b5cf6"
-                glowColor="#06b6d4"
-                backgroundColor="#050510"
-                speed={0.5}
-                gridDensity={15}
-                amplitude={0.15}
-                perspective={0.4}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* Scene 3: Gradient Orbs - Modern, dynamic features */}
-          <Sequence
-            from={scene3Start}
-            durationInFrames={scene3Duration}
-            layout="none"
-          >
+          {/* Scene 1: Subtle gradient orbs - dark and slow */}
+          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
             <BackgroundLayer>
               <GradientOrbs
-                colors={["#a855f7", "#06b6d4", "#f472b6", "#10b981", "#fbbf24"]}
-                backgroundColor="#0a0a1a"
-                blur={0.7}
-                orbSize={0.35}
-                speed={0.8}
+                colors={["#2d1b4e", "#1a3a4a", "#1e1e2e"]}
+                backgroundColor="#030014"
+                blur={0.85}
+                orbSize={0.5}
+                speed={0.15}
               />
             </BackgroundLayer>
           </Sequence>
 
-          {/* Scene 4: Metaballs - Clean, professional CTA */}
-          <Sequence
-            from={scene4Start}
-            durationInFrames={scene4Duration}
-            layout="none"
-          >
+          {/* Scene 2: Very subtle wave grid */}
+          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
             <BackgroundLayer>
-              <MetaballsBackground
-                primaryColor="#7c3aed"
-                secondaryColor="#06b6d4"
+              <WaveGridBackground
+                lineColor="#3b2d5a"
+                glowColor="#1a4a5a"
                 backgroundColor="#030014"
-                speed={0.6}
-                sharpness={0.4}
-                glow={true}
+                speed={0.15}
+                gridDensity={12}
+                amplitude={0.06}
+                perspective={0.25}
               />
             </BackgroundLayer>
           </Sequence>
+
+          {/* Scene 3: Soft gradient orbs */}
+          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
+            <BackgroundLayer>
+              <GradientOrbs
+                colors={["#2a1f4a", "#1a3545", "#251a3a"]}
+                backgroundColor="#050510"
+                blur={0.9}
+                orbSize={0.45}
+                speed={0.12}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* Scene 4: Subtle metaballs */}
+          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
+            <BackgroundLayer>
+              <MetaballsBackground
+                primaryColor="#2d1b4e"
+                secondaryColor="#1a3a4a"
+                backgroundColor="#030014"
+                speed={0.2}
+                sharpness={0.25}
+                glow={false}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* ============================================================== */}
+          {/* SCENE TRANSITIONS - Smooth crossfades                          */}
+          {/* ============================================================== */}
+          
+          {/* Fade in from black at start */}
+          <SceneTransition startFrame={0} duration={25} type="fadeIn" />
+          
+          {/* Scene 1 to 2 transition */}
+          <SceneTransition startFrame={scene1Exit} duration={transitionDuration * 2} type="lightLeak" />
+          
+          {/* Scene 2 to 3 transition */}
+          <SceneTransition startFrame={scene2Exit} duration={transitionDuration * 2} type="lightLeak" />
+          
+          {/* Scene 3 to 4 transition */}
+          <SceneTransition startFrame={scene3Exit} duration={transitionDuration * 2} type="lightLeak" />
 
           {/* ============================================================== */}
           {/* LIGHTING                                                       */}
@@ -916,53 +1108,37 @@ export const Main: React.FC = () => {
           <Lights />
 
           {/* ============================================================== */}
-          {/* FLOATING PARTICLES                                             */}
+          {/* MULTI-LAYER PARTICLES - Subtle accents                         */}
           {/* ============================================================== */}
-          <FloatingParticles count={40} startDelay={0} />
+          <FloatingParticles count={8} startDelay={0} layer="back" />
+          <FloatingParticles count={10} startDelay={15} layer="mid" />
+          <FloatingParticles count={6} startDelay={30} layer="front" />
+
+          {/* ============================================================== */}
+          {/* CINEMATIC VIGNETTE                                             */}
+          {/* ============================================================== */}
+          <CinematicVignette intensity={0.25} />
 
           {/* ============================================================== */}
           {/* SCENE CONTENT                                                  */}
           {/* ============================================================== */}
 
-          {/* Scene 1: Opening */}
-          <Sequence
-            from={scene1Start}
-            durationInFrames={scene1Duration}
-            layout="none"
-          >
-            <Scene1Opening />
+          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
+            <Scene1Opening exitFrame={scene1Exit} />
           </Sequence>
 
-          {/* Scene 2: Product Reveal */}
-          <Sequence
-            from={scene2Start}
-            durationInFrames={scene2Duration}
-            layout="none"
-          >
-            <Scene2ProductReveal />
+          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
+            <Scene2ProductReveal exitFrame={scene2Exit} />
           </Sequence>
 
-          {/* Scene 3: Features */}
-          <Sequence
-            from={scene3Start}
-            durationInFrames={scene3Duration}
-            layout="none"
-          >
-            <Scene3Features />
+          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
+            <Scene3Features exitFrame={scene3Exit} />
           </Sequence>
 
-          {/* Scene 4: CTA */}
-          <Sequence
-            from={scene4Start}
-            durationInFrames={scene4Duration}
-            layout="none"
-          >
+          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
             <Scene4CTA />
           </Sequence>
         </ThreeCanvas>
-
-        {/* FPS Monitor - only visible during preview, not in final render */}
-        {typeof window !== "undefined" && <FPSMonitor position="top-right" />}
       </AbsoluteFill>
     </>
   );

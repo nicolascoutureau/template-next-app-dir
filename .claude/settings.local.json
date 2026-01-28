@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:video-previews.elements.envatousercontent.com)",
+      "Bash(curl:*)",
+      "Bash(tree:*)",
+      "Bash(npx tsc:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run:*)"
+    ]
+  }
+}

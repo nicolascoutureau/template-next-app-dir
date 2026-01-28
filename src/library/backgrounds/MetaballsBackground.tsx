@@ -4,22 +4,25 @@ import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 
 /**
- * Props for the `MetaballsBackground` component.
+ * Props for the `SoftBlobs` component.
  */
-export type MetaballsBackgroundProps = {
+export type SoftBlobsProps = {
   /** Primary blob color. */
   primaryColor?: string;
   /** Secondary blob color. */
   secondaryColor?: string;
   /** Background color. */
   backgroundColor?: string;
-  /** Speed of the animation. */
+  /** Speed of the animation (0.1-0.4 recommended for premium feel). */
   speed?: number;
-  /** Edge sharpness (0-1, lower = softer). */
-  sharpness?: number;
-  /** Enable glow effect. */
-  glow?: boolean;
+  /** Softness of blob edges (0.5-1.0 for subtle). */
+  softness?: number;
+  /** Opacity of blobs against background (0.3-0.6 for subtle). */
+  opacity?: number;
 };
+
+/** @deprecated Use SoftBlobsProps instead */
+export type MetaballsBackgroundProps = SoftBlobsProps;
 
 const vertexShader = `
   varying vec2 vUv;
@@ -34,128 +37,127 @@ const fragmentShader = `
   uniform vec3 uPrimaryColor;
   uniform vec3 uSecondaryColor;
   uniform vec3 uBackgroundColor;
-  uniform float uSharpness;
-  uniform bool uGlow;
+  uniform float uSoftness;
+  uniform float uOpacity;
   varying vec2 vUv;
 
-  // Metaball positions are calculated based on time
-  vec2 getBallPosition(int index, float time) {
+  // Slow, breathing positions for 4 blobs
+  vec2 getBlobPosition(int index, float time) {
     float i = float(index);
-    float angle = time * (0.5 + i * 0.1) + i * 1.047; // Different speeds
-    float radius = 0.2 + sin(time * 0.3 + i) * 0.1;
+    // Very slow motion
+    float angle = time * (0.04 + i * 0.01) + i * 1.57; // PI/2 offset
+    float radius = 0.08 + sin(time * 0.02 + i) * 0.03;
     
     if (index == 0) {
-      return vec2(0.5 + cos(angle) * radius, 0.5 + sin(angle) * radius);
+      // Top-left quadrant
+      return vec2(0.35, 0.38) + vec2(cos(angle) * radius, sin(angle) * radius);
     } else if (index == 1) {
-      return vec2(0.5 + cos(angle * 0.7 + 2.0) * radius * 1.2, 0.5 + sin(angle * 0.7 + 2.0) * radius * 1.2);
+      // Top-right quadrant
+      return vec2(0.62, 0.42) + vec2(sin(angle * 0.8) * radius, cos(angle * 0.8) * radius);
     } else if (index == 2) {
-      return vec2(0.5 + cos(angle * 0.5 + 4.0) * radius * 0.8, 0.5 + sin(angle * 0.5 + 4.0) * radius * 0.8);
-    } else if (index == 3) {
-      return vec2(0.3 + sin(time * 0.4) * 0.15, 0.5 + cos(time * 0.6) * 0.2);
-    } else if (index == 4) {
-      return vec2(0.7 + cos(time * 0.35) * 0.15, 0.5 + sin(time * 0.55) * 0.2);
-    } else if (index == 5) {
-      return vec2(0.5 + sin(time * 0.25) * 0.25, 0.3 + cos(time * 0.45) * 0.15);
-    } else if (index == 6) {
-      return vec2(0.5 + cos(time * 0.3) * 0.2, 0.7 + sin(time * 0.5) * 0.15);
+      // Bottom-center
+      return vec2(0.48, 0.62) + vec2(cos(angle * 0.6 + 1.0) * radius * 0.9, sin(angle * 0.6 + 1.0) * radius * 0.9);
     } else {
-      return vec2(0.5 + sin(time * 0.2 + i) * 0.3, 0.5 + cos(time * 0.3 + i) * 0.3);
+      // Center-left
+      return vec2(0.42, 0.5) + vec2(sin(angle * 0.5) * radius * 0.7, cos(angle * 0.5) * radius * 0.7);
     }
   }
 
-  float getBallRadius(int index, float time) {
+  float getBlobRadius(int index, float time) {
     float i = float(index);
-    float base = 0.08 + i * 0.01;
-    float pulse = sin(time * (1.0 + i * 0.2)) * 0.02;
+    float base = 0.12 + i * 0.02;
+    // Very gentle breathing
+    float pulse = sin(time * (0.06 + i * 0.01)) * 0.01;
     return base + pulse;
   }
 
-  float metaball(vec2 uv, vec2 center, float radius) {
+  float softBlob(vec2 uv, vec2 center, float radius, float softness) {
     float dist = length(uv - center);
-    return (radius * radius) / (dist * dist + 0.001);
+    // Soft gaussian-like falloff
+    float blob = exp(-dist * dist / (radius * radius * (1.0 + softness)));
+    return blob;
   }
 
   void main() {
     vec2 uv = vUv;
     float time = uTime;
     
-    // Accumulate metaball field
-    float field = 0.0;
-    float colorMix = 0.0;
+    // Start with background
+    vec3 color = uBackgroundColor;
     
-    for (int i = 0; i < 8; i++) {
-      vec2 pos = getBallPosition(i, time);
-      float radius = getBallRadius(i, time);
-      float contribution = metaball(uv, pos, radius);
-      field += contribution;
+    // Accumulate blob contributions
+    float totalInfluence = 0.0;
+    vec3 blobColorSum = vec3(0.0);
+    
+    for (int i = 0; i < 4; i++) {
+      vec2 pos = getBlobPosition(i, time);
+      float radius = getBlobRadius(i, time);
+      float blob = softBlob(uv, pos, radius, uSoftness);
       
-      // Track color mixing based on distance
-      float dist = length(uv - pos);
-      colorMix += contribution * float(i) / 8.0;
+      // Alternate between colors
+      vec3 blobColor = (i % 2 == 0) ? uPrimaryColor : uSecondaryColor;
+      
+      blobColorSum += blobColor * blob;
+      totalInfluence += blob;
     }
     
-    // Normalize color mix
-    if (field > 0.0) {
-      colorMix /= field;
+    // Strong blend - opacity has significant impact
+    if (totalInfluence > 0.001) {
+      vec3 blendedBlob = blobColorSum / max(totalInfluence, 1.0);
+      float blendAmount = min(totalInfluence * 2.0, 1.0) * uOpacity * 1.3;
+      color = mix(color, blendedBlob, blendAmount);
     }
     
-    // Apply threshold with adjustable sharpness
-    float threshold = 1.0;
-    float edge = smoothstep(threshold - uSharpness, threshold + uSharpness * 0.1, field);
+    // Film grain
+    float grain = fract(sin(dot(uv * 350.0, vec2(12.9898, 78.233))) * 43758.5453);
+    color += (grain - 0.5) * 0.01;
     
-    // Color based on field strength and position
-    vec3 blobColor = mix(uPrimaryColor, uSecondaryColor, colorMix);
-    
-    // Add internal shading
-    float internalShade = smoothstep(threshold, threshold + 2.0, field);
-    blobColor = mix(blobColor, blobColor * 1.3, internalShade * 0.3);
-    
-    // Glow effect
-    vec3 glowColor = vec3(0.0);
-    if (uGlow) {
-      float glowField = smoothstep(threshold - 0.5, threshold, field);
-      glowColor = mix(uPrimaryColor, uSecondaryColor, 0.5) * glowField * 0.3 * (1.0 - edge);
-    }
-    
-    // Final color
-    vec3 color = mix(uBackgroundColor + glowColor, blobColor, edge);
-    
-    // Subtle highlight on blobs
-    float highlight = smoothstep(threshold + 1.0, threshold + 3.0, field) * 0.2;
-    color += vec3(highlight);
+    // Vignette
+    float vignette = 1.0 - smoothstep(0.5, 1.5, length(uv - 0.5) * 1.1);
+    color *= 0.9 + vignette * 0.1;
     
     gl_FragColor = vec4(color, 1.0);
   }
 `;
 
 /**
- * `MetaballsBackground` creates organic, blobby shapes that merge and separate.
- * Perfect for modern, playful backgrounds with a liquid feel.
+ * `SoftBlobs` creates gentle, organic shapes that slowly drift and merge.
+ * Designed for premium, subtle backgrounds with soft focus aesthetic.
  * 
  * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
  *
  * @example
  * ```tsx
  * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
- *   <MetaballsBackground
- *     primaryColor="#8b5cf6"
- *     secondaryColor="#ec4899"
+ *   <SoftBlobs
+ *     primaryColor="#4a5568"
+ *     secondaryColor="#553c5e"
  *     backgroundColor="#1a1a2e"
+ *     speed={0.25}
  *   />
  * </ThreeCanvas>
  * ```
  */
-export const MetaballsBackground = ({
-  primaryColor = "#8b5cf6",
-  secondaryColor = "#ec4899",
+export const SoftBlobs = ({
+  primaryColor = "#5a6580",
+  secondaryColor = "#6a4a70",
   backgroundColor = "#1a1a2e",
-  speed = 1,
-  sharpness = 0.5,
-  glow = true,
-}: MetaballsBackgroundProps) => {
+  speed = 0.25,
+  softness = 0.7,
+  opacity = 0.8,
+}: SoftBlobsProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
+
+  // Use ref to pass current frame to useFrame callback (avoids stale closure)
+  const frameRef = useRef(frame);
+  frameRef.current = frame;
+
+  // Calculate plane dimensions to fill viewport at fov=90, z=1
+  const aspect = width / height;
+  const planeHeight = 2;
+  const planeWidth = planeHeight * aspect;
 
   const primary = useMemo(() => new THREE.Color(primaryColor), [primaryColor]);
   const secondary = useMemo(() => new THREE.Color(secondaryColor), [secondaryColor]);
@@ -167,22 +169,22 @@ export const MetaballsBackground = ({
       uPrimaryColor: { value: primary },
       uSecondaryColor: { value: secondary },
       uBackgroundColor: { value: background },
-      uSharpness: { value: sharpness },
-      uGlow: { value: glow },
+      uSoftness: { value: softness },
+      uOpacity: { value: opacity },
     }),
-    [primary, secondary, background, sharpness, glow],
+    [primary, secondary, background, softness, opacity],
   );
 
   useFrame(() => {
     if (meshRef.current) {
       const material = meshRef.current.material as THREE.ShaderMaterial;
-      material.uniforms.uTime.value = (frame / fps) * speed;
+      material.uniforms.uTime.value = (frameRef.current / fps) * speed;
     }
   });
 
   return (
     <mesh ref={meshRef}>
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[planeWidth, planeHeight]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
@@ -191,3 +193,6 @@ export const MetaballsBackground = ({
     </mesh>
   );
 };
+
+/** @deprecated Use SoftBlobs instead */
+export const MetaballsBackground = SoftBlobs;
