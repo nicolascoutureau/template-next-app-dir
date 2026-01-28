@@ -7,7 +7,7 @@ import {
   spring,
 } from "remotion";
 import React from "react";
-import { SplitText3DGsap, RichText3DGsap } from "../three/text";
+import { SplitText3DGsap } from "../three/text";
 import { getFontUrl } from "../fonts";
 
 // Local fonts (downloaded via: npm run download-fonts)
@@ -183,48 +183,43 @@ export const Main: React.FC = () => {
             }}
           />
 
-          {/* Rich text example - multiple fonts/styles in one text block! */}
-          <RichText3DGsap
-            segments={[
-              { text: "Create ", fontUrl: interFontUrl, color: "#94a3b8" },
-              { text: "stunning ", fontUrl: poppinsFontUrl, color: "#60a5fa" },
-              {
-                text: "demos",
-                fontUrl: playfairFontUrl,
-                color: "#f472b6",
-              },
-            ]}
-            position={[0, -1.8, 0]}
-            fontSize={0.4}
-            createTimeline={({ tl, segments }) => {
-              // Set initial hidden state for all segments at time 0
-              // This ensures characters are hidden before their animations start
-              segments.forEach((seg) => {
-                tl.set(seg.state, { opacity: 0, y: 0.2 }, 0);
-                tl.set(seg.chars, { y: 0.15, opacity: 0, scale: 0.8 }, 0);
+          {/* Multi-line text example - animate by lines! */}
+          <SplitText3DGsap
+            text={"Create stunning\nvideos with\ncode"}
+            fontUrl={interFontUrl}
+            position={[0, -2, 0]}
+            color="#94a3b8"
+            fontSize={0.35}
+            lineHeight={1.4}
+            createTimeline={({ tl, lines }) => {
+              // Set initial hidden state for all lines
+              lines.forEach((line) => {
+                tl.set(line.state, { opacity: 0, x: -0.5 }, 0);
+                tl.set(line.chars, { opacity: 0, scale: 0.8 }, 0);
               });
-              
-              // Animate each segment with different timing and effects
-              segments.forEach((seg, i) => {
-                const startTime = 1.5 + i * 0.3;
-                // Segment-level entrance
+
+              // Animate each line sliding in from left with stagger
+              lines.forEach((line, i) => {
+                const startTime = 2.5 + i * 0.25;
+
+                // Line slides in
                 tl.to(
-                  seg.state,
-                  { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+                  line.state,
+                  { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
                   startTime,
                 );
-                // Character-level wave within each segment
+
+                // Characters pop in within each line
                 tl.to(
-                  seg.chars,
+                  line.chars,
                   {
-                    y: 0,
                     opacity: 1,
                     scale: 1,
-                    duration: 0.4,
-                    stagger: 0.03,
+                    duration: 0.3,
+                    stagger: 0.02,
                     ease: "back.out(1.7)",
                   },
-                  startTime,
+                  startTime + 0.1,
                 );
               });
               return tl;

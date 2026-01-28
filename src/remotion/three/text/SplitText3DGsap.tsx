@@ -8,7 +8,7 @@ import { useOpenTypeFont, getTextMetrics } from "./SplitText3D";
 // TYPES
 // ============================================================================
 
-export type SplitType = "chars" | "words" | "lines" | "chars,words";
+export type SplitType = "chars" | "words" | "lines" | "chars,words" | "chars,words,lines";
 
 /** Animation state for individual characters */
 export interface CharAnimationState {
@@ -34,6 +34,18 @@ export interface WordAnimationState {
   opacity: number;
 }
 
+/** Animation state for lines (applies to all words/chars in the line) */
+export interface LineAnimationState {
+  x: number;
+  y: number;
+  z: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+  scale: number;
+  opacity: number;
+}
+
 /** Word data with animation state and its characters */
 export interface WordData {
   word: string;
@@ -43,8 +55,22 @@ export interface WordData {
   chars: CharAnimationState[];
 }
 
+/** Line data with animation state and its words */
+export interface LineData {
+  /** The line text */
+  text: string;
+  /** Line index */
+  index: number;
+  /** Line-level animation state (applies to all words/chars) */
+  state: LineAnimationState;
+  /** Words in this line */
+  words: WordData[];
+  /** All character animation states in this line (flat) */
+  chars: CharAnimationState[];
+}
+
 export interface SplitText3DGsapProps {
-  /** The text to animate */
+  /** The text to animate (use \n for line breaks) */
   text: string;
   /** Font URL (use staticFile for local fonts) */
   fontUrl: string;
@@ -56,13 +82,15 @@ export interface SplitText3DGsapProps {
   fontSize?: number;
   /** Additional letter spacing (multiplied by fontSize) */
   letterSpacing?: number;
-  /** Split type: 'chars', 'words', 'lines', or 'chars,words' */
+  /** Line height multiplier (default: 1.2) */
+  lineHeight?: number;
+  /** Split type: 'chars', 'words', 'lines', or combinations */
   splitType?: SplitType;
   /** Function to determine color per character */
   charColor?: (char: string, index: number, total: number) => string;
   /** 
    * Function to create the GSAP timeline
-   * Similar to GSAP SplitText - animate words and chars independently!
+   * Similar to GSAP SplitText - animate lines, words, and chars independently!
    */
   createTimeline: (params: {
     tl: gsap.core.Timeline;
@@ -70,9 +98,33 @@ export interface SplitText3DGsapProps {
     chars: CharAnimationState[];
     /** Word animation states (animate these to move entire words) */
     words: WordData[];
+    /** Line animation states (animate these to move entire lines) */
+    lines: LineData[];
     text: string;
   }) => gsap.core.Timeline;
 }
+
+// ============================================================================
+// HELPER: Create default animation states
+// ============================================================================
+
+const createDefaultLineState = (): LineAnimationState => ({
+  x: 0, y: 0, z: 0,
+  rotationX: 0, rotationY: 0, rotationZ: 0,
+  scale: 1, opacity: 1,
+});
+
+const createDefaultWordState = (): WordAnimationState => ({
+  x: 0, y: 0, z: 0,
+  rotationX: 0, rotationY: 0, rotationZ: 0,
+  scale: 1, opacity: 1,
+});
+
+const createDefaultCharState = (): CharAnimationState => ({
+  x: 0, y: 0, z: 0,
+  rotationX: 0, rotationY: 0, rotationZ: 0,
+  scale: 1, opacity: 1,
+});
 
 // ============================================================================
 // ANIMATED CHARACTER COMPONENT
@@ -81,33 +133,35 @@ export interface SplitText3DGsapProps {
 const AnimatedChar: React.FC<{
   char: string;
   xPosition: number;
+  yPosition: number;
   basePosition: [number, number, number];
   fontSize: number;
   color: string;
   fontUrl: string;
   charState: CharAnimationState;
   wordState: WordAnimationState;
-}> = ({ char, xPosition, basePosition, fontSize, color, fontUrl, charState, wordState }) => {
+  lineState: LineAnimationState;
+}> = ({ char, xPosition, yPosition, basePosition, fontSize, color, fontUrl, charState, wordState, lineState }) => {
   // Skip rendering spaces as 3D text
   if (char === " ") {
     return null;
   }
 
-  // Combine word-level and char-level transforms
-  const combinedX = charState.x + wordState.x;
-  const combinedY = charState.y + wordState.y;
-  const combinedZ = charState.z + wordState.z;
-  const combinedRotX = charState.rotationX + wordState.rotationX;
-  const combinedRotY = charState.rotationY + wordState.rotationY;
-  const combinedRotZ = charState.rotationZ + wordState.rotationZ;
-  const combinedScale = charState.scale * wordState.scale;
-  const combinedOpacity = charState.opacity * wordState.opacity;
+  // Combine line-level, word-level, and char-level transforms
+  const combinedX = charState.x + wordState.x + lineState.x;
+  const combinedY = charState.y + wordState.y + lineState.y;
+  const combinedZ = charState.z + wordState.z + lineState.z;
+  const combinedRotX = charState.rotationX + wordState.rotationX + lineState.rotationX;
+  const combinedRotY = charState.rotationY + wordState.rotationY + lineState.rotationY;
+  const combinedRotZ = charState.rotationZ + wordState.rotationZ + lineState.rotationZ;
+  const combinedScale = charState.scale * wordState.scale * lineState.scale;
+  const combinedOpacity = charState.opacity * wordState.opacity * lineState.opacity;
 
   return (
     <Text
       position={[
         basePosition[0] + xPosition + combinedX,
-        basePosition[1] + combinedY,
+        basePosition[1] + yPosition + combinedY,
         basePosition[2] + combinedZ,
       ]}
       rotation={[combinedRotX, combinedRotY, combinedRotZ]}
@@ -170,6 +224,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   color = "#ffffff",
   fontSize = 1,
   letterSpacing = 0,
+  lineHeight = 1.2,
   charColor,
   createTimeline,
 }) => {
@@ -186,106 +241,124 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   const [, forceUpdate] = useState(0);
 
   // Calculate character positions and create animation states
-  const { characters, charStates, wordDataList, charToWordIndex } = useMemo(() => {
+  const { characters, charStates, wordDataList, lineDataList, charToWordIndex } = useMemo(() => {
     if (!font) {
-      return { characters: [], charStates: [], wordDataList: [], charToWordIndex: [] };
+      return { characters: [], charStates: [], wordDataList: [], lineDataList: [], charToWordIndex: [] };
     }
 
-    const { chars } = getTextMetrics(font, text, fontSize);
+    // Split text into lines
+    const lineTexts = text.split('\n');
+    const numLines = lineTexts.length;
     
-    // Apply letter spacing
-    let processedChars = chars;
-    if (letterSpacing !== 0) {
-      let offset = 0;
-      processedChars = chars.map((c) => {
-        const adjustedX = c.xPosition + offset;
-        offset += letterSpacing * fontSize;
-        return {
-          ...c,
-          xPosition: adjustedX - (offset - letterSpacing * fontSize) / 2,
-        };
-      });
-    }
-
-    // Create animation states for each character
-    const charStates: CharAnimationState[] = processedChars.map(() => ({
-      x: 0,
-      y: 0,
-      z: 0,
-      rotationX: 0,
-      rotationY: 0,
-      rotationZ: 0,
-      scale: 1,
-      opacity: 1,
-    }));
-
-    // Map each char index to its word index
+    // Calculate vertical offset for each line (centered around origin)
+    const totalHeight = (numLines - 1) * fontSize * lineHeight;
+    const startY = totalHeight / 2;
+    
+    // Process each line
+    const allCharacters: Array<{ char: string; xPosition: number; yPosition: number; index: number; lineIndex: number }> = [];
+    const allCharStates: CharAnimationState[] = [];
+    const allWordDataList: WordData[] = [];
+    const lineDataList: LineData[] = [];
     const charToWordIndex: number[] = [];
-
-    // Group by words with word-level animation state
-    const wordDataList: WordData[] = [];
     
-    let currentWordChars: CharAnimationState[] = [];
-    let currentWordStr = "";
-    let wordIndex = 0;
+    let globalCharIndex = 0;
+    let globalWordIndex = 0;
     
-    processedChars.forEach((c, index) => {
-      if (c.char === " ") {
-        if (currentWordChars.length > 0) {
-          wordDataList.push({
-            word: currentWordStr,
-            state: {
-              x: 0,
-              y: 0,
-              z: 0,
-              rotationX: 0,
-              rotationY: 0,
-              rotationZ: 0,
-              scale: 1,
-              opacity: 1,
-            },
-            chars: [...currentWordChars],
-          });
-          currentWordChars = [];
-          currentWordStr = "";
-          wordIndex++;
-        }
-        charToWordIndex.push(-1); // Space doesn't belong to a word
-      } else {
-        currentWordChars.push(charStates[index]);
-        currentWordStr += c.char;
-        charToWordIndex.push(wordIndex);
+    lineTexts.forEach((lineText, lineIndex) => {
+      const lineY = startY - lineIndex * fontSize * lineHeight;
+      const lineState = createDefaultLineState();
+      const lineWords: WordData[] = [];
+      const lineChars: CharAnimationState[] = [];
+      
+      // Get metrics for this line
+      const { chars: lineCharMetrics } = getTextMetrics(font, lineText, fontSize);
+      
+      // Apply letter spacing
+      let processedChars = lineCharMetrics;
+      if (letterSpacing !== 0) {
+        let offset = 0;
+        processedChars = lineCharMetrics.map((c) => {
+          const adjustedX = c.xPosition + offset;
+          offset += letterSpacing * fontSize;
+          return {
+            ...c,
+            xPosition: adjustedX - (offset - letterSpacing * fontSize) / 2,
+          };
+        });
       }
-    });
-    
-    // Don't forget the last word
-    if (currentWordChars.length > 0) {
-      wordDataList.push({
-        word: currentWordStr,
-        state: {
-          x: 0,
-          y: 0,
-          z: 0,
-          rotationX: 0,
-          rotationY: 0,
-          rotationZ: 0,
-          scale: 1,
-          opacity: 1,
-        },
-        chars: currentWordChars,
+      
+      // Create char states for this line
+      const lineCharStates: CharAnimationState[] = processedChars.map(() => createDefaultCharState());
+      
+      // Group chars into words
+      let currentWordChars: CharAnimationState[] = [];
+      let currentWordStr = "";
+      
+      processedChars.forEach((c, localIndex) => {
+        const charState = lineCharStates[localIndex];
+        
+        allCharacters.push({
+          char: c.char,
+          xPosition: c.xPosition,
+          yPosition: lineY,
+          index: globalCharIndex,
+          lineIndex,
+        });
+        allCharStates.push(charState);
+        lineChars.push(charState);
+        
+        if (c.char === " " || c.char === "\n") {
+          if (currentWordChars.length > 0) {
+            const wordData: WordData = {
+              word: currentWordStr,
+              state: createDefaultWordState(),
+              chars: [...currentWordChars],
+            };
+            allWordDataList.push(wordData);
+            lineWords.push(wordData);
+            currentWordChars = [];
+            currentWordStr = "";
+            globalWordIndex++;
+          }
+          charToWordIndex.push(-1); // Space doesn't belong to a word
+        } else {
+          currentWordChars.push(charState);
+          currentWordStr += c.char;
+          charToWordIndex.push(globalWordIndex);
+        }
+        
+        globalCharIndex++;
       });
-    }
+      
+      // Don't forget the last word in the line
+      if (currentWordChars.length > 0) {
+        const wordData: WordData = {
+          word: currentWordStr,
+          state: createDefaultWordState(),
+          chars: currentWordChars,
+        };
+        allWordDataList.push(wordData);
+        lineWords.push(wordData);
+        globalWordIndex++;
+      }
+      
+      lineDataList.push({
+        text: lineText,
+        index: lineIndex,
+        state: lineState,
+        words: lineWords,
+        chars: lineChars,
+      });
+    });
 
     return {
-      characters: processedChars.map((c, index) => ({
-        ...c,
-        index,
-      })),
-      charStates,
-      wordDataList,
+      characters: allCharacters,
+      charStates: allCharStates,
+      wordDataList: allWordDataList,
+      lineDataList,
       charToWordIndex,
     };
-  }, [font, text, fontSize, letterSpacing]);
+  }, [font, text, fontSize, letterSpacing, lineHeight]);
 
   // Memoize timeline factory
   const memoizedCreateTimeline = useCallback(createTimeline, []);
@@ -306,6 +379,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
       tl,
       chars: charStates,
       words: wordDataList,
+      lines: lineDataList,
       text,
     });
 
@@ -315,7 +389,7 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
         timelineRef.current.kill();
       }
     };
-  }, [font, charStates, wordDataList, text, memoizedCreateTimeline]);
+  }, [font, charStates, wordDataList, lineDataList, text, memoizedCreateTimeline]);
 
   // Seek timeline on each frame
   useEffect(() => {
@@ -331,30 +405,30 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     return null;
   }
 
-  // Default word state for spaces
-  const defaultWordState: WordAnimationState = {
-    x: 0, y: 0, z: 0,
-    rotationX: 0, rotationY: 0, rotationZ: 0,
-    scale: 1, opacity: 1,
-  };
+  // Default states for spaces
+  const defaultWordState: WordAnimationState = createDefaultWordState();
+  const defaultLineState: LineAnimationState = createDefaultLineState();
 
   return (
     <group>
-      {characters.map(({ char, index, xPosition }) => {
+      {characters.map(({ char, index, xPosition, yPosition, lineIndex }) => {
         const wordIdx = charToWordIndex[index];
         const wordState = wordIdx >= 0 ? wordDataList[wordIdx].state : defaultWordState;
+        const lineState = lineIndex >= 0 ? lineDataList[lineIndex].state : defaultLineState;
         
         return (
           <AnimatedChar
             key={`${index}-${char}`}
             char={char}
             xPosition={xPosition}
+            yPosition={yPosition}
             basePosition={position}
             fontSize={fontSize}
             fontUrl={fontUrl}
             color={charColor ? charColor(char, index, characters.length) : color}
             charState={charStates[index]}
             wordState={wordState}
+            lineState={lineState}
           />
         );
       })}
@@ -498,6 +572,66 @@ export const gsapPresetGlitch = (
       tl.to(char, { x: 0.1, duration: 0.05 }, delay + 0.05);
       tl.to(char, { x: 0, duration: 0.1, ease: "power2.out" }, delay + 0.1);
     });
+    return tl;
+  };
+};
+
+/** 
+ * Preset: Line-by-line animation
+ * Each line slides in and fades, then chars animate within
+ */
+export const gsapPresetLineByLine = (
+  lineDuration = 0.5,
+  lineStagger = 0.3,
+  charStagger = 0.02
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, lines }) => {
+    lines.forEach((line, i) => {
+      const lineDelay = i * lineStagger;
+      
+      // Set initial state at time 0
+      tl.set(line.state, { opacity: 0, y: 0.5 }, 0);
+      tl.set(line.chars, { opacity: 0, y: 0.2 }, 0);
+      
+      // Animate line entrance
+      tl.to(
+        line.state,
+        { opacity: 1, y: 0, duration: lineDuration, ease: "power3.out" },
+        lineDelay
+      );
+      
+      // Animate chars within line
+      tl.to(
+        line.chars,
+        { opacity: 1, y: 0, duration: 0.4, stagger: charStagger, ease: "power2.out" },
+        lineDelay
+      );
+    });
+    return tl;
+  };
+};
+
+/**
+ * Preset: Lines reveal from bottom
+ * Lines slide up from below with stagger
+ */
+export const gsapPresetLinesReveal = (
+  duration = 0.6,
+  stagger = 0.2
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, lines }) => {
+    // Set initial hidden state
+    lines.forEach(line => {
+      tl.set(line.state, { opacity: 0, y: -1 }, 0);
+    });
+    
+    // Animate lines
+    const lineStates = lines.map(l => l.state);
+    tl.to(
+      lineStates,
+      { opacity: 1, y: 0, duration, stagger, ease: "power3.out" },
+      0.1
+    );
     return tl;
   };
 };

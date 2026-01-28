@@ -20,7 +20,9 @@ export {
   type SplitType,
   type CharAnimationState,
   type WordAnimationState,
+  type LineAnimationState,
   type WordData,
+  type LineData,
   // Preset timeline factories
   gsapPresetFadeUp,
   gsapPresetElastic,
@@ -30,6 +32,8 @@ export {
   gsapPreset3DReveal,
   gsapPresetWave,
   gsapPresetGlitch,
+  gsapPresetLineByLine,
+  gsapPresetLinesReveal,
 } from "./SplitText3DGsap";
 
 // Rich text (multiple fonts/styles in single text block)

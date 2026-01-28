@@ -26,7 +26,9 @@ export {
   type SplitType,
   type CharAnimationState,
   type WordAnimationState,
+  type LineAnimationState,
   type WordData,
+  type LineData,
   gsapPresetFadeUp,
   gsapPresetElastic,
   gsapPresetWordByWord,
@@ -35,6 +37,8 @@ export {
   gsapPreset3DReveal,
   gsapPresetWave,
   gsapPresetGlitch,
+  gsapPresetLineByLine,
+  gsapPresetLinesReveal,
   // Rich text (multiple fonts/styles)
   RichText3DGsap,
   type RichText3DGsapProps,
