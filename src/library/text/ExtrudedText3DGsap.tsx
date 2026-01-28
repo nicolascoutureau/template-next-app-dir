@@ -1,5 +1,5 @@
 import { useCurrentFrame, useVideoConfig, delayRender, continueRender } from "remotion";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import gsap from "gsap";
 import opentype from "opentype.js";
 import * as THREE from "three";
@@ -275,6 +275,12 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
   const { fps } = useVideoConfig();
   const font = useOpenTypeFont(fontUrl);
 
+  // Refs to access current values without causing effect re-runs
+  const frameRef = useRef(frame);
+  const fpsRef = useRef(fps);
+  frameRef.current = frame;
+  fpsRef.current = fps;
+
   // Store animation data
   const [characters, setCharacters] = useState<CharacterData[]>([]);
   const [allCharStates, setAllCharStates] = useState<CharAnimationState[]>([]);
@@ -492,12 +498,16 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
       text,
     });
 
+    // Seek immediately to prevent 1-frame flash
+    const timeInSeconds = frameRef.current / fpsRef.current;
+    tl.seek(timeInSeconds);
+
     timelineRef.current = tl;
     setTimelineVersion(v => v + 1);
   }, [characters, allCharStates, wordDataList, lineDataList, text]);
 
-  // Seek timeline on frame change
-  useEffect(() => {
+  // Seek timeline on frame change (useLayoutEffect for synchronous update before paint)
+  useLayoutEffect(() => {
     if (timelineRef.current) {
       const timeInSeconds = frame / fps;
       timelineRef.current.seek(timeInSeconds);
@@ -507,11 +517,8 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
 
   // Don't render until ready
   if (!font || characters.length === 0 || timelineVersion === 0) {
-    console.log(`[ExtrudedText3D] Not ready: font=${!!font}, chars=${characters.length}, timelineVersion=${timelineVersion}`);
     return null;
   }
-  
-  console.log(`[ExtrudedText3D] Rendering ${characters.length} characters`);
 
   return (
     <group position={position}>

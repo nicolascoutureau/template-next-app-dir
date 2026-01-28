@@ -1,6 +1,6 @@
 import { useCurrentFrame, useVideoConfig, delayRender, continueRender } from "remotion";
 import { Text } from "@react-three/drei";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import opentype from "opentype.js";
 import { calculateRichTextLayout } from "./textLayout";
@@ -489,8 +489,8 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segmentDataList, allChars, allWords]);
 
-  // Seek timeline on each frame change
-  useEffect(() => {
+  // Seek timeline on each frame change (useLayoutEffect for synchronous update before paint)
+  useLayoutEffect(() => {
     if (timelineRef.current && isTimelineReady) {
       const timeInSeconds = frame / fps;
       timelineRef.current.seek(timeInSeconds);

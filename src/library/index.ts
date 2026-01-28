@@ -6,6 +6,35 @@
 
 // Re-export everything from text folder
 export {
+  // Backgrounds
+  GradientBackground,
+  type GradientBackgroundProps,
+  type GradientType,
+  LavaShader,
+  type LavaShaderProps,
+  StripeGradientMesh,
+  type StripeGradientMeshProps,
+  AuroraBackground,
+  type AuroraBackgroundProps,
+  NoiseGradient,
+  type NoiseGradientProps,
+  type NoiseType,
+  PlasmaBackground,
+  type PlasmaBackgroundProps,
+  type PlasmaStyle,
+  MetaballsBackground,
+  type MetaballsBackgroundProps,
+  WaveGridBackground,
+  type WaveGridBackgroundProps,
+  GradientOrbs,
+  type GradientOrbsProps,
+  FluidSimulation,
+  type FluidSimulationProps,
+  ParticleNebula,
+  type ParticleNebulaProps,
+} from "./backgrounds";
+
+export {
   // SplitText3D
   SplitText3D,
   type SplitText3DProps,

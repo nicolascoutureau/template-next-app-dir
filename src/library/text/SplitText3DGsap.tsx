@@ -1,6 +1,6 @@
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { Text } from "@react-three/drei";
-import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { useOpenTypeFont, getTextMetrics } from "./SplitText3D";
 
@@ -231,6 +231,12 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
+  // Refs to access current values without causing effect re-runs
+  const frameRef = useRef(frame);
+  const fpsRef = useRef(fps);
+  frameRef.current = frame;
+  fpsRef.current = fps;
+  
   // Load font with opentype.js
   const font = useOpenTypeFont(fontUrl);
   
@@ -383,6 +389,10 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
       text,
     });
 
+    // Seek immediately to prevent 1-frame flash
+    const timeInSeconds = frameRef.current / fpsRef.current;
+    timelineRef.current.seek(timeInSeconds);
+
     // Cleanup
     return () => {
       if (timelineRef.current) {
@@ -391,8 +401,8 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     };
   }, [font, charStates, wordDataList, lineDataList, text, memoizedCreateTimeline]);
 
-  // Seek timeline on each frame
-  useEffect(() => {
+  // Seek timeline on each frame (useLayoutEffect for synchronous update before paint)
+  useLayoutEffect(() => {
     if (timelineRef.current) {
       timelineRef.current.seek(frame / fps);
       // Force re-render to apply animation values
