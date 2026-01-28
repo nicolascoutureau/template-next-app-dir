@@ -371,7 +371,7 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
                 curveSegments: curveSegments,
               });
 
-              // Center geometry
+              // Compute bounding box for positioning
               geometry.computeBoundingBox();
               const bbox = geometry.boundingBox!;
               charWidth = bbox.max.x - bbox.min.x;
@@ -385,7 +385,11 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
                 charHeight = fontSize * 0.8;
                 geometry = new THREE.BoxGeometry(charWidth, charHeight, depth);
               } else {
-                geometry.translate(-charWidth / 2, -charHeight / 2, -depth / 2);
+                // IMPORTANT: Only center horizontally, NOT vertically!
+                // After Y-flip in pathToShapes, baseline is at y=0 for all characters.
+                // Centering vertically would break baseline alignment.
+                // We translate X to center the char, and Z to center depth, but leave Y at baseline.
+                geometry.translate(-bbox.min.x - charWidth / 2, 0, -depth / 2);
               }
             } catch (error) {
               console.error(`[ExtrudedText3D] Error creating geometry for char "${char}":`, error);
