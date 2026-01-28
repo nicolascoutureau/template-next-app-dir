@@ -4,21 +4,14 @@
  * A collection of professional 3D text animation components for React Three Fiber + Remotion.
  */
 
-// Re-export everything from text folder
+// Re-export everything from backgrounds folder
 export {
-  // Backgrounds
+  // Backgrounds (all optimized for performance)
   GradientBackground,
   type GradientBackgroundProps,
   type GradientType,
   LavaShader,
   type LavaShaderProps,
-  StripeGradientMesh,
-  type StripeGradientMeshProps,
-  AuroraBackground,
-  type AuroraBackgroundProps,
-  NoiseGradient,
-  type NoiseGradientProps,
-  type NoiseType,
   PlasmaBackground,
   type PlasmaBackgroundProps,
   type PlasmaStyle,
@@ -28,10 +21,6 @@ export {
   type WaveGridBackgroundProps,
   GradientOrbs,
   type GradientOrbsProps,
-  FluidSimulation,
-  type FluidSimulationProps,
-  ParticleNebula,
-  type ParticleNebulaProps,
 } from "./backgrounds";
 
 export {
@@ -96,3 +85,6 @@ export {
   type SegmentLayout,
   type RichTextLayout,
 } from "./text";
+
+// Utilities
+export { FPSMonitor, useFPS, type FPSMonitorProps } from "./utils";

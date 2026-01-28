@@ -9,25 +9,30 @@ import {
 } from "./RichText3DGsap";
 
 /** Helper wrapper that auto-remounts StorybookCanvas to handle WebGL context issues */
-const AutoRemountCanvas: React.FC<{ children: React.ReactNode; fps?: number; durationInFrames?: number }> = ({
-  children,
-  fps = 30,
-  durationInFrames = 90,
-}) => {
+const AutoRemountCanvas: React.FC<{
+  children: React.ReactNode;
+  fps?: number;
+  durationInFrames?: number;
+}> = ({ children, fps = 30, durationInFrames = 90 }) => {
   const [key, setKey] = React.useState(0);
-  
+
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      setKey(prev => prev + 1);
+      setKey((prev) => prev + 1);
     }, 200);
     return () => clearTimeout(timer);
   }, []);
-  
+
   return (
     <div>
       <button
-        onClick={() => setKey(k => k + 1)}
-        style={{ marginBottom: 10, padding: "8px 16px", cursor: "pointer", fontSize: 12 }}
+        onClick={() => setKey((k) => k + 1)}
+        style={{
+          marginBottom: 10,
+          padding: "8px 16px",
+          cursor: "pointer",
+          fontSize: 12,
+        }}
       >
         Remount if blank (key: {key})
       </button>

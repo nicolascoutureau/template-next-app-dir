@@ -3,15 +3,10 @@ import React from "react";
 import { RemotionPreview } from "./RemotionPreview";
 import {
   LavaShader,
-  StripeGradientMesh,
-  AuroraBackground,
-  NoiseGradient,
   PlasmaBackground,
   MetaballsBackground,
   WaveGridBackground,
   GradientOrbs,
-  FluidSimulation,
-  ParticleNebula,
   GradientBackground,
 } from "../backgrounds";
 import { AbsoluteFill } from "remotion";
@@ -143,7 +138,7 @@ export const TestBasic: Story = {
 };
 
 // ============================================================================
-// LAVA SHADER
+// LAVA SHADER (FAST)
 // ============================================================================
 
 export const LavaClassic: Story = {
@@ -209,162 +204,7 @@ export const LavaPurple: Story = {
 };
 
 // ============================================================================
-// STRIPE GRADIENT MESH
-// ============================================================================
-
-export const StripeDefault: Story = {
-  name: "Stripe - Default",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <StripeGradientMesh
-            colors={["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"]}
-            amplitude={0.2}
-          />
-        </ShaderBackgroundCanvas>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-5xl font-bold text-white mix-blend-overlay">
-            GRADIENT MESH
-          </div>
-        </div>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const StripeOcean: Story = {
-  name: "Stripe - Ocean",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <StripeGradientMesh
-            colors={["#0077B6", "#00B4D8", "#90E0EF", "#CAF0F8", "#03045E"]}
-            amplitude={0.3}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const StripeSunset: Story = {
-  name: "Stripe - Sunset",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <StripeGradientMesh
-            colors={["#1a1a2e", "#e94560", "#ff6b6b", "#ffd93d", "#ffb347"]}
-            amplitude={0.25}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-// ============================================================================
-// AURORA BACKGROUND
-// ============================================================================
-
-export const AuroraClassic: Story = {
-  name: "Aurora - Northern Lights",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <AuroraBackground
-            colors={["#00ff87", "#60efff", "#ff00ff"]}
-            backgroundColor="#0a0a1a"
-            intensity={0.7}
-          />
-        </ShaderBackgroundCanvas>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-6xl font-bold text-white/80">AURORA</div>
-        </div>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const AuroraPurple: Story = {
-  name: "Aurora - Purple Dreams",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <AuroraBackground
-            colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
-            backgroundColor="#0f0f23"
-            intensity={0.9}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-// ============================================================================
-// NOISE GRADIENT
-// ============================================================================
-
-export const NoiseWarm: Story = {
-  name: "Noise - Warm Sunset",
-  render: () => (
-    <AutoRemount durationInFrames={150}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <NoiseGradient
-            colors={["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"]}
-            noiseType="simplex"
-            scale={3}
-            grain={0.03}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const NoiseVoronoi: Story = {
-  name: "Noise - Voronoi Cells",
-  render: () => (
-    <AutoRemount durationInFrames={150}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <NoiseGradient
-            colors={["#0f0f23", "#1e3a5f", "#3d5a80", "#98c1d9"]}
-            noiseType="voronoi"
-            scale={5}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const NoiseWorley: Story = {
-  name: "Noise - Worley Pattern",
-  render: () => (
-    <AutoRemount durationInFrames={150}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <NoiseGradient
-            colors={["#0d1117", "#161b22", "#21262d", "#30363d"]}
-            noiseType="worley"
-            scale={4}
-            contrast={1.2}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-// ============================================================================
-// PLASMA BACKGROUND
+// PLASMA BACKGROUND (FAST - only sin functions)
 // ============================================================================
 
 export const PlasmaClassic: Story = {
@@ -411,6 +251,19 @@ export const PlasmaFire: Story = {
   ),
 };
 
+export const PlasmaOcean: Story = {
+  name: "Plasma - Ocean",
+  render: () => (
+    <AutoRemount durationInFrames={120}>
+      <AbsoluteFill>
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <PlasmaBackground style="ocean" complexity={1} />
+        </ShaderBackgroundCanvas>
+      </AbsoluteFill>
+    </AutoRemount>
+  ),
+};
+
 export const PlasmaPsychedelic: Story = {
   name: "Plasma - Psychedelic",
   render: () => (
@@ -425,7 +278,7 @@ export const PlasmaPsychedelic: Story = {
 };
 
 // ============================================================================
-// METABALLS BACKGROUND
+// METABALLS BACKGROUND (FAST - simple math)
 // ============================================================================
 
 export const MetaballsPurple: Story = {
@@ -466,8 +319,27 @@ export const MetaballsGreen: Story = {
   ),
 };
 
+export const MetaballsOrange: Story = {
+  name: "Metaballs - Sunset Orange",
+  render: () => (
+    <AutoRemount durationInFrames={180}>
+      <AbsoluteFill>
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <MetaballsBackground
+            primaryColor="#f97316"
+            secondaryColor="#fbbf24"
+            backgroundColor="#1c1917"
+            sharpness={0.4}
+            glow
+          />
+        </ShaderBackgroundCanvas>
+      </AbsoluteFill>
+    </AutoRemount>
+  ),
+};
+
 // ============================================================================
-// WAVE GRID BACKGROUND
+// WAVE GRID BACKGROUND (FAST - simple math)
 // ============================================================================
 
 export const WaveGridSynthwave: Story = {
@@ -514,8 +386,28 @@ export const WaveGridTech: Story = {
   ),
 };
 
+export const WaveGridNeon: Story = {
+  name: "Wave Grid - Neon Green",
+  render: () => (
+    <AutoRemount durationInFrames={150}>
+      <AbsoluteFill>
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <WaveGridBackground
+            lineColor="#22c55e"
+            glowColor="#4ade80"
+            backgroundColor="#052e16"
+            gridDensity={18}
+            amplitude={0.15}
+            perspective={0.6}
+          />
+        </ShaderBackgroundCanvas>
+      </AbsoluteFill>
+    </AutoRemount>
+  ),
+};
+
 // ============================================================================
-// GRADIENT ORBS
+// GRADIENT ORBS (FAST - distance calculations)
 // ============================================================================
 
 export const GradientOrbsPastel: Story = {
@@ -557,119 +449,17 @@ export const GradientOrbsVibrant: Story = {
   ),
 };
 
-// ============================================================================
-// FLUID SIMULATION
-// ============================================================================
-
-export const FluidInk: Story = {
-  name: "Fluid - Ink in Water",
+export const GradientOrbsSunset: Story = {
+  name: "Gradient Orbs - Sunset",
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
         <ShaderBackgroundCanvas width={W} height={H}>
-          <FluidSimulation
-            colors={["#1e3a8a", "#7c3aed", "#db2777"]}
-            backgroundColor="#0f0f23"
-            turbulence={0.5}
-            viscosity={1}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const FluidLava: Story = {
-  name: "Fluid - Slow Lava",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <FluidSimulation
-            colors={["#dc2626", "#f97316", "#fbbf24"]}
+          <GradientOrbs
+            colors={["#f97316", "#ef4444", "#ec4899", "#8b5cf6", "#fbbf24"]}
             backgroundColor="#1c1917"
-            viscosity={2}
-            turbulence={0.3}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const FluidOcean: Story = {
-  name: "Fluid - Ocean Currents",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <FluidSimulation
-            colors={["#0284c7", "#06b6d4", "#22d3ee"]}
-            backgroundColor="#0c1929"
-            viscosity={1.5}
-            turbulence={0.6}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-// ============================================================================
-// PARTICLE NEBULA
-// ============================================================================
-
-export const NebulaClassic: Story = {
-  name: "Nebula - Deep Space",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <ParticleNebula
-            colors={["#7c3aed", "#ec4899", "#06b6d4"]}
-            backgroundColor="#050510"
-            brightness={0.7}
-            stars
-          />
-        </ShaderBackgroundCanvas>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-6xl font-bold text-white/80">NEBULA</div>
-        </div>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const NebulaFire: Story = {
-  name: "Nebula - Fiery",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <ParticleNebula
-            colors={["#dc2626", "#f97316", "#fbbf24"]}
-            backgroundColor="#0a0505"
-            brightness={0.9}
-            stars
-            density={4}
-          />
-        </ShaderBackgroundCanvas>
-      </AbsoluteFill>
-    </AutoRemount>
-  ),
-};
-
-export const NebulaGreen: Story = {
-  name: "Nebula - Cosmic Green",
-  render: () => (
-    <AutoRemount durationInFrames={180}>
-      <AbsoluteFill>
-        <ShaderBackgroundCanvas width={W} height={H}>
-          <ParticleNebula
-            colors={["#059669", "#10b981", "#34d399"]}
-            backgroundColor="#030a08"
-            brightness={0.8}
-            stars
+            blur={0.7}
+            orbSize={0.32}
           />
         </ShaderBackgroundCanvas>
       </AbsoluteFill>

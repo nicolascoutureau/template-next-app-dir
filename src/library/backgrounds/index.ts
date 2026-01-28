@@ -1,8 +1,10 @@
 /**
  * @module backgrounds
  *
- * A collection of professional shader backgrounds for motion design videos.
+ * A collection of performant shader backgrounds for motion design videos.
  * All backgrounds are designed to work seamlessly with Remotion and React Three Fiber.
+ * 
+ * All backgrounds are optimized for real-time performance.
  */
 
 // Simple CSS gradient
@@ -15,49 +17,24 @@ export {
 // Lava/Magma shader
 export { LavaShader, type LavaShaderProps } from "./LavaShader";
 
-// Stripe-style gradient mesh
-export {
-  StripeGradientMesh,
-  type StripeGradientMeshProps,
-} from "./StripeGradientMesh";
-
-// Aurora/Northern lights
-export { AuroraBackground, type AuroraBackgroundProps } from "./AuroraBackground";
-
-// Noise-based gradients (Codrops style)
-export {
-  NoiseGradient,
-  type NoiseGradientProps,
-  type NoiseType,
-} from "./NoiseGradient";
-
-// Classic plasma effect
+// Classic plasma effect (fast - only sin functions)
 export {
   PlasmaBackground,
   type PlasmaBackgroundProps,
   type PlasmaStyle,
 } from "./PlasmaBackground";
 
-// Organic metaballs/blobs
+// Organic metaballs/blobs (fast - simple math)
 export {
   MetaballsBackground,
   type MetaballsBackgroundProps,
 } from "./MetaballsBackground";
 
-// Retro wave grid
+// Retro wave grid (fast - simple math)
 export {
   WaveGridBackground,
   type WaveGridBackgroundProps,
 } from "./WaveGridBackground";
 
-// Floating gradient orbs
+// Floating gradient orbs (fast - distance calculations)
 export { GradientOrbs, type GradientOrbsProps } from "./GradientOrbs";
-
-// Fluid/ink simulation
-export {
-  FluidSimulation,
-  type FluidSimulationProps,
-} from "./FluidSimulation";
-
-// Space nebula
-export { ParticleNebula, type ParticleNebulaProps } from "./ParticleNebula";

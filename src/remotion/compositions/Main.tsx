@@ -13,11 +13,13 @@ import {
   SplitText3DGsap,
   RichText3DGsap,
   ExtrudedText3DGsap,
-  // Beautiful shader backgrounds from the library
-  ParticleNebula,
-  AuroraBackground,
+  // Fast shader backgrounds from the library
   GradientOrbs,
-  StripeGradientMesh,
+  PlasmaBackground,
+  MetaballsBackground,
+  WaveGridBackground,
+  // FPS Monitor
+  FPSMonitor,
 } from "../../library";
 import { getFontUrl } from "../fonts";
 
@@ -44,7 +46,6 @@ const colors = {
   white: "#ffffff",
   gray: "#94a3b8",
 };
-
 
 // ============================================================================
 // FLOATING PARTICLES
@@ -95,7 +96,13 @@ const FloatingParticles: React.FC<{ count?: number; startDelay?: number }> = ({
           >
             <sphereGeometry args={[p.size, 8, 8]} />
             <meshBasicMaterial
-              color={i % 3 === 0 ? colors.primary : i % 3 === 1 ? colors.secondary : colors.accent}
+              color={
+                i % 3 === 0
+                  ? colors.primary
+                  : i % 3 === 1
+                    ? colors.secondary
+                    : colors.accent
+              }
               transparent
               opacity={0.6}
             />
@@ -131,7 +138,10 @@ const GlowingOrb: React.FC<{
   const floatY = Math.sin((frame / fps) * Math.PI * 0.5) * 0.2;
 
   return (
-    <group position={[position[0], position[1] + floatY, position[2]]} scale={entrance}>
+    <group
+      position={[position[0], position[1] + floatY, position[2]]}
+      scale={entrance}
+    >
       {/* Core */}
       <mesh scale={pulse}>
         <sphereGeometry args={[size * 0.6, 32, 32]} />
@@ -201,7 +211,10 @@ const AnimatedRing: React.FC<{
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-      <mesh rotation={[-Math.PI / 8, -rotation * 0.7, Math.PI / 4]} position={[0, 0, -3]}>
+      <mesh
+        rotation={[-Math.PI / 8, -rotation * 0.7, Math.PI / 4]}
+        position={[0, 0, -3]}
+      >
         <torusGeometry args={[size * 0.85, 0.01, 16, 100]} />
         <meshBasicMaterial
           color={colors.secondary}
@@ -228,24 +241,37 @@ const Scene1Opening: React.FC = () => {
         fontSize={1.1}
         color={colors.white}
         createTimeline={({ tl, chars }) => {
-          tl.set(chars, { opacity: 0, z: -2, rotationX: Math.PI / 3, scale: 0.5 });
-          tl.to(chars, {
-            opacity: 1,
-            z: 0,
-            rotationX: 0,
-            scale: 1,
-            duration: 1.0,
-            stagger: 0.04,
-            ease: "power4.out",
-          }, 0);
+          tl.set(chars, {
+            opacity: 0,
+            z: -2,
+            rotationX: Math.PI / 3,
+            scale: 0.5,
+          });
+          tl.to(
+            chars,
+            {
+              opacity: 1,
+              z: 0,
+              rotationX: 0,
+              scale: 1,
+              duration: 1.0,
+              stagger: 0.04,
+              ease: "power4.out",
+            },
+            0,
+          );
           // Subtle float
-          tl.to(chars, {
-            y: 0.05,
-            duration: 1.5,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          }, 1.0);
+          tl.to(
+            chars,
+            {
+              y: 0.05,
+              duration: 1.5,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            },
+            1.0,
+          );
           return tl;
         }}
       />
@@ -261,21 +287,35 @@ const Scene1Opening: React.FC = () => {
         }}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, y: 1, scale: 0 });
-          tl.to(chars, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.9,
-            stagger: 0.05,
-            ease: "elastic.out(1, 0.5)",
-          }, 0.6);
+          tl.to(
+            chars,
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.9,
+              stagger: 0.05,
+              ease: "elastic.out(1, 0.5)",
+            },
+            0.6,
+          );
           return tl;
         }}
       />
 
       <AnimatedRing delay={30} />
-      <GlowingOrb position={[-5, 2, -2]} color={colors.primary} delay={40} size={0.4} />
-      <GlowingOrb position={[5, -1.5, -1]} color={colors.secondary} delay={50} size={0.35} />
+      <GlowingOrb
+        position={[-5, 2, -2]}
+        color={colors.primary}
+        delay={40}
+        size={0.4}
+      />
+      <GlowingOrb
+        position={[5, -1.5, -1]}
+        color={colors.secondary}
+        delay={50}
+        size={0.35}
+      />
     </group>
   );
 };
@@ -304,8 +344,14 @@ const Scene2ProductReveal: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, y: 0.3 },
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.02, ease: "power2.out" },
-            0
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              stagger: 0.02,
+              ease: "power2.out",
+            },
+            0,
           );
           return tl;
         }}
@@ -328,23 +374,31 @@ const Scene2ProductReveal: React.FC = () => {
         createTimeline={({ tl, chars }) => {
           // Dramatic entrance
           tl.set(chars, { opacity: 0, z: -5, rotationY: Math.PI, scale: 0 });
-          tl.to(chars, {
-            opacity: 1,
-            z: 0,
-            rotationY: 0,
-            scale: 1,
-            duration: 1.4,
-            stagger: 0.1,
-            ease: "expo.out",
-          }, 0.3);
+          tl.to(
+            chars,
+            {
+              opacity: 1,
+              z: 0,
+              rotationY: 0,
+              scale: 1,
+              duration: 1.4,
+              stagger: 0.1,
+              ease: "expo.out",
+            },
+            0.3,
+          );
           // Gentle breathe
-          tl.to(chars, {
-            z: 0.1,
-            duration: 2,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          }, 1.7);
+          tl.to(
+            chars,
+            {
+              z: 0.1,
+              duration: 2,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            },
+            1.7,
+          );
           return tl;
         }}
       />
@@ -367,14 +421,22 @@ const Scene2ProductReveal: React.FC = () => {
 
           segments.forEach((seg, i) => {
             const startTime = 1.2 + i * 0.25;
-            tl.to(seg.state, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, startTime);
-            tl.to(seg.chars, {
-              opacity: 1,
-              scale: 1,
-              duration: 0.4,
-              stagger: 0.03,
-              ease: "back.out(1.7)",
-            }, startTime);
+            tl.to(
+              seg.state,
+              { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+              startTime,
+            );
+            tl.to(
+              seg.chars,
+              {
+                opacity: 1,
+                scale: 1,
+                duration: 0.4,
+                stagger: 0.03,
+                ease: "back.out(1.7)",
+              },
+              startTime,
+            );
           });
           return tl;
         }}
@@ -382,8 +444,20 @@ const Scene2ProductReveal: React.FC = () => {
 
       {/* Decorative elements */}
       <AnimatedRing delay={20} color={colors.primary} size={4} />
-      <GlowingOrb position={[-6, 1, -3]} color={colors.accent} delay={60} size={0.5} pulseSpeed={0.8} />
-      <GlowingOrb position={[6, -1, -2]} color={colors.gold} delay={70} size={0.4} pulseSpeed={1.2} />
+      <GlowingOrb
+        position={[-6, 1, -3]}
+        color={colors.accent}
+        delay={60}
+        size={0.5}
+        pulseSpeed={0.8}
+      />
+      <GlowingOrb
+        position={[6, -1, -2]}
+        color={colors.gold}
+        delay={70}
+        size={0.4}
+        pulseSpeed={1.2}
+      />
     </group>
   );
 };
@@ -408,13 +482,19 @@ const Scene3Features: React.FC = () => {
               word.state,
               { opacity: 0, x: -1 },
               { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
-              i * 0.15
+              i * 0.15,
             );
             tl.fromTo(
               word.chars,
               { opacity: 0, y: 0.2 },
-              { opacity: 1, y: 0, duration: 0.3, stagger: 0.02, ease: "power2.out" },
-              i * 0.15
+              {
+                opacity: 1,
+                y: 0,
+                duration: 0.3,
+                stagger: 0.02,
+                ease: "power2.out",
+              },
+              i * 0.15,
             );
           });
           return tl;
@@ -432,8 +512,15 @@ const Scene3Features: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, rotationY: Math.PI / 2, x: -0.5 },
-            { opacity: 1, rotationY: 0, x: 0, duration: 0.8, stagger: 0.03, ease: "power3.out" },
-            0.5
+            {
+              opacity: 1,
+              rotationY: 0,
+              x: 0,
+              duration: 0.8,
+              stagger: 0.03,
+              ease: "power3.out",
+            },
+            0.5,
           );
           return tl;
         }}
@@ -450,8 +537,15 @@ const Scene3Features: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, scale: 0, rotationZ: Math.PI / 4 },
-            { opacity: 1, scale: 1, rotationZ: 0, duration: 0.9, stagger: 0.025, ease: "elastic.out(1, 0.6)" },
-            0.9
+            {
+              opacity: 1,
+              scale: 1,
+              rotationZ: 0,
+              duration: 0.9,
+              stagger: 0.025,
+              ease: "elastic.out(1, 0.6)",
+            },
+            0.9,
           );
           return tl;
         }}
@@ -468,17 +562,39 @@ const Scene3Features: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, y: 1, z: -1 },
-            { opacity: 1, y: 0, z: 0, duration: 0.7, stagger: 0.03, ease: "power4.out" },
-            1.3
+            {
+              opacity: 1,
+              y: 0,
+              z: 0,
+              duration: 0.7,
+              stagger: 0.03,
+              ease: "power4.out",
+            },
+            1.3,
           );
           return tl;
         }}
       />
 
       {/* Decorative orbs */}
-      <GlowingOrb position={[-4, 1.2, -1]} color={colors.primary} delay={20} size={0.3} />
-      <GlowingOrb position={[0, 0.4, -1]} color={colors.secondary} delay={35} size={0.3} />
-      <GlowingOrb position={[4, -0.4, -1]} color={colors.accent} delay={50} size={0.3} />
+      <GlowingOrb
+        position={[-4, 1.2, -1]}
+        color={colors.primary}
+        delay={20}
+        size={0.3}
+      />
+      <GlowingOrb
+        position={[0, 0.4, -1]}
+        color={colors.secondary}
+        delay={35}
+        size={0.3}
+      />
+      <GlowingOrb
+        position={[4, -0.4, -1]}
+        color={colors.accent}
+        delay={50}
+        size={0.3}
+      />
     </group>
   );
 };
@@ -510,23 +626,31 @@ const Scene4CTA: React.FC = () => {
         }}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, scale: 0, y: 2, rotationX: Math.PI / 2 });
-          tl.to(chars, {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            rotationX: 0,
-            duration: 1.2,
-            stagger: 0.06,
-            ease: "elastic.out(1, 0.4)",
-          }, 0);
+          tl.to(
+            chars,
+            {
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              rotationX: 0,
+              duration: 1.2,
+              stagger: 0.06,
+              ease: "elastic.out(1, 0.4)",
+            },
+            0,
+          );
           // Pulse effect
-          tl.to(chars, {
-            scale: 1.05,
-            duration: 0.8,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-          }, 1.5);
+          tl.to(
+            chars,
+            {
+              scale: 1.05,
+              duration: 0.8,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+            },
+            1.5,
+          );
           return tl;
         }}
       />
@@ -542,8 +666,14 @@ const Scene4CTA: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, y: -0.5 },
-            { opacity: 1, y: 0, duration: 0.6, stagger: 0.04, ease: "power2.out" },
-            0.8
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              stagger: 0.04,
+              ease: "power2.out",
+            },
+            0.8,
           );
           return tl;
         }}
@@ -563,8 +693,15 @@ const Scene4CTA: React.FC = () => {
           tl.fromTo(
             chars,
             { opacity: 0, scale: 1.5, rotationY: -Math.PI / 4 },
-            { opacity: 1, scale: 1, rotationY: 0, duration: 0.8, stagger: 0.05, ease: "back.out(1.7)" },
-            1.2
+            {
+              opacity: 1,
+              scale: 1,
+              rotationY: 0,
+              duration: 0.8,
+              stagger: 0.05,
+              ease: "back.out(1.7)",
+            },
+            1.2,
           );
           return tl;
         }}
@@ -575,10 +712,30 @@ const Scene4CTA: React.FC = () => {
       <AnimatedRing delay={25} color={colors.primary} size={4.5} />
 
       {/* Celebration orbs */}
-      <GlowingOrb position={[-5, 2.5, -2]} color={colors.primary} delay={30} size={0.4} />
-      <GlowingOrb position={[5, 2, -2]} color={colors.secondary} delay={40} size={0.45} />
-      <GlowingOrb position={[-4, -2, -1]} color={colors.accent} delay={50} size={0.35} />
-      <GlowingOrb position={[4, -2.5, -1.5]} color={colors.gold} delay={60} size={0.4} />
+      <GlowingOrb
+        position={[-5, 2.5, -2]}
+        color={colors.primary}
+        delay={30}
+        size={0.4}
+      />
+      <GlowingOrb
+        position={[5, 2, -2]}
+        color={colors.secondary}
+        delay={40}
+        size={0.45}
+      />
+      <GlowingOrb
+        position={[-4, -2, -1]}
+        color={colors.accent}
+        delay={50}
+        size={0.35}
+      />
+      <GlowingOrb
+        position={[4, -2.5, -1.5]}
+        color={colors.gold}
+        delay={60}
+        size={0.4}
+      />
     </group>
   );
 };
@@ -591,8 +748,16 @@ const Lights: React.FC = () => {
   return (
     <>
       <ambientLight intensity={0.4} />
-      <directionalLight position={[10, 10, 5]} intensity={1.0} color="#ffffff" />
-      <directionalLight position={[-5, -5, 3]} intensity={0.3} color="#a855f7" />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1.0}
+        color="#ffffff"
+      />
+      <directionalLight
+        position={[-5, -5, 3]}
+        intensity={0.3}
+        color="#a855f7"
+      />
       <pointLight position={[0, 5, 8]} intensity={0.6} color="#06b6d4" />
       <pointLight position={[-8, 0, 5]} intensity={0.4} color="#a855f7" />
       <pointLight position={[8, 0, 5]} intensity={0.4} color="#f472b6" />
@@ -608,7 +773,9 @@ const Lights: React.FC = () => {
 // BACKGROUND WRAPPER - Scales shader backgrounds to fill the view
 // ============================================================================
 
-const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { width, height } = useVideoConfig();
   // Orthographic camera: visible area is fixed regardless of distance
   // Camera frustum: top/bottom = ±6 (height=12), left/right = ±6*(aspect)
@@ -618,7 +785,10 @@ const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({ children }) 
   const frustumHeight = 12; // top - bottom = 6 - (-6)
   const frustumWidth = frustumHeight * aspect;
   return (
-    <group position={[0, 0, -5]} scale={[frustumWidth / 2, frustumHeight / 2, 1]}>
+    <group
+      position={[0, 0, -5]}
+      scale={[frustumWidth / 2, frustumHeight / 2, 1]}
+    >
       {children}
     </group>
   );
@@ -670,34 +840,47 @@ export const Main: React.FC = () => {
           {/* SHADER BACKGROUNDS - Positioned behind 3D content              */}
           {/* ============================================================== */}
 
-          {/* Scene 1: Particle Nebula - Cosmic, dramatic opening */}
-          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
+          {/* Scene 1: Plasma - Cosmic, dramatic opening */}
+          <Sequence
+            from={scene1Start}
+            durationInFrames={scene1Duration}
+            layout="none"
+          >
             <BackgroundLayer>
-              <ParticleNebula
-                colors={["#7c3aed", "#a855f7", "#06b6d4"]}
-                backgroundColor="#030014"
-                brightness={0.8}
-                density={3}
-                speed={0.8}
-                stars={true}
+              <PlasmaBackground
+                style="neon"
+                colors={["#7c3aed", "#a855f7", "#06b6d4", "#ec4899"]}
+                speed={0.6}
+                complexity={0.8}
               />
             </BackgroundLayer>
           </Sequence>
 
-          {/* Scene 2: Aurora Background - Ethereal product reveal */}
-          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
+          {/* Scene 2: Wave Grid - Ethereal product reveal */}
+          <Sequence
+            from={scene2Start}
+            durationInFrames={scene2Duration}
+            layout="none"
+          >
             <BackgroundLayer>
-              <AuroraBackground
-                colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
+              <WaveGridBackground
+                lineColor="#8b5cf6"
+                glowColor="#06b6d4"
                 backgroundColor="#050510"
-                intensity={0.85}
-                speed={0.6}
+                speed={0.5}
+                gridDensity={15}
+                amplitude={0.15}
+                perspective={0.4}
               />
             </BackgroundLayer>
           </Sequence>
 
           {/* Scene 3: Gradient Orbs - Modern, dynamic features */}
-          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
+          <Sequence
+            from={scene3Start}
+            durationInFrames={scene3Duration}
+            layout="none"
+          >
             <BackgroundLayer>
               <GradientOrbs
                 colors={["#a855f7", "#06b6d4", "#f472b6", "#10b981", "#fbbf24"]}
@@ -709,14 +892,20 @@ export const Main: React.FC = () => {
             </BackgroundLayer>
           </Sequence>
 
-          {/* Scene 4: Stripe Gradient Mesh - Clean, professional CTA */}
-          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
+          {/* Scene 4: Metaballs - Clean, professional CTA */}
+          <Sequence
+            from={scene4Start}
+            durationInFrames={scene4Duration}
+            layout="none"
+          >
             <BackgroundLayer>
-              <StripeGradientMesh
-                colors={["#7c3aed", "#06b6d4", "#ec4899", "#8b5cf6", "#030014"]}
-                speed={0.5}
-                amplitude={0.4}
-                blendFactor={0.6}
+              <MetaballsBackground
+                primaryColor="#7c3aed"
+                secondaryColor="#06b6d4"
+                backgroundColor="#030014"
+                speed={0.6}
+                sharpness={0.4}
+                glow={true}
               />
             </BackgroundLayer>
           </Sequence>
@@ -736,25 +925,44 @@ export const Main: React.FC = () => {
           {/* ============================================================== */}
 
           {/* Scene 1: Opening */}
-          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
+          <Sequence
+            from={scene1Start}
+            durationInFrames={scene1Duration}
+            layout="none"
+          >
             <Scene1Opening />
           </Sequence>
 
           {/* Scene 2: Product Reveal */}
-          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
+          <Sequence
+            from={scene2Start}
+            durationInFrames={scene2Duration}
+            layout="none"
+          >
             <Scene2ProductReveal />
           </Sequence>
 
           {/* Scene 3: Features */}
-          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
+          <Sequence
+            from={scene3Start}
+            durationInFrames={scene3Duration}
+            layout="none"
+          >
             <Scene3Features />
           </Sequence>
 
           {/* Scene 4: CTA */}
-          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
+          <Sequence
+            from={scene4Start}
+            durationInFrames={scene4Duration}
+            layout="none"
+          >
             <Scene4CTA />
           </Sequence>
         </ThreeCanvas>
+
+        {/* FPS Monitor - only visible during preview, not in final render */}
+        {typeof window !== "undefined" && <FPSMonitor position="top-right" />}
       </AbsoluteFill>
     </>
   );

@@ -471,8 +471,10 @@ export const ExtrudedText3DGsap: React.FC<ExtrudedText3DGsapProps> = ({
   }, [font, text, fontSize, depth, bevelEnabled, bevelThickness, bevelSize, bevelSegments, curveSegments, defaultColor, charColor, lineHeight]);
 
   // Update state when layout changes
+  // IMPORTANT: Reset timelineVersion to 0 to prevent flash while new timeline is being created
   useEffect(() => {
     if (layoutData) {
+      setTimelineVersion(0); // Reset to prevent rendering with un-seeked states
       setCharacters(layoutData.characters);
       setAllCharStates(layoutData.charStates);
       setWordDataList(layoutData.wordDataList);

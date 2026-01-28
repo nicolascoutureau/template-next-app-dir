@@ -23,7 +23,16 @@ const googleFontUrlCache: Map<string, string> = new Map();
 /**
  * Google Font weight mapping
  */
-export type GoogleFontWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+export type GoogleFontWeight =
+  | 100
+  | 200
+  | 300
+  | 400
+  | 500
+  | 600
+  | 700
+  | 800
+  | 900;
 
 /**
  * Google Font configuration
@@ -37,27 +46,27 @@ export interface GoogleFontConfig {
 /**
  * Fetches the TTF URL for a Google Font
  * Google Fonts serves TTF when requested with an older user-agent
- * 
+ *
  * @example
  * const url = await getGoogleFontTTFUrl({ family: "Inter", weight: 700 });
  * // Returns: "https://fonts.gstatic.com/s/inter/v13/..."
  */
 export const getGoogleFontTTFUrl = async (
-  config: GoogleFontConfig
+  config: GoogleFontConfig,
 ): Promise<string> => {
   const { family, weight = 400, italic = false } = config;
   const cacheKey = `${family}:${weight}:${italic}`;
-  
+
   // Check cache first
   if (googleFontUrlCache.has(cacheKey)) {
     return googleFontUrlCache.get(cacheKey)!;
   }
-  
+
   // Build the Google Fonts CSS API URL
   // Format: family=Inter:wght@700 or family=Inter:ital,wght@1,700 for italic
   const weightSpec = italic ? `ital,wght@1,${weight}` : `wght@${weight}`;
   const apiUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${weightSpec}&display=swap`;
-  
+
   // Fetch with a user-agent that triggers TTF response
   // Using an older Safari user-agent that doesn't support WOFF2
   const response = await fetch(apiUrl, {
@@ -65,46 +74,52 @@ export const getGoogleFontTTFUrl = async (
       "User-Agent": "Safari/537.36",
     },
   });
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch Google Font CSS: ${response.statusText}`);
   }
-  
+
   const css = await response.text();
-  
+
   // Extract the font URL from the CSS
   // The CSS contains: src: url(...) format('truetype')
-  const ttfMatch = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"]truetype['"]\)/);
-  
+  const ttfMatch = css.match(
+    /src:\s*url\(([^)]+)\)\s*format\(['"]truetype['"]\)/,
+  );
+
   if (ttfMatch && ttfMatch[1]) {
     const url = ttfMatch[1];
     googleFontUrlCache.set(cacheKey, url);
     return url;
   }
-  
+
   // Fallback: try to find any font URL (might be woff2, which won't work with opentype.js)
   const anyUrlMatch = css.match(/src:\s*url\(([^)]+)\)/);
   if (anyUrlMatch && anyUrlMatch[1]) {
     console.warn(
       `Google Font "${family}" TTF not available, got different format. ` +
-      `Consider using a local TTF file for accurate metrics.`
+        `Consider using a local TTF file for accurate metrics.`,
     );
     const url = anyUrlMatch[1];
     googleFontUrlCache.set(cacheKey, url);
     return url;
   }
-  
-  throw new Error(`Could not extract font URL from Google Fonts CSS for "${family}"`);
+
+  throw new Error(
+    `Could not extract font URL from Google Fonts CSS for "${family}"`,
+  );
 };
 
 /**
  * Hook to load a Google Font with opentype.js
  * Automatically fetches the TTF version for accurate metrics
- * 
+ *
  * @example
  * const font = useGoogleFont({ family: "Inter", weight: 700 });
  */
-export const useGoogleFont = (config: GoogleFontConfig): {
+export const useGoogleFont = (
+  config: GoogleFontConfig,
+): {
   font: opentype.Font | null;
   fontUrl: string | null;
   loading: boolean;
@@ -114,7 +129,7 @@ export const useGoogleFont = (config: GoogleFontConfig): {
   const [font, setFont] = useState<opentype.Font | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const configKey = `${config.family}:${config.weight || 400}:${config.italic || false}`;
   const handleRef = useRef<number | null>(null);
   const currentConfigRef = useRef<string>(configKey);
@@ -123,23 +138,23 @@ export const useGoogleFont = (config: GoogleFontConfig): {
     currentConfigRef.current = configKey;
     setLoading(true);
     setError(null);
-    
+
     const handle = delayRender(`Loading Google Font: ${config.family}`);
     handleRef.current = handle;
-    
+
     const loadFont = async () => {
       try {
         // Get TTF URL from Google Fonts
         const url = await getGoogleFontTTFUrl(config);
-        
+
         // Check if config changed while fetching
         if (currentConfigRef.current !== configKey) {
           continueRender(handle);
           return;
         }
-        
+
         setFontUrl(url);
-        
+
         // Check if already in cache
         if (fontCache.has(url)) {
           setFont(fontCache.get(url)!);
@@ -147,21 +162,23 @@ export const useGoogleFont = (config: GoogleFontConfig): {
           continueRender(handle);
           return;
         }
-        
+
         // Load with opentype.js
         opentype.load(url, (err, loadedFont) => {
           if (currentConfigRef.current !== configKey) {
             continueRender(handle);
             return;
           }
-          
+
           if (err || !loadedFont) {
-            setError(`Failed to parse font: ${err?.message || "Unknown error"}`);
+            setError(
+              `Failed to parse font: ${err?.message || "Unknown error"}`,
+            );
             setLoading(false);
             continueRender(handle);
             return;
           }
-          
+
           fontCache.set(url, loadedFont);
           setFont(loadedFont);
           setLoading(false);
@@ -172,22 +189,22 @@ export const useGoogleFont = (config: GoogleFontConfig): {
           continueRender(handle);
           return;
         }
-        
+
         setError(err instanceof Error ? err.message : "Failed to load font");
         setLoading(false);
         continueRender(handle);
       }
     };
-    
+
     loadFont();
-    
+
     return () => {
       if (handleRef.current === handle) {
         continueRender(handle);
       }
     };
   }, [configKey, config.family, config.weight, config.italic]);
-  
+
   return { font, fontUrl, loading, error };
 };
 
@@ -195,26 +212,27 @@ export const useGoogleFont = (config: GoogleFontConfig): {
  * Hook to load a font with opentype.js for accurate text metrics
  * Supports both local TTF files and URLs
  * Uses Remotion's delayRender/continueRender to wait for font loading
- * 
+ *
  * @example
  * // Local file
  * const font = useOpenTypeFont(staticFile("fonts/Inter-Bold.ttf"));
- * 
+ *
  * // Remote URL (must be TTF/OTF - WOFF2 not supported by opentype.js)
  * const font = useOpenTypeFont("https://example.com/font.ttf");
  */
 export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
   const [font, setFont] = useState<opentype.Font | null>(
-    () => fontCache.get(fontUrl) || null
+    () => fontCache.get(fontUrl) || null,
   );
-  
+
   // Track if we've already continued render for this font URL
   const continuedRef = useRef<string | null>(null);
   const handleRef = useRef<number | null>(null);
-  
+
   // Check if we're in a browser environment that supports delayRender properly
   // In some contexts (like Storybook with Player), delayRender might cause issues
-  const isRemotionRenderingContext = typeof window !== 'undefined' && 
+  const isRemotionRenderingContext =
+    typeof window !== "undefined" &&
     // @ts-expect-error - Check for Remotion rendering context
     window.__REMOTION_RENDERING__;
 
@@ -261,7 +279,11 @@ export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
 
     // Cleanup: if effect re-runs before load completes, continue the old handle
     return () => {
-      if (handle !== null && handleRef.current === handle && continuedRef.current !== fontUrl) {
+      if (
+        handle !== null &&
+        handleRef.current === handle &&
+        continuedRef.current !== fontUrl
+      ) {
         continueRender(handle);
       }
     };
@@ -277,7 +299,7 @@ export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
 export const getTextMetrics = (
   font: opentype.Font,
   text: string,
-  fontSize: number
+  fontSize: number,
 ): {
   chars: { char: string; width: number; xPosition: number }[];
   totalWidth: number;
@@ -499,28 +521,44 @@ const AnimatedChar: React.FC<{
   const progress = spring({
     fps,
     frame,
-    config: animation.springConfig || { damping: 80, stiffness: 150, mass: 0.8 },
+    config: animation.springConfig || {
+      damping: 80,
+      stiffness: 150,
+      mass: 0.8,
+    },
     delay: charDelay,
   });
 
   // Calculate animated values
   const yOffset = animation.yOffset
-    ? interpolate(progress, [0, 1], [animation.yOffset.from, animation.yOffset.to])
+    ? interpolate(
+        progress,
+        [0, 1],
+        [animation.yOffset.from, animation.yOffset.to],
+      )
     : 0;
 
   const xOffset = animation.xOffset
-    ? interpolate(progress, [0, 1], [animation.xOffset.from, animation.xOffset.to])
+    ? interpolate(
+        progress,
+        [0, 1],
+        [animation.xOffset.from, animation.xOffset.to],
+      )
     : 0;
 
   const zOffset = animation.zOffset
-    ? interpolate(progress, [0, 1], [animation.zOffset.from, animation.zOffset.to])
+    ? interpolate(
+        progress,
+        [0, 1],
+        [animation.zOffset.from, animation.zOffset.to],
+      )
     : 0;
 
   const rotationX = animation.rotationX
     ? interpolate(
         progress,
         [0, 1],
-        [animation.rotationX.from, animation.rotationX.to]
+        [animation.rotationX.from, animation.rotationX.to],
       )
     : 0;
 
@@ -528,7 +566,7 @@ const AnimatedChar: React.FC<{
     ? interpolate(
         progress,
         [0, 1],
-        [animation.rotationY.from, animation.rotationY.to]
+        [animation.rotationY.from, animation.rotationY.to],
       )
     : 0;
 
@@ -536,7 +574,7 @@ const AnimatedChar: React.FC<{
     ? interpolate(
         progress,
         [0, 1],
-        [animation.rotationZ.from, animation.rotationZ.to]
+        [animation.rotationZ.from, animation.rotationZ.to],
       )
     : 0;
 
@@ -545,7 +583,11 @@ const AnimatedChar: React.FC<{
     : 1;
 
   const opacity = animation.opacity
-    ? interpolate(progress, [0, 1], [animation.opacity.from, animation.opacity.to])
+    ? interpolate(
+        progress,
+        [0, 1],
+        [animation.opacity.from, animation.opacity.to],
+      )
     : 1;
 
   // Continuous animations (after entrance)

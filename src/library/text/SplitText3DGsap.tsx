@@ -243,6 +243,9 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   // Timeline ref
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   
+  // Track timeline initialization to prevent flash
+  const [timelineReady, setTimelineReady] = useState(false);
+  
   // Force re-render counter
   const [, forceUpdate] = useState(0);
 
@@ -369,6 +372,13 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
   // Memoize timeline factory
   const memoizedCreateTimeline = useCallback(createTimeline, []);
 
+  // Reset timeline ready state when layout changes
+  // IMPORTANT: useLayoutEffect ensures reset happens synchronously before paint,
+  // preventing flash where characters appear at default state
+  useLayoutEffect(() => {
+    setTimelineReady(false);
+  }, [font, charStates, wordDataList, lineDataList, text]);
+
   // Create GSAP timeline
   useEffect(() => {
     if (!font || charStates.length === 0) return;
@@ -392,6 +402,9 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
     // Seek immediately to prevent 1-frame flash
     const timeInSeconds = frameRef.current / fpsRef.current;
     timelineRef.current.seek(timeInSeconds);
+    
+    // Mark timeline as ready for rendering
+    setTimelineReady(true);
 
     // Cleanup
     return () => {
@@ -403,15 +416,16 @@ export const SplitText3DGsap: React.FC<SplitText3DGsapProps> = ({
 
   // Seek timeline on each frame (useLayoutEffect for synchronous update before paint)
   useLayoutEffect(() => {
-    if (timelineRef.current) {
+    if (timelineRef.current && timelineReady) {
       timelineRef.current.seek(frame / fps);
       // Force re-render to apply animation values
       forceUpdate((n) => n + 1);
     }
-  }, [frame, fps]);
+  }, [frame, fps, timelineReady]);
 
-  // Don't render until font is loaded
-  if (!font || characters.length === 0) {
+  // Don't render until font is loaded and timeline is ready
+  // This prevents flash where characters appear at default state before timeline seeks
+  if (!font || characters.length === 0 || !timelineReady) {
     return null;
   }
 

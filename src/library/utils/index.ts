@@ -3,3 +3,4 @@
  */
 
 export { StorybookCanvas, type StorybookCanvasProps } from "./StorybookPlayer";
+export { FPSMonitor, useFPS, type FPSMonitorProps } from "./FPSMonitor";
