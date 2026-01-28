@@ -668,3 +668,208 @@ export const extrudedPresetDomino = ({
   
   return tl;
 };
+
+// ============================================================================
+// IN/OUT ANIMATION PRESETS
+// ============================================================================
+
+/**
+ * Preset: 3D Reveal In/Out
+ * Dramatic entrance from depth, then exits back into depth
+ */
+export const extrudedPreset3DRevealInOut = (
+  inDuration = 1.0,
+  holdDuration = 1.5,
+  outDuration = 0.6,
+  stagger = 0.04
+) => ({
+  tl,
+  chars,
+}: {
+  tl: gsap.core.Timeline;
+  chars: CharAnimationState[];
+}) => {
+  // Set initial state
+  tl.set(chars, { opacity: 0, z: -3, rotationX: Math.PI / 2, scale: 0.3 });
+  
+  // Animate IN
+  tl.to(chars, {
+    opacity: 1,
+    z: 0,
+    rotationX: 0,
+    scale: 1,
+    duration: inDuration,
+    stagger,
+    ease: "power4.out",
+  }, 0);
+  
+  // Calculate when in animation ends
+  const inEndTime = inDuration + (chars.length - 1) * stagger;
+  
+  // Hold
+  tl.to({}, { duration: holdDuration }, inEndTime);
+  
+  // Animate OUT (push back into depth)
+  tl.to(chars, {
+    opacity: 0,
+    z: 3,
+    rotationX: -Math.PI / 2,
+    scale: 0.3,
+    duration: outDuration,
+    stagger: stagger / 2,
+    ease: "power2.in",
+  }, inEndTime + holdDuration);
+  
+  return tl;
+};
+
+/**
+ * Preset: Flip In/Out
+ * Characters flip in from behind, then flip away to the front
+ */
+export const extrudedPresetFlipInOut = (
+  inDuration = 0.7,
+  holdDuration = 1.5,
+  outDuration = 0.5,
+  stagger = 0.05
+) => ({
+  tl,
+  chars,
+}: {
+  tl: gsap.core.Timeline;
+  chars: CharAnimationState[];
+}) => {
+  // Set initial state
+  tl.set(chars, { opacity: 0, rotationY: -Math.PI, z: -1.5, scale: 0.5 });
+  
+  // Animate IN
+  tl.to(chars, {
+    opacity: 1,
+    rotationY: 0,
+    z: 0,
+    scale: 1,
+    duration: inDuration,
+    stagger,
+    ease: "back.out(1.4)",
+  }, 0);
+  
+  const inEndTime = inDuration + (chars.length - 1) * stagger;
+  
+  // Hold
+  tl.to({}, { duration: holdDuration }, inEndTime);
+  
+  // Animate OUT (flip forward)
+  tl.to(chars, {
+    opacity: 0,
+    rotationY: Math.PI,
+    z: 1.5,
+    scale: 0.5,
+    duration: outDuration,
+    stagger: stagger / 2,
+    ease: "power2.in",
+  }, inEndTime + holdDuration);
+  
+  return tl;
+};
+
+/**
+ * Preset: Explode In/Out
+ * Characters explode from center in, then implode out
+ */
+export const extrudedPresetExplodeInOut = (
+  inDuration = 0.8,
+  holdDuration = 1.2,
+  outDuration = 0.5,
+  stagger = 0.03
+) => ({
+  tl,
+  chars,
+}: {
+  tl: gsap.core.Timeline;
+  chars: CharAnimationState[];
+}) => {
+  // Set initial state
+  tl.set(chars, { opacity: 0, scale: 0, z: 3 });
+  
+  // Animate IN (explode from center)
+  tl.to(chars, {
+    opacity: 1,
+    scale: 1,
+    z: 0,
+    duration: inDuration,
+    stagger: {
+      each: stagger,
+      from: "center",
+    },
+    ease: "elastic.out(1, 0.6)",
+  }, 0);
+  
+  const inEndTime = inDuration + (chars.length - 1) * stagger;
+  
+  // Hold
+  tl.to({}, { duration: holdDuration }, inEndTime);
+  
+  // Animate OUT (implode to center)
+  tl.to(chars, {
+    opacity: 0,
+    scale: 0,
+    z: -3,
+    duration: outDuration,
+    stagger: {
+      each: stagger / 2,
+      from: "edges",
+    },
+    ease: "power3.in",
+  }, inEndTime + holdDuration);
+  
+  return tl;
+};
+
+/**
+ * Preset: Spin In/Out
+ * Characters spin in while scaling up, then spin out while scaling down
+ */
+export const extrudedPresetSpinInOut = (
+  inDuration = 0.8,
+  holdDuration = 1.5,
+  outDuration = 0.5,
+  stagger = 0.06
+) => ({
+  tl,
+  chars,
+}: {
+  tl: gsap.core.Timeline;
+  chars: CharAnimationState[];
+}) => {
+  // Set initial state
+  tl.set(chars, { opacity: 0, scale: 0, rotationZ: Math.PI * 2, rotationY: Math.PI / 4 });
+  
+  // Animate IN
+  tl.to(chars, {
+    opacity: 1,
+    scale: 1,
+    rotationZ: 0,
+    rotationY: 0,
+    duration: inDuration,
+    stagger,
+    ease: "back.out(1.2)",
+  }, 0);
+  
+  const inEndTime = inDuration + (chars.length - 1) * stagger;
+  
+  // Hold
+  tl.to({}, { duration: holdDuration }, inEndTime);
+  
+  // Animate OUT (spin the other way)
+  tl.to(chars, {
+    opacity: 0,
+    scale: 0,
+    rotationZ: -Math.PI * 2,
+    rotationY: -Math.PI / 4,
+    duration: outDuration,
+    stagger: stagger / 2,
+    ease: "power2.in",
+  }, inEndTime + holdDuration);
+  
+  return tl;
+};

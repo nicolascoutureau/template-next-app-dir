@@ -1,3 +1,4 @@
+// SplitText3D - Spring-based animations with presets
 export {
   SplitText3D,
   type SplitText3DProps,
@@ -14,6 +15,7 @@ export {
   type GoogleFontWeight,
 } from "./SplitText3D";
 
+// SplitText3DGsap - GSAP timeline-based animations
 export {
   SplitText3DGsap,
   type SplitText3DGsapProps,
@@ -36,7 +38,7 @@ export {
   gsapPresetLinesReveal,
 } from "./SplitText3DGsap";
 
-// Rich text (multiple fonts/styles in single text block)
+// RichText3DGsap - Multiple fonts/styles in single text block
 export {
   RichText3DGsap,
   type RichText3DGsapProps,
@@ -54,7 +56,7 @@ export {
   verifyNoOverlap,
 } from "./RichText3DGsap";
 
-// Extruded 3D text (true geometry with depth)
+// ExtrudedText3DGsap - True 3D extruded text with depth
 export {
   ExtrudedText3DGsap,
   type ExtrudedText3DGsapProps,

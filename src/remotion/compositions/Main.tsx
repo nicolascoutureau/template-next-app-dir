@@ -11,7 +11,7 @@ import {
   SplitText3DGsap,
   RichText3DGsap,
   ExtrudedText3DGsap,
-} from "../three/text";
+} from "../../library";
 import { getFontUrl } from "../fonts";
 
 // Local fonts (downloaded via: npm run download-fonts)

@@ -211,6 +211,12 @@ export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
   // Track if we've already continued render for this font URL
   const continuedRef = useRef<string | null>(null);
   const handleRef = useRef<number | null>(null);
+  
+  // Check if we're in a browser environment that supports delayRender properly
+  // In some contexts (like Storybook with Player), delayRender might cause issues
+  const isRemotionRenderingContext = typeof window !== 'undefined' && 
+    // @ts-expect-error - Check for Remotion rendering context
+    window.__REMOTION_RENDERING__;
 
   useEffect(() => {
     // If already have this font loaded, no need to delay
@@ -219,15 +225,18 @@ export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
       return;
     }
 
-    // Create a new delay handle for this font URL
-    const handle = delayRender(`Loading font: ${fontUrl}`);
-    handleRef.current = handle;
+    // Only use delayRender in actual Remotion rendering context (not Player)
+    let handle: number | null = null;
+    if (isRemotionRenderingContext) {
+      handle = delayRender(`Loading font: ${fontUrl}`);
+      handleRef.current = handle;
+    }
     continuedRef.current = null;
 
     // Load the font
     opentype.load(fontUrl, (err, loadedFont) => {
       // Check if this is still the current request (fontUrl might have changed)
-      if (handleRef.current !== handle) {
+      if (handle !== null && handleRef.current !== handle) {
         // A newer request superseded this one, just continue the old handle
         continueRender(handle);
         return;
@@ -235,24 +244,28 @@ export const useOpenTypeFont = (fontUrl: string): opentype.Font | null => {
 
       if (err || !loadedFont) {
         console.error("Failed to load font:", err);
-        continueRender(handle);
+        if (handle !== null) {
+          continueRender(handle);
+        }
         continuedRef.current = fontUrl;
         return;
       }
 
       fontCache.set(fontUrl, loadedFont);
       setFont(loadedFont);
-      continueRender(handle);
+      if (handle !== null) {
+        continueRender(handle);
+      }
       continuedRef.current = fontUrl;
     });
 
     // Cleanup: if effect re-runs before load completes, continue the old handle
     return () => {
-      if (handleRef.current === handle && continuedRef.current !== fontUrl) {
+      if (handle !== null && handleRef.current === handle && continuedRef.current !== fontUrl) {
         continueRender(handle);
       }
     };
-  }, [fontUrl]);
+  }, [fontUrl, isRemotionRenderingContext]);
 
   return font;
 };

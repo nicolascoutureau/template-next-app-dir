@@ -11,6 +11,8 @@
     "deploy": "node deploy.mjs",
     "download-font": "node scripts/download-google-font.mjs",
     "download-fonts": "node scripts/download-top-fonts.mjs",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "test": "vitest",
     "test:run": "vitest run",
     "lint:fix": "eslint src --fix; tsc --noEmit",
@@ -54,7 +56,13 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^5.0.0",
     "@eslint/eslintrc": "3.1.0",
+    "@storybook/addon-a11y": "^10.2.1",
+    "@storybook/addon-docs": "^10.2.1",
+    "@storybook/addon-onboarding": "^10.2.1",
+    "@storybook/nextjs-vite": "^10.2.1",
+    "storybook": "^10.2.1",
     "@next/eslint-plugin-next": "^16.1.4",
     "@remotion/eslint-config-flat": "^4.0.408",
     "@remotion/eslint-plugin": "^4.0.408",

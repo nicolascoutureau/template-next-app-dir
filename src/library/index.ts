@@ -1,26 +1,24 @@
-export { Scene, sceneSchema, type SceneProps } from "./Scene";
-export { AdvancedScene, advancedSceneSchema, type AdvancedSceneProps } from "./AdvancedScene";
-export { RotatingBox } from "./components/RotatingBox";
-export { AnimatedSphere } from "./components/AnimatedSphere";
-export { OrbitingObjects } from "./components/OrbitingObjects";
-export { Lights } from "./components/Lights";
+/**
+ * @module library
+ *
+ * A collection of professional 3D text animation components for React Three Fiber + Remotion.
+ */
 
-// Text utilities
+// Re-export everything from text folder
 export {
+  // SplitText3D
   SplitText3D,
   type SplitText3DProps,
   type AnimationPreset,
   type AnimationConfig,
   ANIMATION_PRESETS,
-  // Font loading utilities
   useOpenTypeFont,
   useGoogleFont,
   getGoogleFontTTFUrl,
   getTextMetrics,
-  // Google Font types
   type GoogleFontConfig,
   type GoogleFontWeight,
-  // GSAP text animation
+  // SplitText3DGsap
   SplitText3DGsap,
   type SplitText3DGsapProps,
   type SplitType,
@@ -39,7 +37,7 @@ export {
   gsapPresetGlitch,
   gsapPresetLineByLine,
   gsapPresetLinesReveal,
-  // Rich text (multiple fonts/styles)
+  // RichText3DGsap
   RichText3DGsap,
   type RichText3DGsapProps,
   type TextSegment,
@@ -49,7 +47,10 @@ export {
   richTextPresetSegmentStagger,
   richTextPresetWave,
   richTextPresetTypewriter,
-  // Extruded 3D text (true geometry with depth!)
+  calculateRichTextLayout,
+  verifyLayoutCentered,
+  verifyNoOverlap,
+  // ExtrudedText3DGsap
   ExtrudedText3DGsap,
   type ExtrudedText3DGsapProps,
   extrudedPreset3DReveal,
@@ -57,4 +58,12 @@ export {
   extrudedPresetExplode,
   extrudedPresetMatrix,
   extrudedPresetDomino,
+  // Text layout utilities
+  calculateTextMetrics,
+  calculateBaselineOffset,
+  verifySegmentOrder,
+  type CharMetric,
+  type TextMetricsResult,
+  type SegmentLayout,
+  type RichTextLayout,
 } from "./text";

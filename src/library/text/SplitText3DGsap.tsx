@@ -635,3 +635,256 @@ export const gsapPresetLinesReveal = (
     return tl;
   };
 };
+
+// ============================================================================
+// IN/OUT ANIMATION PRESETS
+// ============================================================================
+
+/**
+ * Preset: Fade up in, fade down out
+ * Characters animate in with stagger, hold, then animate out
+ */
+export const gsapPresetFadeUpInOut = (
+  inDuration = 0.6,
+  holdDuration = 1.5,
+  outDuration = 0.4,
+  stagger = 0.03
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, chars }) => {
+    // Animate IN
+    tl.fromTo(
+      chars,
+      { y: -0.5, opacity: 0, rotationX: Math.PI / 8 },
+      { y: 0, opacity: 1, rotationX: 0, duration: inDuration, stagger, ease: "back.out(1.4)" }
+    );
+    
+    // Hold
+    tl.to({}, { duration: holdDuration });
+    
+    // Animate OUT
+    tl.to(chars, {
+      y: 0.5,
+      opacity: 0,
+      rotationX: -Math.PI / 8,
+      duration: outDuration,
+      stagger: stagger / 2,
+      ease: "power2.in",
+    });
+    
+    return tl;
+  };
+};
+
+/**
+ * Preset: Scale bounce in, shrink out
+ * Characters scale up elastically, then shrink away
+ */
+export const gsapPresetScaleInOut = (
+  inDuration = 0.8,
+  holdDuration = 1.2,
+  outDuration = 0.3,
+  stagger = 0.04
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, chars }) => {
+    // Animate IN
+    tl.fromTo(
+      chars,
+      { scale: 0, opacity: 0, rotationZ: Math.PI / 6 },
+      { scale: 1, opacity: 1, rotationZ: 0, duration: inDuration, stagger, ease: "elastic.out(1, 0.5)" }
+    );
+    
+    // Hold
+    tl.to({}, { duration: holdDuration });
+    
+    // Animate OUT (shrink and spin)
+    tl.to(chars, {
+      scale: 0,
+      opacity: 0,
+      rotationZ: -Math.PI / 4,
+      duration: outDuration,
+      stagger: stagger / 2,
+      ease: "back.in(2)",
+    });
+    
+    return tl;
+  };
+};
+
+/**
+ * Preset: 3D flip in, flip out
+ * Characters rotate in from behind, then flip out to the other side
+ */
+export const gsapPreset3DFlipInOut = (
+  inDuration = 0.7,
+  holdDuration = 1.5,
+  outDuration = 0.5,
+  stagger = 0.05
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, chars }) => {
+    // Animate IN (flip from behind)
+    tl.fromTo(
+      chars,
+      { rotationY: Math.PI / 2, opacity: 0, z: -1, scale: 0.5 },
+      { rotationY: 0, opacity: 1, z: 0, scale: 1, duration: inDuration, stagger, ease: "power3.out" }
+    );
+    
+    // Hold
+    tl.to({}, { duration: holdDuration });
+    
+    // Animate OUT (flip away)
+    tl.to(chars, {
+      rotationY: -Math.PI / 2,
+      opacity: 0,
+      z: -1,
+      scale: 0.5,
+      duration: outDuration,
+      stagger: stagger / 2,
+      ease: "power2.in",
+    });
+    
+    return tl;
+  };
+};
+
+/**
+ * Preset: Word by word in/out
+ * Words animate in sequentially, hold, then animate out in reverse
+ */
+export const gsapPresetWordByWordInOut = (
+  wordInDuration = 0.5,
+  holdDuration = 1.0,
+  wordOutDuration = 0.3
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, words }) => {
+    // Animate IN - word by word
+    words.forEach((word) => {
+      tl.fromTo(
+        word.state,
+        { y: 0.8, opacity: 0, scale: 0.8 },
+        { y: 0, opacity: 1, scale: 1, duration: wordInDuration, ease: "power3.out" }
+      );
+      tl.fromTo(
+        word.chars,
+        { opacity: 0, y: 0.2 },
+        { opacity: 1, y: 0, duration: 0.3, stagger: 0.02, ease: "power2.out" },
+        "<0.1"
+      );
+    });
+    
+    // Hold
+    tl.to({}, { duration: holdDuration });
+    
+    // Animate OUT - words in reverse order
+    [...words].reverse().forEach((word) => {
+      tl.to(word.state, {
+        y: -0.5,
+        opacity: 0,
+        scale: 0.8,
+        duration: wordOutDuration,
+        ease: "power2.in",
+      });
+    });
+    
+    return tl;
+  };
+};
+
+/**
+ * Preset: Slide in from sides, slide out to sides
+ * Characters slide in from left/right alternating, then slide out
+ */
+export const gsapPresetSlideInOut = (
+  inDuration = 0.5,
+  holdDuration = 1.5,
+  outDuration = 0.4,
+  stagger = 0.03
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, chars }) => {
+    // Set initial positions (alternating left/right)
+    chars.forEach((char, i) => {
+      const fromLeft = i % 2 === 0;
+      tl.set(char, { x: fromLeft ? -2 : 2, opacity: 0 }, 0);
+    });
+    
+    // Animate IN
+    tl.to(chars, {
+      x: 0,
+      opacity: 1,
+      duration: inDuration,
+      stagger,
+      ease: "power3.out",
+    }, 0.1);
+    
+    // Hold
+    const inEndTime = 0.1 + inDuration + (chars.length - 1) * stagger;
+    tl.to({}, { duration: holdDuration }, inEndTime);
+    
+    // Animate OUT (slide to opposite sides)
+    const outStartTime = inEndTime + holdDuration;
+    chars.forEach((char, i) => {
+      const toLeft = i % 2 === 0;
+      tl.to(char, {
+        x: toLeft ? 2 : -2,
+        opacity: 0,
+        duration: outDuration,
+        ease: "power2.in",
+      }, outStartTime + i * (stagger / 2));
+    });
+    
+    return tl;
+  };
+};
+
+/**
+ * Preset: Lines sweep in/out
+ * Each line sweeps in from the side, then sweeps out
+ */
+export const gsapPresetLinesSweepInOut = (
+  inDuration = 0.6,
+  holdDuration = 1.5,
+  outDuration = 0.4,
+  lineStagger = 0.2
+): SplitText3DGsapProps["createTimeline"] => {
+  return ({ tl, lines }) => {
+    // Animate IN - lines sweep from alternating sides
+    lines.forEach((line, i) => {
+      const fromLeft = i % 2 === 0;
+      tl.set(line.state, { x: fromLeft ? -3 : 3, opacity: 0 }, 0);
+      tl.set(line.chars, { opacity: 0 }, 0);
+      
+      tl.to(line.state, {
+        x: 0,
+        opacity: 1,
+        duration: inDuration,
+        ease: "power3.out",
+      }, i * lineStagger);
+      
+      tl.to(line.chars, {
+        opacity: 1,
+        duration: 0.3,
+        stagger: 0.02,
+        ease: "power2.out",
+      }, i * lineStagger + 0.1);
+    });
+    
+    // Calculate when all lines are in
+    const inEndTime = (lines.length - 1) * lineStagger + inDuration;
+    
+    // Hold
+    tl.to({}, { duration: holdDuration }, inEndTime);
+    
+    // Animate OUT - lines sweep to opposite sides
+    const outStartTime = inEndTime + holdDuration;
+    lines.forEach((line, i) => {
+      const toLeft = i % 2 === 0;
+      tl.to(line.state, {
+        x: toLeft ? 3 : -3,
+        opacity: 0,
+        duration: outDuration,
+        ease: "power2.in",
+      }, outStartTime + i * (lineStagger / 2));
+    });
+    
+    return tl;
+  };
+};
