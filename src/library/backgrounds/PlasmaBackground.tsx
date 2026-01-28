@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -21,10 +20,6 @@ export type PlasmaBackgroundProps = {
   speed?: number;
   /** Complexity of the plasma pattern. */
   complexity?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -95,29 +90,52 @@ const fragmentShader = `
   }
 `;
 
-function PlasmaPlane({
+const stylePresets: Record<PlasmaStyle, string[]> = {
+  classic: ["#000080", "#0080ff", "#00ff80", "#ffff00"],
+  neon: ["#ff00ff", "#00ffff", "#ff0080", "#8000ff"],
+  fire: ["#1a0000", "#8b0000", "#ff4500", "#ffd700"],
+  ocean: ["#001f3f", "#003366", "#006699", "#00ccff"],
+  psychedelic: ["#ff0000", "#00ff00", "#0000ff", "#ffff00"],
+};
+
+/**
+ * `PlasmaBackground` creates a classic plasma effect with modern aesthetics.
+ * Features smooth color cycling and wave interference patterns.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <PlasmaBackground style="classic" />
+ * </ThreeCanvas>
+ * ```
+ */
+export const PlasmaBackground = ({
+  style = "classic",
   colors,
-  complexity,
-  speed,
-}: {
-  colors: THREE.Color[];
-  complexity: number;
-  speed: number;
-}) {
+  speed = 1,
+  complexity = 1,
+}: PlasmaBackgroundProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const colorArray = colors || stylePresets[style];
+    return colorArray.slice(0, 4).map((c) => new THREE.Color(c));
+  }, [colors, style]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uColor4: { value: colors[3] },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uColor4: { value: threeColors[3] },
       uComplexity: { value: complexity },
     }),
-    [colors, complexity],
+    [threeColors, complexity],
   );
 
   useFrame(() => {
@@ -136,61 +154,5 @@ function PlasmaPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-const stylePresets: Record<PlasmaStyle, string[]> = {
-  classic: ["#000080", "#0080ff", "#00ff80", "#ffff00"],
-  neon: ["#ff00ff", "#00ffff", "#ff0080", "#8000ff"],
-  fire: ["#1a0000", "#8b0000", "#ff4500", "#ffd700"],
-  ocean: ["#001f3f", "#003366", "#006699", "#00ccff"],
-  psychedelic: ["#ff0000", "#00ff00", "#0000ff", "#ffff00"],
-};
-
-/**
- * `PlasmaBackground` creates a classic plasma effect with modern aesthetics.
- * Features smooth color cycling and wave interference patterns.
- *
- * @example
- * ```tsx
- * // Classic blue plasma
- * <PlasmaBackground style="classic" />
- *
- * // Neon cyberpunk
- * <PlasmaBackground style="neon" complexity={1.5} />
- *
- * // Custom colors
- * <PlasmaBackground
- *   colors={["#1a1a2e", "#e94560", "#ff6b6b", "#ffd93d"]}
- * />
- * ```
- */
-export const PlasmaBackground = ({
-  style = "classic",
-  colors,
-  speed = 1,
-  complexity = 1,
-  width,
-  height,
-}: PlasmaBackgroundProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const colorArray = colors || stylePresets[style];
-    return colorArray.slice(0, 4).map((c) => new THREE.Color(c));
-  }, [colors, style]);
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <PlasmaPlane colors={threeColors} complexity={complexity} speed={speed} />
-      </ThreeCanvas>
-    </div>
   );
 };

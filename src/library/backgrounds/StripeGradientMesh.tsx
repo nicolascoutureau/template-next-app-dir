@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -16,10 +15,6 @@ export type StripeGradientMeshProps = {
   amplitude?: number;
   /** How much the colors blend together. */
   blendFactor?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -71,7 +66,7 @@ const fragmentShader = `
   }
 
   vec3 getGradientColor(float t) {
-    // Create smooth 5-color gradient
+    // 5-color gradient
     if (t < 0.25) {
       return mix(uColor1, uColor2, t * 4.0);
     } else if (t < 0.5) {
@@ -85,18 +80,19 @@ const fragmentShader = `
 
   void main() {
     vec2 uv = vUv;
+    float time = uTime;
     
-    // Create organic flowing mesh
-    float time = uTime * 0.5;
-    
-    // Multiple layers of distortion
+    // Create flowing distortion
     vec2 distortion = vec2(
-      fbm(uv * 3.0 + time * 0.3) * uAmplitude,
-      fbm(uv * 3.0 + vec2(100.0) + time * 0.2) * uAmplitude
+      fbm(uv * 3.0 + time * 0.2) * uAmplitude,
+      fbm(uv * 3.0 + vec2(5.0, 5.0) + time * 0.15) * uAmplitude
     );
     
-    // Create flowing gradient positions
-    float n1 = fbm((uv + distortion) * 2.0 + time * 0.1);
+    // Apply distortion to create flowing effect
+    vec2 distortedUv = uv + distortion;
+    
+    // Create multiple noise layers for gradient
+    float n1 = fbm(distortedUv * 2.0 + time * 0.1);
     float n2 = fbm((uv + distortion * 0.5) * 3.0 - time * 0.15);
     float n3 = fbm((uv - distortion * 0.3) * 1.5 + time * 0.08);
     
@@ -123,33 +119,52 @@ const fragmentShader = `
   }
 `;
 
-function GradientMeshPlane({
-  colors,
-  amplitude,
-  blendFactor,
-  speed,
-}: {
-  colors: THREE.Color[];
-  amplitude: number;
-  blendFactor: number;
-  speed: number;
-}) {
+/**
+ * `StripeGradientMesh` creates a beautiful, flowing gradient mesh background
+ * inspired by Stripe's iconic visual style. Features smooth color transitions
+ * with organic movement.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <StripeGradientMesh
+ *     colors={["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"]}
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const StripeGradientMesh = ({
+  colors = ["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"],
+  speed = 1,
+  amplitude = 0.2,
+  blendFactor = 0.5,
+}: StripeGradientMeshProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 5) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 5).map((c) => new THREE.Color(c));
+  }, [colors]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uColor4: { value: colors[3] },
-      uColor5: { value: colors[4] },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uColor4: { value: threeColors[3] },
+      uColor5: { value: threeColors[4] },
       uAmplitude: { value: amplitude },
       uBlendFactor: { value: blendFactor },
     }),
-    [colors, amplitude, blendFactor],
+    [threeColors, amplitude, blendFactor],
   );
 
   useFrame(() => {
@@ -168,63 +183,5 @@ function GradientMeshPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `StripeGradientMesh` creates a beautiful, flowing gradient mesh background
- * inspired by Stripe's iconic visual style. Features smooth color transitions
- * with organic movement.
- *
- * @example
- * ```tsx
- * // Stripe-style purple/blue
- * <StripeGradientMesh
- *   colors={["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"]}
- * />
- *
- * // Ocean theme
- * <StripeGradientMesh
- *   colors={["#0077B6", "#00B4D8", "#90E0EF", "#CAF0F8", "#03045E"]}
- *   amplitude={0.3}
- * />
- * ```
- */
-export const StripeGradientMesh = ({
-  colors = ["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"],
-  speed = 1,
-  amplitude = 0.2,
-  blendFactor = 0.5,
-  width,
-  height,
-}: StripeGradientMeshProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    // Ensure we have exactly 5 colors
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 5) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 5).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <GradientMeshPlane
-          colors={threeColors}
-          amplitude={amplitude}
-          blendFactor={blendFactor}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

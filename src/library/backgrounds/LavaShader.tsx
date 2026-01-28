@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -20,10 +19,6 @@ export type LavaShaderProps = {
   scale?: number;
   /** Intensity of the glow effect (0-1). */
   glowIntensity?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -156,35 +151,49 @@ const fragmentShader = `
   }
 `;
 
-function LavaPlane({
-  primaryColor,
-  secondaryColor,
-  backgroundColor,
-  scale,
-  glowIntensity,
-  speed,
-}: {
-  primaryColor: THREE.Color;
-  secondaryColor: THREE.Color;
-  backgroundColor: THREE.Color;
-  scale: number;
-  glowIntensity: number;
-  speed: number;
-}) {
+/**
+ * `LavaShader` creates a realistic flowing lava/magma background effect.
+ * Uses GLSL shaders with fractal Brownian motion for organic movement.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <LavaShader
+ *     primaryColor="#ff4500"
+ *     secondaryColor="#ff8c00"
+ *     backgroundColor="#1a0000"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const LavaShader = ({
+  primaryColor = "#ff4500",
+  secondaryColor = "#ff8c00",
+  backgroundColor = "#1a0000",
+  speed = 1,
+  scale = 3,
+  glowIntensity = 0.8,
+}: LavaShaderProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const primary = useMemo(() => new THREE.Color(primaryColor), [primaryColor]);
+  const secondary = useMemo(() => new THREE.Color(secondaryColor), [secondaryColor]);
+  const background = useMemo(() => new THREE.Color(backgroundColor), [backgroundColor]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uPrimaryColor: { value: primaryColor },
-      uSecondaryColor: { value: secondaryColor },
-      uBackgroundColor: { value: backgroundColor },
+      uPrimaryColor: { value: primary },
+      uSecondaryColor: { value: secondary },
+      uBackgroundColor: { value: background },
       uScale: { value: scale },
       uGlowIntensity: { value: glowIntensity },
     }),
-    [primaryColor, secondaryColor, backgroundColor, scale, glowIntensity],
+    [primary, secondary, background, scale, glowIntensity],
   );
 
   useFrame(() => {
@@ -203,70 +212,5 @@ function LavaPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `LavaShader` creates a realistic flowing lava/magma background effect.
- * Uses GLSL shaders with fractal Brownian motion for organic movement.
- *
- * @example
- * ```tsx
- * // Classic lava
- * <LavaShader
- *   primaryColor="#ff4500"
- *   secondaryColor="#ff8c00"
- *   backgroundColor="#1a0000"
- * />
- *
- * // Blue plasma variant
- * <LavaShader
- *   primaryColor="#00bfff"
- *   secondaryColor="#0040ff"
- *   backgroundColor="#000020"
- * />
- * ```
- */
-export const LavaShader = ({
-  primaryColor = "#ff4500",
-  secondaryColor = "#ff8c00",
-  backgroundColor = "#1a0000",
-  speed = 1,
-  scale = 3,
-  glowIntensity = 0.8,
-  width,
-  height,
-}: LavaShaderProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const primary = useMemo(() => new THREE.Color(primaryColor), [primaryColor]);
-  const secondary = useMemo(
-    () => new THREE.Color(secondaryColor),
-    [secondaryColor],
-  );
-  const background = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <LavaPlane
-          primaryColor={primary}
-          secondaryColor={secondary}
-          backgroundColor={background}
-          scale={scale}
-          glowIntensity={glowIntensity}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

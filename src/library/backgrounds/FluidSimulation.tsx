@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -18,10 +17,6 @@ export type FluidSimulationProps = {
   viscosity?: number;
   /** Turbulence intensity. */
   turbulence?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -173,34 +168,54 @@ const fragmentShader = `
   }
 `;
 
-function FluidPlane({
-  colors,
-  backgroundColor,
-  viscosity,
-  turbulence,
-  speed,
-}: {
-  colors: THREE.Color[];
-  backgroundColor: THREE.Color;
-  viscosity: number;
-  turbulence: number;
-  speed: number;
-}) {
+/**
+ * `FluidSimulation` creates a smooth, ink-in-water style fluid background.
+ * Uses curl noise for realistic fluid dynamics simulation.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <FluidSimulation
+ *     colors={["#1e3a8a", "#7c3aed", "#db2777"]}
+ *     backgroundColor="#0f0f23"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const FluidSimulation = ({
+  colors = ["#1e3a8a", "#7c3aed", "#db2777"],
+  backgroundColor = "#0f0f23",
+  speed = 1,
+  viscosity = 1,
+  turbulence = 0.5,
+}: FluidSimulationProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 3) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
+  }, [colors]);
+
+  const bgColor = useMemo(() => new THREE.Color(backgroundColor), [backgroundColor]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uBackgroundColor: { value: backgroundColor },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uBackgroundColor: { value: bgColor },
       uViscosity: { value: viscosity },
       uTurbulence: { value: turbulence },
     }),
-    [colors, backgroundColor, viscosity, turbulence],
+    [threeColors, bgColor, viscosity, turbulence],
   );
 
   useFrame(() => {
@@ -219,70 +234,5 @@ function FluidPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `FluidSimulation` creates a smooth, ink-in-water style fluid background.
- * Uses curl noise for realistic fluid dynamics simulation.
- *
- * @example
- * ```tsx
- * // Ink drops
- * <FluidSimulation
- *   colors={["#1e3a8a", "#7c3aed", "#db2777"]}
- *   backgroundColor="#0f0f23"
- * />
- *
- * // Slow lava
- * <FluidSimulation
- *   colors={["#dc2626", "#f97316", "#fbbf24"]}
- *   viscosity={2}
- *   turbulence={0.3}
- * />
- * ```
- */
-export const FluidSimulation = ({
-  colors = ["#1e3a8a", "#7c3aed", "#db2777"],
-  backgroundColor = "#0f0f23",
-  speed = 1,
-  viscosity = 1,
-  turbulence = 0.5,
-  width,
-  height,
-}: FluidSimulationProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 3) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  const bgColor = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <FluidPlane
-          colors={threeColors}
-          backgroundColor={bgColor}
-          viscosity={viscosity}
-          turbulence={turbulence}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

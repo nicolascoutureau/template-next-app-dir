@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -18,12 +17,6 @@ export type GradientOrbsProps = {
   blur?: number;
   /** Size of the orbs. */
   orbSize?: number;
-  /** Number of orbs. */
-  orbCount?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -120,36 +113,59 @@ const fragmentShader = `
   }
 `;
 
-function GradientOrbsPlane({
-  colors,
-  backgroundColor,
-  blur,
-  orbSize,
-  speed,
-}: {
-  colors: THREE.Color[];
-  backgroundColor: THREE.Color;
-  blur: number;
-  orbSize: number;
-  speed: number;
-}) {
+/**
+ * `GradientOrbs` creates soft, floating gradient orbs that move organically.
+ * Similar to iOS/macOS dynamic wallpapers with beautiful color blending.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <GradientOrbs
+ *     colors={["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"]}
+ *     backgroundColor="#1e1b4b"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const GradientOrbs = ({
+  colors = ["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"],
+  backgroundColor = "#1e1b4b",
+  speed = 1,
+  blur = 0.6,
+  orbSize = 0.3,
+}: GradientOrbsProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 5) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 5).map((c) => new THREE.Color(c));
+  }, [colors]);
+
+  const bgColor = useMemo(
+    () => new THREE.Color(backgroundColor),
+    [backgroundColor],
+  );
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uColor4: { value: colors[3] },
-      uColor5: { value: colors[4] },
-      uBackgroundColor: { value: backgroundColor },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uColor4: { value: threeColors[3] },
+      uColor5: { value: threeColors[4] },
+      uBackgroundColor: { value: bgColor },
       uBlur: { value: blur },
       uOrbSize: { value: orbSize },
     }),
-    [colors, backgroundColor, blur, orbSize],
+    [threeColors, bgColor, blur, orbSize],
   );
 
   useFrame(() => {
@@ -168,69 +184,5 @@ function GradientOrbsPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `GradientOrbs` creates soft, floating gradient orbs that move organically.
- * Similar to iOS/macOS dynamic wallpapers with beautiful color blending.
- *
- * @example
- * ```tsx
- * // Soft pastels
- * <GradientOrbs
- *   colors={["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"]}
- *   backgroundColor="#1e1b4b"
- * />
- *
- * // Vibrant
- * <GradientOrbs
- *   colors={["#ff0080", "#7928ca", "#0070f3", "#00dfd8", "#ff4d4d"]}
- *   blur={0.8}
- * />
- * ```
- */
-export const GradientOrbs = ({
-  colors = ["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"],
-  backgroundColor = "#1e1b4b",
-  speed = 1,
-  blur = 0.6,
-  orbSize = 0.3,
-  width,
-  height,
-}: GradientOrbsProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 5) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 5).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  const bgColor = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <GradientOrbsPlane
-          colors={threeColors}
-          backgroundColor={bgColor}
-          blur={blur}
-          orbSize={orbSize}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

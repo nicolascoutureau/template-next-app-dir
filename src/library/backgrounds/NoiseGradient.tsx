@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -25,10 +24,6 @@ export type NoiseGradientProps = {
   contrast?: number;
   /** Grain intensity (0-1). */
   grain?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -218,38 +213,62 @@ const fragmentShader = `
   }
 `;
 
-function NoiseGradientPlane({
-  colors,
-  noiseType,
-  scale,
-  contrast,
-  grain,
-  speed,
-}: {
-  colors: THREE.Color[];
-  noiseType: number;
-  scale: number;
-  contrast: number;
-  grain: number;
-  speed: number;
-}) {
+const noiseTypeMap: Record<NoiseType, number> = {
+  perlin: 0,
+  simplex: 1,
+  worley: 2,
+  voronoi: 3,
+};
+
+/**
+ * `NoiseGradient` creates smooth, organic gradient backgrounds using various noise algorithms.
+ * Inspired by Codrops-style abstract backgrounds with domain warping for extra organic feel.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <NoiseGradient
+ *     colors={["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"]}
+ *     noiseType="simplex"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const NoiseGradient = ({
+  colors = ["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"],
+  noiseType = "simplex",
+  speed = 1,
+  scale = 3,
+  contrast = 1,
+  grain = 0.03,
+}: NoiseGradientProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 4) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 4).map((c) => new THREE.Color(c));
+  }, [colors]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uColor4: { value: colors[3] },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uColor4: { value: threeColors[3] },
       uScale: { value: scale },
       uContrast: { value: contrast },
       uGrain: { value: grain },
-      uNoiseType: { value: noiseType },
+      uNoiseType: { value: noiseTypeMap[noiseType] },
     }),
-    [colors, noiseType, scale, contrast, grain],
+    [threeColors, noiseType, scale, contrast, grain],
   );
 
   useFrame(() => {
@@ -268,74 +287,5 @@ function NoiseGradientPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-const noiseTypeMap: Record<NoiseType, number> = {
-  perlin: 0,
-  simplex: 1,
-  worley: 2,
-  voronoi: 3,
-};
-
-/**
- * `NoiseGradient` creates smooth, organic gradient backgrounds using various noise algorithms.
- * Inspired by Codrops-style abstract backgrounds with domain warping for extra organic feel.
- *
- * @example
- * ```tsx
- * // Warm sunset
- * <NoiseGradient
- *   colors={["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"]}
- *   noiseType="simplex"
- * />
- *
- * // Abstract cells
- * <NoiseGradient
- *   colors={["#0f0f23", "#1e3a5f", "#3d5a80", "#98c1d9"]}
- *   noiseType="voronoi"
- *   scale={5}
- * />
- * ```
- */
-export const NoiseGradient = ({
-  colors = ["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"],
-  noiseType = "simplex",
-  speed = 1,
-  scale = 3,
-  contrast = 1,
-  grain = 0.03,
-  width,
-  height,
-}: NoiseGradientProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 4) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 4).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <NoiseGradientPlane
-          colors={threeColors}
-          noiseType={noiseTypeMap[noiseType]}
-          scale={scale}
-          contrast={contrast}
-          grain={grain}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

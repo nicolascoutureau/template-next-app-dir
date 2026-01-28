@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -22,10 +21,6 @@ export type WaveGridBackgroundProps = {
   amplitude?: number;
   /** Perspective tilt (0-1). */
   perspective?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -108,38 +103,51 @@ const fragmentShader = `
   }
 `;
 
-function WaveGridPlane({
-  lineColor,
-  glowColor,
-  backgroundColor,
-  gridDensity,
-  amplitude,
-  perspective,
-  speed,
-}: {
-  lineColor: THREE.Color;
-  glowColor: THREE.Color;
-  backgroundColor: THREE.Color;
-  gridDensity: number;
-  amplitude: number;
-  perspective: number;
-  speed: number;
-}) {
+/**
+ * `WaveGridBackground` creates a retro-futuristic grid with wave animation.
+ * Perfect for synthwave, vaporwave, or sci-fi aesthetics.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <WaveGridBackground
+ *     lineColor="#ff00ff"
+ *     glowColor="#00ffff"
+ *     backgroundColor="#0a0015"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const WaveGridBackground = ({
+  lineColor = "#ff00ff",
+  glowColor = "#00ffff",
+  backgroundColor = "#0a0015",
+  speed = 1,
+  gridDensity = 20,
+  amplitude = 0.2,
+  perspective = 0.5,
+}: WaveGridBackgroundProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const line = useMemo(() => new THREE.Color(lineColor), [lineColor]);
+  const glow = useMemo(() => new THREE.Color(glowColor), [glowColor]);
+  const background = useMemo(() => new THREE.Color(backgroundColor), [backgroundColor]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uLineColor: { value: lineColor },
-      uGlowColor: { value: glowColor },
-      uBackgroundColor: { value: backgroundColor },
+      uLineColor: { value: line },
+      uGlowColor: { value: glow },
+      uBackgroundColor: { value: background },
       uGridDensity: { value: gridDensity },
       uAmplitude: { value: amplitude },
       uPerspective: { value: perspective },
     }),
-    [lineColor, glowColor, backgroundColor, gridDensity, amplitude, perspective],
+    [line, glow, background, gridDensity, amplitude, perspective],
   );
 
   useFrame(() => {
@@ -158,70 +166,5 @@ function WaveGridPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `WaveGridBackground` creates a retro-futuristic grid with wave animation.
- * Perfect for synthwave, vaporwave, or sci-fi aesthetics.
- *
- * @example
- * ```tsx
- * // Synthwave classic
- * <WaveGridBackground
- *   lineColor="#ff00ff"
- *   glowColor="#00ffff"
- *   backgroundColor="#0a0015"
- * />
- *
- * // Subtle tech
- * <WaveGridBackground
- *   lineColor="#3b82f6"
- *   glowColor="#60a5fa"
- *   backgroundColor="#0f172a"
- *   amplitude={0.1}
- * />
- * ```
- */
-export const WaveGridBackground = ({
-  lineColor = "#ff00ff",
-  glowColor = "#00ffff",
-  backgroundColor = "#0a0015",
-  speed = 1,
-  gridDensity = 20,
-  amplitude = 0.2,
-  perspective = 0.5,
-  width,
-  height,
-}: WaveGridBackgroundProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const line = useMemo(() => new THREE.Color(lineColor), [lineColor]);
-  const glow = useMemo(() => new THREE.Color(glowColor), [glowColor]);
-  const background = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <WaveGridPlane
-          lineColor={line}
-          glowColor={glow}
-          backgroundColor={background}
-          gridDensity={gridDensity}
-          amplitude={amplitude}
-          perspective={perspective}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

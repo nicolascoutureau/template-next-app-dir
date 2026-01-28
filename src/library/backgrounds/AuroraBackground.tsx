@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -16,12 +15,6 @@ export type AuroraBackgroundProps = {
   speed?: number;
   /** Intensity of the aurora glow (0-1). */
   intensity?: number;
-  /** Number of aurora bands. */
-  bands?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -151,32 +144,56 @@ const fragmentShader = `
   }
 `;
 
-function AuroraPlane({
-  colors,
-  backgroundColor,
-  intensity,
-  speed,
-}: {
-  colors: THREE.Color[];
-  backgroundColor: THREE.Color;
-  intensity: number;
-  speed: number;
-}) {
+/**
+ * `AuroraBackground` creates a stunning northern lights effect.
+ * Features flowing curtains of light with organic movement and subtle stars.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <AuroraBackground
+ *     colors={["#00ff87", "#60efff", "#ff00ff"]}
+ *     backgroundColor="#0a0a1a"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const AuroraBackground = ({
+  colors = ["#00ff87", "#60efff", "#ff00ff"],
+  backgroundColor = "#0a0a1a",
+  speed = 1,
+  intensity = 0.7,
+}: AuroraBackgroundProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 3) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
+  }, [colors]);
+
+  const bgColor = useMemo(
+    () => new THREE.Color(backgroundColor),
+    [backgroundColor],
+  );
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uBackgroundColor: { value: backgroundColor },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uBackgroundColor: { value: bgColor },
       uIntensity: { value: intensity },
       uBands: { value: 3 },
     }),
-    [colors, backgroundColor, intensity],
+    [threeColors, bgColor, intensity],
   );
 
   useFrame(() => {
@@ -195,67 +212,5 @@ function AuroraPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `AuroraBackground` creates a stunning northern lights effect.
- * Features flowing curtains of light with organic movement and subtle stars.
- *
- * @example
- * ```tsx
- * // Classic aurora
- * <AuroraBackground
- *   colors={["#00ff87", "#60efff", "#ff00ff"]}
- *   backgroundColor="#0a0a1a"
- * />
- *
- * // Purple/pink variant
- * <AuroraBackground
- *   colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
- *   intensity={0.9}
- * />
- * ```
- */
-export const AuroraBackground = ({
-  colors = ["#00ff87", "#60efff", "#ff00ff"],
-  backgroundColor = "#0a0a1a",
-  speed = 1,
-  intensity = 0.7,
-  width,
-  height,
-}: AuroraBackgroundProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 3) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  const bgColor = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <AuroraPlane
-          colors={threeColors}
-          backgroundColor={bgColor}
-          intensity={intensity}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

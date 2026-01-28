@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -14,18 +13,12 @@ export type MetaballsBackgroundProps = {
   secondaryColor?: string;
   /** Background color. */
   backgroundColor?: string;
-  /** Number of metaballs. */
-  ballCount?: number;
   /** Speed of the animation. */
   speed?: number;
   /** Edge sharpness (0-1, lower = softer). */
   sharpness?: number;
   /** Enable glow effect. */
   glow?: boolean;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -135,35 +128,49 @@ const fragmentShader = `
   }
 `;
 
-function MetaballsPlane({
-  primaryColor,
-  secondaryColor,
-  backgroundColor,
-  sharpness,
-  glow,
-  speed,
-}: {
-  primaryColor: THREE.Color;
-  secondaryColor: THREE.Color;
-  backgroundColor: THREE.Color;
-  sharpness: number;
-  glow: boolean;
-  speed: number;
-}) {
+/**
+ * `MetaballsBackground` creates organic, blobby shapes that merge and separate.
+ * Perfect for modern, playful backgrounds with a liquid feel.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <MetaballsBackground
+ *     primaryColor="#8b5cf6"
+ *     secondaryColor="#ec4899"
+ *     backgroundColor="#1a1a2e"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const MetaballsBackground = ({
+  primaryColor = "#8b5cf6",
+  secondaryColor = "#ec4899",
+  backgroundColor = "#1a1a2e",
+  speed = 1,
+  sharpness = 0.5,
+  glow = true,
+}: MetaballsBackgroundProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const primary = useMemo(() => new THREE.Color(primaryColor), [primaryColor]);
+  const secondary = useMemo(() => new THREE.Color(secondaryColor), [secondaryColor]);
+  const background = useMemo(() => new THREE.Color(backgroundColor), [backgroundColor]);
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uPrimaryColor: { value: primaryColor },
-      uSecondaryColor: { value: secondaryColor },
-      uBackgroundColor: { value: backgroundColor },
+      uPrimaryColor: { value: primary },
+      uSecondaryColor: { value: secondary },
+      uBackgroundColor: { value: background },
       uSharpness: { value: sharpness },
       uGlow: { value: glow },
     }),
-    [primaryColor, secondaryColor, backgroundColor, sharpness, glow],
+    [primary, secondary, background, sharpness, glow],
   );
 
   useFrame(() => {
@@ -182,74 +189,5 @@ function MetaballsPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `MetaballsBackground` creates organic, blobby shapes that merge and separate.
- * Perfect for modern, playful backgrounds with a liquid feel.
- *
- * @example
- * ```tsx
- * // Purple blobs
- * <MetaballsBackground
- *   primaryColor="#8b5cf6"
- *   secondaryColor="#ec4899"
- *   backgroundColor="#1a1a2e"
- * />
- *
- * // Soft organic
- * <MetaballsBackground
- *   primaryColor="#22c55e"
- *   secondaryColor="#06b6d4"
- *   sharpness={0.3}
- *   glow={true}
- * />
- * ```
- */
-export const MetaballsBackground = ({
-  primaryColor = "#8b5cf6",
-  secondaryColor = "#ec4899",
-  backgroundColor = "#1a1a2e",
-  speed = 1,
-  sharpness = 0.5,
-  glow = true,
-  width,
-  height,
-}: MetaballsBackgroundProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const primary = useMemo(
-    () => new THREE.Color(primaryColor),
-    [primaryColor],
-  );
-  const secondary = useMemo(
-    () => new THREE.Color(secondaryColor),
-    [secondaryColor],
-  );
-  const background = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <MetaballsPlane
-          primaryColor={primary}
-          secondaryColor={secondary}
-          backgroundColor={background}
-          sharpness={sharpness}
-          glow={glow}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

@@ -1,4 +1,3 @@
-import { ThreeCanvas } from "@remotion/three";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -20,10 +19,6 @@ export type ParticleNebulaProps = {
   stars?: boolean;
   /** Brightness of the nebula (0-1). */
   brightness?: number;
-  /** Width of the canvas. */
-  width?: number;
-  /** Height of the canvas. */
-  height?: number;
 };
 
 const vertexShader = `
@@ -203,37 +198,59 @@ const fragmentShader = `
   }
 `;
 
-function NebulaPlane({
-  colors,
-  backgroundColor,
-  density,
-  stars,
-  brightness,
-  speed,
-}: {
-  colors: THREE.Color[];
-  backgroundColor: THREE.Color;
-  density: number;
-  stars: boolean;
-  brightness: number;
-  speed: number;
-}) {
+/**
+ * `ParticleNebula` creates a stunning deep space nebula effect.
+ * Features volumetric cloud rendering with twinkling stars.
+ * 
+ * Use inside a ThreeCanvas with camera={{ position: [0, 0, 1], fov: 90 }}.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 1], fov: 90 }}>
+ *   <ParticleNebula
+ *     colors={["#7c3aed", "#ec4899", "#06b6d4"]}
+ *     backgroundColor="#050510"
+ *   />
+ * </ThreeCanvas>
+ * ```
+ */
+export const ParticleNebula = ({
+  colors = ["#7c3aed", "#ec4899", "#06b6d4"],
+  backgroundColor = "#050510",
+  speed = 1,
+  density = 3,
+  stars: showStars = true,
+  brightness = 0.7,
+}: ParticleNebulaProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  const threeColors = useMemo(() => {
+    const normalizedColors = [...colors];
+    while (normalizedColors.length < 3) {
+      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
+    }
+    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
+  }, [colors]);
+
+  const bgColor = useMemo(
+    () => new THREE.Color(backgroundColor),
+    [backgroundColor],
+  );
+
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor1: { value: colors[0] },
-      uColor2: { value: colors[1] },
-      uColor3: { value: colors[2] },
-      uBackgroundColor: { value: backgroundColor },
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uBackgroundColor: { value: bgColor },
       uDensity: { value: density },
-      uStars: { value: stars },
+      uStars: { value: showStars },
       uBrightness: { value: brightness },
     }),
-    [colors, backgroundColor, density, stars, brightness],
+    [threeColors, bgColor, density, showStars, brightness],
   );
 
   useFrame(() => {
@@ -252,71 +269,5 @@ function NebulaPlane({
         uniforms={uniforms}
       />
     </mesh>
-  );
-}
-
-/**
- * `ParticleNebula` creates a stunning deep space nebula effect.
- * Features volumetric cloud rendering with twinkling stars.
- *
- * @example
- * ```tsx
- * // Classic nebula
- * <ParticleNebula
- *   colors={["#7c3aed", "#ec4899", "#06b6d4"]}
- *   backgroundColor="#050510"
- * />
- *
- * // Fiery nebula
- * <ParticleNebula
- *   colors={["#dc2626", "#f97316", "#fbbf24"]}
- *   brightness={0.9}
- * />
- * ```
- */
-export const ParticleNebula = ({
-  colors = ["#7c3aed", "#ec4899", "#06b6d4"],
-  backgroundColor = "#050510",
-  speed = 1,
-  density = 3,
-  stars: showStars = true,
-  brightness = 0.7,
-  width,
-  height,
-}: ParticleNebulaProps) => {
-  const { width: videoWidth, height: videoHeight } = useVideoConfig();
-  const w = width ?? videoWidth;
-  const h = height ?? videoHeight;
-
-  const threeColors = useMemo(() => {
-    const normalizedColors = [...colors];
-    while (normalizedColors.length < 3) {
-      normalizedColors.push(normalizedColors[normalizedColors.length - 1]);
-    }
-    return normalizedColors.slice(0, 3).map((c) => new THREE.Color(c));
-  }, [colors]);
-
-  const bgColor = useMemo(
-    () => new THREE.Color(backgroundColor),
-    [backgroundColor],
-  );
-
-  return (
-    <div style={{ width: w, height: h, position: "absolute", inset: 0 }}>
-      <ThreeCanvas
-        width={w}
-        height={h}
-        camera={{ position: [0, 0, 1], fov: 90 }}
-      >
-        <NebulaPlane
-          colors={threeColors}
-          backgroundColor={bgColor}
-          density={density}
-          stars={showStars}
-          brightness={brightness}
-          speed={speed}
-        />
-      </ThreeCanvas>
-    </div>
   );
 };

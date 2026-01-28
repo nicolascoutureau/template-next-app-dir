@@ -15,6 +15,25 @@ import {
   GradientBackground,
 } from "../backgrounds";
 import { AbsoluteFill } from "remotion";
+import { ThreeCanvas } from "@remotion/three";
+
+/**
+ * Wrapper for shader backgrounds that need to be inside a ThreeCanvas.
+ * These backgrounds are now just shader meshes without their own canvas.
+ */
+const ShaderBackgroundCanvas: React.FC<{
+  children: React.ReactNode;
+  width: number;
+  height: number;
+}> = ({ children, width, height }) => (
+  <ThreeCanvas
+    width={width}
+    height={height}
+    camera={{ position: [0, 0, 1], fov: 90 }}
+  >
+    {children}
+  </ThreeCanvas>
+);
 
 const meta: Meta = {
   title: "Motion Library/Backgrounds",
@@ -132,15 +151,15 @@ export const LavaClassic: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <LavaShader
-          primaryColor="#ff4500"
-          secondaryColor="#ff8c00"
-          backgroundColor="#1a0000"
-          scale={3}
-          glowIntensity={0.8}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <LavaShader
+            primaryColor="#ff4500"
+            secondaryColor="#ff8c00"
+            backgroundColor="#1a0000"
+            scale={3}
+            glowIntensity={0.8}
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-6xl font-black text-white drop-shadow-2xl">
             LAVA
@@ -156,15 +175,15 @@ export const LavaBlue: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <LavaShader
-          primaryColor="#00bfff"
-          secondaryColor="#0040ff"
-          backgroundColor="#000020"
-          scale={4}
-          glowIntensity={0.9}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <LavaShader
+            primaryColor="#00bfff"
+            secondaryColor="#0040ff"
+            backgroundColor="#000020"
+            scale={4}
+            glowIntensity={0.9}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -175,15 +194,15 @@ export const LavaPurple: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <LavaShader
-          primaryColor="#9333ea"
-          secondaryColor="#ec4899"
-          backgroundColor="#0a0015"
-          scale={2.5}
-          glowIntensity={0.7}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <LavaShader
+            primaryColor="#9333ea"
+            secondaryColor="#ec4899"
+            backgroundColor="#0a0015"
+            scale={2.5}
+            glowIntensity={0.7}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -198,12 +217,12 @@ export const StripeDefault: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <StripeGradientMesh
-          colors={["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"]}
-          amplitude={0.2}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <StripeGradientMesh
+            colors={["#7928CA", "#FF0080", "#FF4D4D", "#F9CB28", "#4DFFDF"]}
+            amplitude={0.2}
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-5xl font-bold text-white mix-blend-overlay">
             GRADIENT MESH
@@ -219,12 +238,12 @@ export const StripeOcean: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <StripeGradientMesh
-          colors={["#0077B6", "#00B4D8", "#90E0EF", "#CAF0F8", "#03045E"]}
-          amplitude={0.3}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <StripeGradientMesh
+            colors={["#0077B6", "#00B4D8", "#90E0EF", "#CAF0F8", "#03045E"]}
+            amplitude={0.3}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -235,12 +254,12 @@ export const StripeSunset: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <StripeGradientMesh
-          colors={["#1a1a2e", "#e94560", "#ff6b6b", "#ffd93d", "#ffb347"]}
-          amplitude={0.25}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <StripeGradientMesh
+            colors={["#1a1a2e", "#e94560", "#ff6b6b", "#ffd93d", "#ffb347"]}
+            amplitude={0.25}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -255,13 +274,13 @@ export const AuroraClassic: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <AuroraBackground
-          colors={["#00ff87", "#60efff", "#ff00ff"]}
-          backgroundColor="#0a0a1a"
-          intensity={0.7}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <AuroraBackground
+            colors={["#00ff87", "#60efff", "#ff00ff"]}
+            backgroundColor="#0a0a1a"
+            intensity={0.7}
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-6xl font-bold text-white/80">AURORA</div>
         </div>
@@ -275,13 +294,13 @@ export const AuroraPurple: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <AuroraBackground
-          colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
-          backgroundColor="#0f0f23"
-          intensity={0.9}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <AuroraBackground
+            colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
+            backgroundColor="#0f0f23"
+            intensity={0.9}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -296,14 +315,14 @@ export const NoiseWarm: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <NoiseGradient
-          colors={["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"]}
-          noiseType="simplex"
-          scale={3}
-          grain={0.03}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <NoiseGradient
+            colors={["#1a1a2e", "#16213e", "#e94560", "#ff6b6b"]}
+            noiseType="simplex"
+            scale={3}
+            grain={0.03}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -314,13 +333,13 @@ export const NoiseVoronoi: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <NoiseGradient
-          colors={["#0f0f23", "#1e3a5f", "#3d5a80", "#98c1d9"]}
-          noiseType="voronoi"
-          scale={5}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <NoiseGradient
+            colors={["#0f0f23", "#1e3a5f", "#3d5a80", "#98c1d9"]}
+            noiseType="voronoi"
+            scale={5}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -331,14 +350,14 @@ export const NoiseWorley: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <NoiseGradient
-          colors={["#0d1117", "#161b22", "#21262d", "#30363d"]}
-          noiseType="worley"
-          scale={4}
-          contrast={1.2}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <NoiseGradient
+            colors={["#0d1117", "#161b22", "#21262d", "#30363d"]}
+            noiseType="worley"
+            scale={4}
+            contrast={1.2}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -353,7 +372,9 @@ export const PlasmaClassic: Story = {
   render: () => (
     <AutoRemount durationInFrames={120}>
       <AbsoluteFill>
-        <PlasmaBackground style="classic" complexity={1} width={W} height={H} />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <PlasmaBackground style="classic" complexity={1} />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -364,7 +385,9 @@ export const PlasmaNeon: Story = {
   render: () => (
     <AutoRemount durationInFrames={120}>
       <AbsoluteFill>
-        <PlasmaBackground style="neon" complexity={1.5} width={W} height={H} />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <PlasmaBackground style="neon" complexity={1.5} />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-6xl font-black text-white mix-blend-difference">
             NEON
@@ -380,7 +403,9 @@ export const PlasmaFire: Story = {
   render: () => (
     <AutoRemount durationInFrames={120}>
       <AbsoluteFill>
-        <PlasmaBackground style="fire" complexity={1.2} width={W} height={H} />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <PlasmaBackground style="fire" complexity={1.2} />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -391,12 +416,9 @@ export const PlasmaPsychedelic: Story = {
   render: () => (
     <AutoRemount durationInFrames={120}>
       <AbsoluteFill>
-        <PlasmaBackground
-          style="psychedelic"
-          complexity={2}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <PlasmaBackground style="psychedelic" complexity={2} />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -411,15 +433,15 @@ export const MetaballsPurple: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <MetaballsBackground
-          primaryColor="#8b5cf6"
-          secondaryColor="#ec4899"
-          backgroundColor="#1a1a2e"
-          sharpness={0.5}
-          glow
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <MetaballsBackground
+            primaryColor="#8b5cf6"
+            secondaryColor="#ec4899"
+            backgroundColor="#1a1a2e"
+            sharpness={0.5}
+            glow
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -430,15 +452,15 @@ export const MetaballsGreen: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <MetaballsBackground
-          primaryColor="#22c55e"
-          secondaryColor="#06b6d4"
-          backgroundColor="#0a1628"
-          sharpness={0.3}
-          glow
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <MetaballsBackground
+            primaryColor="#22c55e"
+            secondaryColor="#06b6d4"
+            backgroundColor="#0a1628"
+            sharpness={0.3}
+            glow
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -453,16 +475,16 @@ export const WaveGridSynthwave: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <WaveGridBackground
-          lineColor="#ff00ff"
-          glowColor="#00ffff"
-          backgroundColor="#0a0015"
-          gridDensity={20}
-          amplitude={0.2}
-          perspective={0.5}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <WaveGridBackground
+            lineColor="#ff00ff"
+            glowColor="#00ffff"
+            backgroundColor="#0a0015"
+            gridDensity={20}
+            amplitude={0.2}
+            perspective={0.5}
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-cyan-500">
             RETRO
@@ -478,15 +500,15 @@ export const WaveGridTech: Story = {
   render: () => (
     <AutoRemount durationInFrames={150}>
       <AbsoluteFill>
-        <WaveGridBackground
-          lineColor="#3b82f6"
-          glowColor="#60a5fa"
-          backgroundColor="#0f172a"
-          amplitude={0.1}
-          gridDensity={25}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <WaveGridBackground
+            lineColor="#3b82f6"
+            glowColor="#60a5fa"
+            backgroundColor="#0f172a"
+            amplitude={0.1}
+            gridDensity={25}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -501,14 +523,14 @@ export const GradientOrbsPastel: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <GradientOrbs
-          colors={["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"]}
-          backgroundColor="#1e1b4b"
-          blur={0.6}
-          orbSize={0.3}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <GradientOrbs
+            colors={["#f472b6", "#a78bfa", "#60a5fa", "#34d399", "#fbbf24"]}
+            backgroundColor="#1e1b4b"
+            blur={0.6}
+            orbSize={0.3}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -519,14 +541,14 @@ export const GradientOrbsVibrant: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <GradientOrbs
-          colors={["#ff0080", "#7928ca", "#0070f3", "#00dfd8", "#ff4d4d"]}
-          backgroundColor="#0a0a0a"
-          blur={0.8}
-          orbSize={0.35}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <GradientOrbs
+            colors={["#ff0080", "#7928ca", "#0070f3", "#00dfd8", "#ff4d4d"]}
+            backgroundColor="#0a0a0a"
+            blur={0.8}
+            orbSize={0.35}
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-5xl font-bold text-white/90">DYNAMIC</div>
         </div>
@@ -544,14 +566,14 @@ export const FluidInk: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <FluidSimulation
-          colors={["#1e3a8a", "#7c3aed", "#db2777"]}
-          backgroundColor="#0f0f23"
-          turbulence={0.5}
-          viscosity={1}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <FluidSimulation
+            colors={["#1e3a8a", "#7c3aed", "#db2777"]}
+            backgroundColor="#0f0f23"
+            turbulence={0.5}
+            viscosity={1}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -562,14 +584,14 @@ export const FluidLava: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <FluidSimulation
-          colors={["#dc2626", "#f97316", "#fbbf24"]}
-          backgroundColor="#1c1917"
-          viscosity={2}
-          turbulence={0.3}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <FluidSimulation
+            colors={["#dc2626", "#f97316", "#fbbf24"]}
+            backgroundColor="#1c1917"
+            viscosity={2}
+            turbulence={0.3}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -580,14 +602,14 @@ export const FluidOcean: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <FluidSimulation
-          colors={["#0284c7", "#06b6d4", "#22d3ee"]}
-          backgroundColor="#0c1929"
-          viscosity={1.5}
-          turbulence={0.6}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <FluidSimulation
+            colors={["#0284c7", "#06b6d4", "#22d3ee"]}
+            backgroundColor="#0c1929"
+            viscosity={1.5}
+            turbulence={0.6}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -602,14 +624,14 @@ export const NebulaClassic: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <ParticleNebula
-          colors={["#7c3aed", "#ec4899", "#06b6d4"]}
-          backgroundColor="#050510"
-          brightness={0.7}
-          stars
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <ParticleNebula
+            colors={["#7c3aed", "#ec4899", "#06b6d4"]}
+            backgroundColor="#050510"
+            brightness={0.7}
+            stars
+          />
+        </ShaderBackgroundCanvas>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-6xl font-bold text-white/80">NEBULA</div>
         </div>
@@ -623,15 +645,15 @@ export const NebulaFire: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <ParticleNebula
-          colors={["#dc2626", "#f97316", "#fbbf24"]}
-          backgroundColor="#0a0505"
-          brightness={0.9}
-          stars
-          density={4}
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <ParticleNebula
+            colors={["#dc2626", "#f97316", "#fbbf24"]}
+            backgroundColor="#0a0505"
+            brightness={0.9}
+            stars
+            density={4}
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),
@@ -642,14 +664,14 @@ export const NebulaGreen: Story = {
   render: () => (
     <AutoRemount durationInFrames={180}>
       <AbsoluteFill>
-        <ParticleNebula
-          colors={["#059669", "#10b981", "#34d399"]}
-          backgroundColor="#030a08"
-          brightness={0.8}
-          stars
-          width={W}
-          height={H}
-        />
+        <ShaderBackgroundCanvas width={W} height={H}>
+          <ParticleNebula
+            colors={["#059669", "#10b981", "#34d399"]}
+            backgroundColor="#030a08"
+            brightness={0.8}
+            stars
+          />
+        </ShaderBackgroundCanvas>
       </AbsoluteFill>
     </AutoRemount>
   ),

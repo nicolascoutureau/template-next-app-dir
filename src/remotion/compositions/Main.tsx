@@ -13,6 +13,11 @@ import {
   SplitText3DGsap,
   RichText3DGsap,
   ExtrudedText3DGsap,
+  // Beautiful shader backgrounds from the library
+  ParticleNebula,
+  AuroraBackground,
+  GradientOrbs,
+  StripeGradientMesh,
 } from "../../library";
 import { getFontUrl } from "../fonts";
 
@@ -40,61 +45,6 @@ const colors = {
   gray: "#94a3b8",
 };
 
-// ============================================================================
-// ANIMATED BACKGROUND GRADIENT
-// ============================================================================
-
-const AnimatedBackground: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  // Slowly rotating gradient effect using multiple planes
-  const rotation = (frame / fps) * 0.1;
-  const pulse = Math.sin((frame / fps) * Math.PI * 0.5) * 0.1 + 0.9;
-
-  return (
-    <group>
-      {/* Deep space gradient sphere */}
-      <mesh scale={50}>
-        <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial color="#030014" side={THREE.BackSide} />
-      </mesh>
-
-      {/* Animated nebula glow 1 */}
-      <mesh position={[-8, 4, -15]} rotation={[0, 0, rotation]}>
-        <planeGeometry args={[20, 20]} />
-        <meshBasicMaterial
-          color="#7c3aed"
-          transparent
-          opacity={0.15 * pulse}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Animated nebula glow 2 */}
-      <mesh position={[8, -4, -15]} rotation={[0, 0, -rotation * 0.7]}>
-        <planeGeometry args={[18, 18]} />
-        <meshBasicMaterial
-          color="#06b6d4"
-          transparent
-          opacity={0.12 * pulse}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-
-      {/* Accent glow */}
-      <mesh position={[0, -6, -12]} rotation={[0, 0, rotation * 0.5]}>
-        <planeGeometry args={[15, 15]} />
-        <meshBasicMaterial
-          color="#f472b6"
-          transparent
-          opacity={0.08}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-    </group>
-  );
-};
 
 // ============================================================================
 // FLOATING PARTICLES
@@ -654,6 +604,27 @@ const Lights: React.FC = () => {
 // MAIN COMPOSITION
 // ============================================================================
 
+// ============================================================================
+// BACKGROUND WRAPPER - Scales shader backgrounds to fill the view
+// ============================================================================
+
+const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // The shader backgrounds use a 2x2 plane and expect camera at z=1 with FOV 90
+  // Our main camera is at z=12 with FOV 50
+  // To fill the view, we position the background at z=-5 and scale appropriately
+  // At distance 17 (12 - (-5)), with FOV 50: visible height = 2 * 17 * tan(25°) ≈ 15.8
+  // Scale factor: 15.8 / 2 ≈ 8
+  return (
+    <group position={[0, 0, -5]} scale={[14, 8, 1]}>
+      {children}
+    </group>
+  );
+};
+
+// ============================================================================
+// MAIN COMPOSITION
+// ============================================================================
+
 export const Main: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height, durationInFrames } = useVideoConfig();
@@ -686,41 +657,93 @@ export const Main: React.FC = () => {
             position: [0, 0, 12],
           }}
         >
-          {/* Lighting */}
+          {/* ============================================================== */}
+          {/* SHADER BACKGROUNDS - Positioned behind 3D content              */}
+          {/* ============================================================== */}
+
+          {/* Scene 1: Particle Nebula - Cosmic, dramatic opening */}
+          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
+            <BackgroundLayer>
+              <ParticleNebula
+                colors={["#7c3aed", "#a855f7", "#06b6d4"]}
+                backgroundColor="#030014"
+                brightness={0.8}
+                density={3}
+                speed={0.8}
+                stars={true}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* Scene 2: Aurora Background - Ethereal product reveal */}
+          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
+            <BackgroundLayer>
+              <AuroraBackground
+                colors={["#8b5cf6", "#ec4899", "#06b6d4"]}
+                backgroundColor="#050510"
+                intensity={0.85}
+                speed={0.6}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* Scene 3: Gradient Orbs - Modern, dynamic features */}
+          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
+            <BackgroundLayer>
+              <GradientOrbs
+                colors={["#a855f7", "#06b6d4", "#f472b6", "#10b981", "#fbbf24"]}
+                backgroundColor="#0a0a1a"
+                blur={0.7}
+                orbSize={0.35}
+                speed={0.8}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* Scene 4: Stripe Gradient Mesh - Clean, professional CTA */}
+          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
+            <BackgroundLayer>
+              <StripeGradientMesh
+                colors={["#7c3aed", "#06b6d4", "#ec4899", "#8b5cf6", "#030014"]}
+                speed={0.5}
+                amplitude={0.4}
+                blendFactor={0.6}
+              />
+            </BackgroundLayer>
+          </Sequence>
+
+          {/* ============================================================== */}
+          {/* LIGHTING                                                       */}
+          {/* ============================================================== */}
           <Lights />
 
-          {/* Animated Background */}
-          <AnimatedBackground />
-
-          {/* Floating particles throughout */}
+          {/* ============================================================== */}
+          {/* FLOATING PARTICLES                                             */}
+          {/* ============================================================== */}
           <FloatingParticles count={40} startDelay={0} />
+
+          {/* ============================================================== */}
+          {/* SCENE CONTENT                                                  */}
+          {/* ============================================================== */}
 
           {/* Scene 1: Opening */}
           <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
-            <group>
-              <Scene1Opening />
-            </group>
+            <Scene1Opening />
           </Sequence>
 
           {/* Scene 2: Product Reveal */}
           <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
-            <group>
-              <Scene2ProductReveal />
-            </group>
+            <Scene2ProductReveal />
           </Sequence>
 
           {/* Scene 3: Features */}
           <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
-            <group>
-              <Scene3Features />
-            </group>
+            <Scene3Features />
           </Sequence>
 
           {/* Scene 4: CTA */}
           <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
-            <group>
-              <Scene4CTA />
-            </group>
+            <Scene4CTA />
           </Sequence>
         </ThreeCanvas>
       </AbsoluteFill>
