@@ -240,7 +240,7 @@ export const Main: React.FC = () => {
             bevelEnabled={false}
             metalness={0.5}
             roughness={0.3}
-            color="#f472b6"
+            color="#0bff23"
             createTimeline={({ tl, chars }) => {
               // Simple fade in
               tl.fromTo(
