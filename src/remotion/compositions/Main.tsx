@@ -5,63 +5,18 @@ import {
   useCurrentFrame,
   useVideoConfig,
   spring,
-  interpolate,
   staticFile,
 } from "remotion";
-import { Text } from "@react-three/drei";
+import React from "react";
+import { SplitText3D } from "../three/text";
 
 // Inter Bold font from public folder
 const interFontUrl = staticFile("fonts/Inter-Bold.ttf");
 
-// Animated 3D Text component
-const AnimatedText: React.FC<{
-  text: string;
-  position: [number, number, number];
-  color: string;
-  delay?: number;
-  fontSize?: number;
-}> = ({ text, position, color, delay = 0, fontSize = 1 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+// ============================================================================
+// DECORATIVE COMPONENTS
+// ============================================================================
 
-  // Spring entrance animation
-  const entrance = spring({
-    fps,
-    frame,
-    config: {
-      damping: 80,
-      stiffness: 150,
-      mass: 0.8,
-    },
-    delay,
-  });
-
-  // Y position animation (rise up)
-  const yOffset = interpolate(entrance, [0, 1], [-2, 0]);
-
-  // Rotation animation
-  const rotationX = interpolate(entrance, [0, 1], [Math.PI / 4, 0]);
-
-  // Opacity
-  const opacity = interpolate(entrance, [0, 0.5, 1], [0, 0.5, 1]);
-
-  return (
-    <Text
-      position={[position[0], position[1] + yOffset, position[2]]}
-      rotation={[rotationX, 0, 0]}
-      fontSize={fontSize}
-      color={color}
-      anchorX="center"
-      anchorY="middle"
-      fillOpacity={opacity}
-      font={interFontUrl}
-    >
-      {text}
-    </Text>
-  );
-};
-
-// Floating decorative sphere
 const FloatingSphere: React.FC<{
   position: [number, number, number];
   color: string;
@@ -78,7 +33,6 @@ const FloatingSphere: React.FC<{
     delay,
   });
 
-  // Floating animation
   const floatY = Math.sin((frame / fps) * Math.PI * 2) * 0.1;
 
   return (
@@ -98,7 +52,6 @@ const FloatingSphere: React.FC<{
   );
 };
 
-// Rotating torus decoration
 const RotatingTorus: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -124,13 +77,22 @@ const RotatingTorus: React.FC = () => {
   );
 };
 
+// ============================================================================
+// MAIN COMPOSITION
+// ============================================================================
+
 export const Main: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
+  // Rainbow color function for characters
+  const rainbowColor = (char: string, index: number, total: number): string => {
+    const hue = (index / total) * 360;
+    return `hsl(${hue}, 80%, 65%)`;
+  };
+
   return (
     <>
-      {/* Thumbnail artifact */}
       {frame === 0 && (
         <Artifact content={Artifact.Thumbnail} filename="thumbnail.jpeg" />
       )}
@@ -145,43 +107,54 @@ export const Main: React.FC = () => {
           }}
         >
           {/* Lighting */}
-          <ambientLight intensity={0.4} />
-          <directionalLight position={[10, 10, 5]} intensity={1} />
-          <directionalLight position={[-10, -10, -5]} intensity={0.3} />
-          <pointLight position={[0, 5, 5]} intensity={0.5} color="#60a5fa" />
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 5]} intensity={1.2} />
+          <directionalLight position={[-10, -10, -5]} intensity={0.4} />
+          <pointLight position={[0, 5, 5]} intensity={0.6} color="#60a5fa" />
 
-          {/* Main text */}
-          <AnimatedText
+          {/* Main text with split animation */}
+          <SplitText3D
             text="welcome to"
-            position={[0, 1, 0]}
+            fontUrl={interFontUrl}
+            position={[0, 1.2, 0]}
             color="#ffffff"
+            fontSize={0.7}
             delay={0}
-            fontSize={0.8}
+            preset="cascade"
+            continuousAnimation={{
+              wave: { amplitude: 0.05, frequency: 3 },
+            }}
           />
-          <AnimatedText
+
+          {/* Brand name with elastic animation and rainbow colors */}
+          <SplitText3D
             text="Motionabl"
-            position={[0, -0.5, 0]}
-            color="#60a5fa"
-            delay={15}
-            fontSize={1.4}
+            fontUrl={interFontUrl}
+            position={[0, -0.3, 0]}
+            fontSize={1.2}
+            delay={25}
+            preset="elastic"
+            charColor={rainbowColor}
+            continuousAnimation={{
+              pulse: { min: 0.98, max: 1.02, frequency: 4 },
+            }}
           />
 
           {/* Decorative elements */}
           <RotatingTorus />
 
-          {/* Floating spheres */}
-          <FloatingSphere position={[-4, 2, -1]} color="#f472b6" delay={30} />
-          <FloatingSphere position={[4, -1, -1]} color="#34d399" delay={35} />
+          <FloatingSphere position={[-4, 2, -1]} color="#f472b6" delay={50} />
+          <FloatingSphere position={[4, -1, -1]} color="#34d399" delay={55} />
           <FloatingSphere
             position={[-3, -2, 0]}
             color="#fbbf24"
-            delay={40}
+            delay={60}
             size={0.2}
           />
           <FloatingSphere
             position={[3.5, 1.5, -0.5]}
             color="#a78bfa"
-            delay={45}
+            delay={65}
             size={0.25}
           />
         </ThreeCanvas>
