@@ -433,6 +433,9 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     setAllWords(newAllWords);
   }, [allFontsLoaded, segments, fonts, defaultFontSize, defaultColor, segmentSpacing]);
 
+  // Track timeline version for initial seek
+  const [timelineVersion, setTimelineVersion] = useState(0);
+
   // Create and manage GSAP timeline
   useEffect(() => {
     if (segmentDataList.length === 0 || allChars.length === 0) return;
@@ -456,16 +459,19 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     });
 
     timelineRef.current = tl;
+    
+    // Trigger a seek by incrementing version
+    setTimelineVersion(v => v + 1);
   }, [segmentDataList, allChars, allWords, segments]);
 
-  // Seek timeline on each frame
+  // Seek timeline on each frame or when timeline is created
   useEffect(() => {
     if (timelineRef.current) {
       const timeInSeconds = frame / fps;
       timelineRef.current.seek(timeInSeconds);
       forceUpdate(n => n + 1);
     }
-  }, [frame, fps]);
+  }, [frame, fps, timelineVersion]);
 
   // Don't render until all fonts are loaded
   if (!allFontsLoaded || segmentDataList.length === 0) {

@@ -188,24 +188,34 @@ export const Main: React.FC = () => {
             segments={[
               { text: "Create ", fontUrl: interFontUrl, color: "#94a3b8" },
               { text: "stunning ", fontUrl: poppinsFontUrl, color: "#60a5fa" },
-              { text: "videos", fontUrl: playfairFontUrl, color: "#f472b6" },
+              {
+                text: "demos",
+                fontUrl: playfairFontUrl,
+                color: "#f472b6",
+              },
             ]}
             position={[0, -1.8, 0]}
             fontSize={0.4}
             createTimeline={({ tl, segments }) => {
+              // Set initial hidden state for all segments at time 0
+              // This ensures characters are hidden before their animations start
+              segments.forEach((seg) => {
+                tl.set(seg.state, { opacity: 0, y: 0.2 }, 0);
+                tl.set(seg.chars, { y: 0.15, opacity: 0, scale: 0.8 }, 0);
+              });
+              
               // Animate each segment with different timing and effects
               segments.forEach((seg, i) => {
+                const startTime = 1.5 + i * 0.3;
                 // Segment-level entrance
-                tl.fromTo(
+                tl.to(
                   seg.state,
-                  { opacity: 0, y: 0.2 },
                   { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
-                  1.5 + i * 0.3, // Stagger segment entrances
+                  startTime,
                 );
                 // Character-level wave within each segment
-                tl.fromTo(
+                tl.to(
                   seg.chars,
-                  { y: 0.15, opacity: 0, scale: 0.8 },
                   {
                     y: 0,
                     opacity: 1,
@@ -214,7 +224,7 @@ export const Main: React.FC = () => {
                     stagger: 0.03,
                     ease: "back.out(1.7)",
                   },
-                  1.5 + i * 0.3,
+                  startTime,
                 );
               });
               return tl;
