@@ -7,13 +7,14 @@ import {
   spring,
 } from "remotion";
 import React from "react";
-import { SplitText3DGsap } from "../three/text";
+import { SplitText3DGsap, RichText3DGsap } from "../three/text";
 import { getFontUrl } from "../fonts";
 
 // Local fonts (downloaded via: npm run download-fonts)
 // TypeScript ensures only valid font/weight combinations are allowed!
 const poppinsFontUrl = getFontUrl("Poppins", 600);
 const playfairFontUrl = getFontUrl("Playfair Display", 700);
+const interFontUrl = getFontUrl("Inter", 400);
 
 // ============================================================================
 // DECORATIVE COMPONENTS
@@ -178,6 +179,44 @@ export const Main: React.FC = () => {
                 0.8, // Start after first text
               );
 
+              return tl;
+            }}
+          />
+
+          {/* Rich text example - multiple fonts/styles in one text block! */}
+          <RichText3DGsap
+            segments={[
+              { text: "Create ", fontUrl: interFontUrl, color: "#94a3b8" },
+              { text: "stunning ", fontUrl: poppinsFontUrl, color: "#60a5fa" },
+              { text: "videos", fontUrl: playfairFontUrl, color: "#f472b6" },
+            ]}
+            position={[0, -1.8, 0]}
+            fontSize={0.4}
+            createTimeline={({ tl, segments }) => {
+              // Animate each segment with different timing and effects
+              segments.forEach((seg, i) => {
+                // Segment-level entrance
+                tl.fromTo(
+                  seg.state,
+                  { opacity: 0, y: 0.2 },
+                  { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" },
+                  1.5 + i * 0.3, // Stagger segment entrances
+                );
+                // Character-level wave within each segment
+                tl.fromTo(
+                  seg.chars,
+                  { y: 0.15, opacity: 0, scale: 0.8 },
+                  {
+                    y: 0,
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.4,
+                    stagger: 0.03,
+                    ease: "back.out(1.7)",
+                  },
+                  1.5 + i * 0.3,
+                );
+              });
               return tl;
             }}
           />

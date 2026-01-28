@@ -31,3 +31,32 @@ export {
   gsapPresetWave,
   gsapPresetGlitch,
 } from "./SplitText3DGsap";
+
+// Rich text (multiple fonts/styles in single text block)
+export {
+  RichText3DGsap,
+  type RichText3DGsapProps,
+  type TextSegment,
+  type SegmentAnimationState,
+  type SegmentData,
+  type RichWordData,
+  // Preset timeline factories
+  richTextPresetSegmentStagger,
+  richTextPresetWave,
+  richTextPresetTypewriter,
+  // Layout utilities (for testing)
+  calculateRichTextLayout,
+  verifyLayoutCentered,
+  verifyNoOverlap,
+} from "./RichText3DGsap";
+
+// Text layout utilities (pure functions for testing)
+export {
+  calculateTextMetrics,
+  calculateBaselineOffset,
+  verifySegmentOrder,
+  type CharMetric,
+  type TextMetricsResult,
+  type SegmentLayout,
+  type RichTextLayout,
+} from "./textLayout";
