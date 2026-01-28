@@ -609,13 +609,16 @@ const Lights: React.FC = () => {
 // ============================================================================
 
 const BackgroundLayer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // The shader backgrounds use a 2x2 plane and expect camera at z=1 with FOV 90
-  // Our main camera is at z=12 with FOV 50
-  // To fill the view, we position the background at z=-5 and scale appropriately
-  // At distance 17 (12 - (-5)), with FOV 50: visible height = 2 * 17 * tan(25°) ≈ 15.8
-  // Scale factor: 15.8 / 2 ≈ 8
+  const { width, height } = useVideoConfig();
+  // Orthographic camera: visible area is fixed regardless of distance
+  // Camera frustum: top/bottom = ±6 (height=12), left/right = ±6*(aspect)
+  // Shader backgrounds use a 2x2 plane
+  // Scale to fill the orthographic view
+  const aspect = width / height;
+  const frustumHeight = 12; // top - bottom = 6 - (-6)
+  const frustumWidth = frustumHeight * aspect;
   return (
-    <group position={[0, 0, -5]} scale={[14, 8, 1]}>
+    <group position={[0, 0, -5]} scale={[frustumWidth / 2, frustumHeight / 2, 1]}>
       {children}
     </group>
   );
@@ -652,9 +655,15 @@ export const Main: React.FC = () => {
         <ThreeCanvas
           width={width}
           height={height}
+          orthographic
           camera={{
-            fov: 50,
             position: [0, 0, 12],
+            left: -6 * (width / height),
+            right: 6 * (width / height),
+            top: 6,
+            bottom: -6,
+            near: 0.1,
+            far: 1000,
           }}
         >
           {/* ============================================================== */}
