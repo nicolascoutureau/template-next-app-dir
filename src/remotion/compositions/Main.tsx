@@ -8,7 +8,8 @@ import {
   staticFile,
 } from "remotion";
 import React from "react";
-import { SplitText3D } from "../three/text";
+import gsap from "gsap";
+import { SplitText3DGsap } from "../three/text";
 
 // Inter Bold font from public folder
 const interFontUrl = staticFile("fonts/Inter-Bold.ttf");
@@ -112,31 +113,73 @@ export const Main: React.FC = () => {
           <directionalLight position={[-10, -10, -5]} intensity={0.4} />
           <pointLight position={[0, 5, 5]} intensity={0.6} color="#60a5fa" />
 
-          {/* Main text with split animation */}
-          <SplitText3D
+          {/* Main text with GSAP word-by-word animation */}
+          <SplitText3DGsap
             text="welcome to"
             fontUrl={interFontUrl}
             position={[0, 1.2, 0]}
             color="#ffffff"
             fontSize={0.7}
-            delay={0}
-            preset="cascade"
-            continuousAnimation={{
-              wave: { amplitude: 0.05, frequency: 3 },
+            splitType="chars,words"
+            createTimeline={({ tl, charsByWord }) => {
+              // Animate word by word, then chars within each word
+              charsByWord.forEach((wordData, wordIndex) => {
+                // Set initial state for this word's chars
+                gsap.set(wordData.chars, {
+                  y: -1,
+                  opacity: 0,
+                  rotationX: Math.PI / 4,
+                  scale: 0.5,
+                });
+
+                // Animate this word's chars
+                tl.to(
+                  wordData.chars,
+                  {
+                    y: 0,
+                    opacity: 1,
+                    rotationX: 0,
+                    scale: 1,
+                    duration: 0.6,
+                    stagger: 0.04,
+                    ease: "back.out(1.7)",
+                  },
+                  wordIndex * 0.3 // Delay between words
+                );
+              });
+
+              return tl;
             }}
           />
 
-          {/* Brand name with elastic animation and rainbow colors */}
-          <SplitText3D
+          {/* Brand name with GSAP elastic char animation + rainbow */}
+          <SplitText3DGsap
             text="Motionabl"
             fontUrl={interFontUrl}
             position={[0, -0.3, 0]}
             fontSize={1.2}
-            delay={25}
-            preset="elastic"
             charColor={rainbowColor}
-            continuousAnimation={{
-              pulse: { min: 0.98, max: 1.02, frequency: 4 },
+            createTimeline={({ tl, chars }) => {
+              // Set initial state
+              gsap.set(chars, {
+                scale: 0,
+                opacity: 0,
+                rotationZ: Math.PI / 3,
+                y: -0.5,
+              });
+
+              // Elastic entrance with stagger
+              tl.to(chars, {
+                scale: 1,
+                opacity: 1,
+                rotationZ: 0,
+                y: 0,
+                duration: 1.2,
+                stagger: 0.05,
+                ease: "elastic.out(1, 0.4)",
+              }, 0.8); // Start after first text
+
+              return tl;
             }}
           />
 
