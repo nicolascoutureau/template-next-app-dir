@@ -49,4 +49,12 @@ export {
   richTextPresetSegmentStagger,
   richTextPresetWave,
   richTextPresetTypewriter,
+  // Extruded 3D text (true geometry with depth!)
+  ExtrudedText3DGsap,
+  type ExtrudedText3DGsapProps,
+  extrudedPreset3DReveal,
+  extrudedPresetFlipIn,
+  extrudedPresetExplode,
+  extrudedPresetMatrix,
+  extrudedPresetDomino,
 } from "./text";

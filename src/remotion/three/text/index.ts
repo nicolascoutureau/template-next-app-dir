@@ -54,6 +54,18 @@ export {
   verifyNoOverlap,
 } from "./RichText3DGsap";
 
+// Extruded 3D text (true geometry with depth)
+export {
+  ExtrudedText3DGsap,
+  type ExtrudedText3DGsapProps,
+  // Preset timeline factories
+  extrudedPreset3DReveal,
+  extrudedPresetFlipIn,
+  extrudedPresetExplode,
+  extrudedPresetMatrix,
+  extrudedPresetDomino,
+} from "./ExtrudedText3DGsap";
+
 // Text layout utilities (pure functions for testing)
 export {
   calculateTextMetrics,

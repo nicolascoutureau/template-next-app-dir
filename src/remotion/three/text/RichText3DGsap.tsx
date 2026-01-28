@@ -301,6 +301,12 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
   const fonts = useMultipleFonts(fontUrls);
   const allFontsLoaded = fonts.every(f => f !== null);
 
+  // Create a stable key from segments to avoid unnecessary recalculations
+  // This prevents flashing when segments array reference changes but content is the same
+  const segmentsKey = segments
+    .map(seg => `${seg.text}|${seg.fontUrl}|${seg.fontSize ?? ''}|${seg.color ?? ''}`)
+    .join('||');
+
   // Store animation states
   const [segmentDataList, setSegmentDataList] = useState<SegmentData[]>([]);
   const [allChars, setAllChars] = useState<CharAnimationState[]>([]);
@@ -313,13 +319,20 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
   // Store createTimeline in ref to avoid dependency issues
   const createTimelineRef = useRef(createTimeline);
   createTimelineRef.current = createTimeline;
+  
+  // Store segments in a ref to access current values without adding to dependencies
+  const segmentsRef = useRef(segments);
+  segmentsRef.current = segments;
 
   // Calculate all character positions and create animation states
   useEffect(() => {
     if (!allFontsLoaded) return;
 
+    // Use ref to access current segments without adding to dependencies
+    const currentSegments = segmentsRef.current;
+
     // Use the tested layout calculation utility
-    const layoutInput = segments.map((seg, i) => ({
+    const layoutInput = currentSegments.map((seg, i) => ({
       text: seg.text,
       font: fonts[i]!,
       fontSize: seg.fontSize ?? defaultFontSize,
@@ -332,7 +345,7 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     const newAllWords: RichWordData[] = [];
 
     // Create segment data from layout
-    segments.forEach((segment, segIndex) => {
+    currentSegments.forEach((segment, segIndex) => {
       const segFontSize = segment.fontSize ?? defaultFontSize;
       const segColor = segment.color ?? defaultColor;
       const segLayout = layout.segments[segIndex];
@@ -432,25 +445,28 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
     setSegmentDataList(newSegmentDataList);
     setAllChars(newAllChars);
     setAllWords(newAllWords);
-  }, [allFontsLoaded, segments, fonts, defaultFontSize, defaultColor, segmentSpacing]);
+    // Use segmentsKey instead of segments to prevent recalculation when only reference changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allFontsLoaded, segmentsKey, fonts, defaultFontSize, defaultColor, segmentSpacing]);
 
-  // Track timeline version for initial seek
-  const [timelineVersion, setTimelineVersion] = useState(0);
+  // Track whether timeline is ready (created AND initial seek done)
+  const [isTimelineReady, setIsTimelineReady] = useState(false);
 
   // Create and manage GSAP timeline
   useEffect(() => {
     if (segmentDataList.length === 0 || allChars.length === 0) return;
 
-    // Kill previous timeline
+    // Kill previous timeline and reset ready state
     if (timelineRef.current) {
       timelineRef.current.kill();
     }
+    setIsTimelineReady(false);
 
     // Create new timeline
     const tl = gsap.timeline({ paused: true });
     
     // Let user build the timeline
-    const fullText = segments.map(s => s.text).join("");
+    const fullText = segmentsRef.current.map(s => s.text).join("");
     createTimelineRef.current({
       tl,
       chars: allChars,
@@ -461,21 +477,29 @@ export const RichText3DGsap: React.FC<RichText3DGsapProps> = ({
 
     timelineRef.current = tl;
     
-    // Trigger a seek by incrementing version
-    setTimelineVersion(v => v + 1);
-  }, [segmentDataList, allChars, allWords, segments]);
+    // Perform initial seek BEFORE marking as ready to prevent flash
+    const timeInSeconds = frame / fps;
+    tl.seek(timeInSeconds);
+    
+    // Now mark as ready - component will render with correct state
+    setIsTimelineReady(true);
+    // Note: We intentionally exclude `segments` and `frame/fps` from deps.
+    // - segments: often a new array reference on each render, use segmentsRef instead
+    // - frame/fps: we only need initial seek here, subsequent seeks happen in the other effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [segmentDataList, allChars, allWords]);
 
-  // Seek timeline on each frame or when timeline is created
+  // Seek timeline on each frame change
   useEffect(() => {
-    if (timelineRef.current) {
+    if (timelineRef.current && isTimelineReady) {
       const timeInSeconds = frame / fps;
       timelineRef.current.seek(timeInSeconds);
       forceUpdate(n => n + 1);
     }
-  }, [frame, fps, timelineVersion]);
+  }, [frame, fps, isTimelineReady]);
 
-  // Don't render until all fonts loaded, layout calculated, and timeline ready
-  if (!allFontsLoaded || segmentDataList.length === 0 || timelineVersion === 0) {
+  // Don't render until all fonts loaded, layout calculated, and timeline ready with initial seek
+  if (!allFontsLoaded || segmentDataList.length === 0 || !isTimelineReady) {
     return null;
   }
 

@@ -7,7 +7,11 @@ import {
   spring,
 } from "remotion";
 import React from "react";
-import { SplitText3DGsap, RichText3DGsap } from "../three/text";
+import {
+  SplitText3DGsap,
+  RichText3DGsap,
+  ExtrudedText3DGsap,
+} from "../three/text";
 import { getFontUrl } from "../fonts";
 
 // Local fonts (downloaded via: npm run download-fonts)
@@ -226,45 +230,31 @@ export const Main: React.FC = () => {
             }}
           />
 
-          {/* Multi-line text example - animate by lines! */}
-          <SplitText3DGsap
-            text={"Create stunning\nvideos with\ncode"}
-            fontUrl={interFontUrl}
-            position={[0, -3, 0]}
-            color="#64748b"
-            fontSize={0.3}
-            lineHeight={1.4}
-            createTimeline={({ tl, lines }) => {
-              // Set initial hidden state for all lines
-              lines.forEach((line) => {
-                tl.set(line.state, { opacity: 0, x: -0.5 }, 0);
-                tl.set(line.chars, { opacity: 0, scale: 0.8 }, 0);
-              });
-
-              // Animate each line sliding in from left with stagger
-              lines.forEach((line, i) => {
-                const startTime = 2.8 + i * 0.25;
-
-                // Line slides in
-                tl.to(
-                  line.state,
-                  { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" },
-                  startTime,
-                );
-
-                // Characters pop in within each line
-                tl.to(
-                  line.chars,
-                  {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.3,
-                    stagger: 0.02,
-                    ease: "back.out(1.7)",
-                  },
-                  startTime + 0.1,
-                );
-              });
+          {/* EXTRUDED 3D TEXT - True geometry with depth! */}
+          <ExtrudedText3DGsap
+            text="3D is here"
+            fontUrl={poppinsFontUrl}
+            position={[0, -2.5, 0]}
+            fontSize={1}
+            depth={0.15}
+            bevelEnabled={false}
+            metalness={0.5}
+            roughness={0.3}
+            color="#f472b6"
+            createTimeline={({ tl, chars }) => {
+              // Simple fade in
+              tl.fromTo(
+                chars,
+                { opacity: 0, scale: 0.5 },
+                {
+                  opacity: 1,
+                  scale: 1,
+                  duration: 0.8,
+                  stagger: 0.15,
+                  ease: "back.out(1.7)",
+                },
+                0,
+              );
               return tl;
             }}
           />
