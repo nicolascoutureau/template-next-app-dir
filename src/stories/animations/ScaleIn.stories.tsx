@@ -175,31 +175,31 @@ export const LogoReveal: Story = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 32,
+        gap: 16,
       }}
     >
       {/* Logo mark */}
       <ScaleIn from={0} duration={0.6} spring="bouncy" fade>
         <div
           style={{
-            width: 140,
-            height: 140,
-            borderRadius: 40,
+            width: 80,
+            height: 80,
+            borderRadius: 24,
             background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            boxShadow: "0 30px 60px rgba(99, 102, 241, 0.4)",
+            boxShadow: "0 15px 40px rgba(99, 102, 241, 0.4)",
           }}
         >
-          <div style={{ fontSize: 64, fontWeight: 800, color: "#fff" }}>A</div>
+          <div style={{ fontSize: 36, fontWeight: 800, color: "#fff" }}>A</div>
         </div>
       </ScaleIn>
       {/* Company name */}
       <ScaleIn from={0.8} duration={0.5} delay={0.25} fade>
         <div
           style={{
-            fontSize: 40,
+            fontSize: 24,
             fontWeight: 700,
             color: "#fff",
             letterSpacing: -1,
@@ -212,9 +212,9 @@ export const LogoReveal: Story = {
       <ScaleIn from={0.9} duration={0.4} delay={0.4} fade>
         <div
           style={{
-            fontSize: 16,
+            fontSize: 10,
             color: "#71717a",
-            letterSpacing: 4,
+            letterSpacing: 3,
             textTransform: "uppercase",
           }}
         >
@@ -257,7 +257,7 @@ export const AppIconGrid: Story = {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 20,
+            gap: 10,
           }}
         >
           {apps.map((app, i) => (
@@ -265,21 +265,21 @@ export const AppIconGrid: Story = {
               key={i}
               from={0}
               duration={0.4}
-              delay={i * 0.06}
+              delay={i * 0.05}
               spring="bouncy"
               fade
             >
               <div
                 style={{
-                  width: 90,
-                  height: 90,
-                  borderRadius: 22,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
                   background: app.bg,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 40,
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                  fontSize: 24,
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
                 }}
               >
                 {app.icon}
@@ -315,24 +315,24 @@ export const BadgeCollection: Story = {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 32,
+          gap: 16,
         }}
       >
         <ScaleIn from={0.8} duration={0.5} fade>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#fff" }}>Built With</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>Built With</div>
         </ScaleIn>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", maxWidth: 500 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 340 }}>
           {badges.map((badge, i) => (
-            <ScaleIn key={i} from={0} duration={0.4} delay={0.15 + i * 0.08} spring="bouncy" fade>
+            <ScaleIn key={i} from={0} duration={0.4} delay={0.15 + i * 0.06} spring="bouncy" fade>
               <div
                 style={{
-                  padding: "12px 24px",
+                  padding: "6px 14px",
                   borderRadius: 100,
                   background: badge.bg,
                   color: badge.color,
-                  fontSize: 16,
+                  fontSize: 11,
                   fontWeight: 600,
-                  boxShadow: `0 8px 20px ${badge.bg}40`,
+                  boxShadow: `0 4px 12px ${badge.bg}40`,
                 }}
               >
                 {badge.text}
@@ -364,29 +364,29 @@ export const ProfileCard: Story = {
       <ScaleIn from={0.9} duration={0.6} fade>
         <div
           style={{
-            width: 360,
+            width: 220,
             background: "#fff",
-            borderRadius: 28,
-            padding: 40,
+            borderRadius: 18,
+            padding: 20,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 20,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+            gap: 12,
+            boxShadow: "0 12px 40px rgba(0,0,0,0.1)",
           }}
         >
           <ScaleIn from={0} duration={0.5} delay={0.2} spring="bouncy" fade>
             <div
               style={{
-                width: 100,
-                height: 100,
+                width: 60,
+                height: 60,
                 borderRadius: "50%",
                 background: "linear-gradient(135deg, #6366f1 0%, #ec4899 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 48,
-                boxShadow: "0 15px 40px rgba(99, 102, 241, 0.3)",
+                fontSize: 28,
+                boxShadow: "0 10px 25px rgba(99, 102, 241, 0.3)",
               }}
             >
               👩‍💻
@@ -394,20 +394,19 @@ export const ProfileCard: Story = {
           </ScaleIn>
           <ScaleIn from={0.9} duration={0.4} delay={0.35} fade>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a" }}>Sarah Chen</div>
-              <div style={{ fontSize: 14, color: "#64748b" }}>Senior Motion Designer</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>Sarah Chen</div>
+              <div style={{ fontSize: 10, color: "#64748b" }}>Motion Designer</div>
             </div>
           </ScaleIn>
           <ScaleIn from={0.9} duration={0.4} delay={0.45} fade>
-            <div style={{ display: "flex", gap: 24 }}>
+            <div style={{ display: "flex", gap: 16 }}>
               {[
                 { label: "Projects", value: "248" },
-                { label: "Following", value: "1.2K" },
                 { label: "Followers", value: "12K" },
               ].map((stat, i) => (
                 <div key={i} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>{stat.value}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8" }}>{stat.label}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{stat.value}</div>
+                  <div style={{ fontSize: 9, color: "#94a3b8" }}>{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -416,14 +415,14 @@ export const ProfileCard: Story = {
             <div
               style={{
                 width: "100%",
-                padding: "14px 0",
+                padding: "8px 0",
                 background: "#0f172a",
                 color: "#fff",
-                borderRadius: 14,
+                borderRadius: 10,
                 textAlign: "center",
-                fontSize: 15,
+                fontSize: 11,
                 fontWeight: 600,
-                marginTop: 8,
+                marginTop: 4,
               }}
             >
               Follow
@@ -459,28 +458,28 @@ export const PopupModal: Story = {
       <ScaleIn from={0.9} duration={0.4} delay={0.1} spring="snappy" fade>
         <div
           style={{
-            width: 420,
+            width: 280,
             background: "#18181b",
-            borderRadius: 24,
-            padding: 32,
+            borderRadius: 16,
+            padding: 20,
             display: "flex",
             flexDirection: "column",
-            gap: 24,
+            gap: 14,
             border: "1px solid #27272a",
-            boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+            boxShadow: "0 15px 40px rgba(0,0,0,0.5)",
           }}
         >
           <ScaleIn from={0} duration={0.3} delay={0.25} spring="bouncy">
             <div
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: 16,
+                width: 44,
+                height: 44,
+                borderRadius: 12,
                 background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 32,
+                fontSize: 22,
                 alignSelf: "center",
               }}
             >
@@ -489,26 +488,26 @@ export const PopupModal: Story = {
           </ScaleIn>
           <ScaleIn from={0.95} duration={0.3} delay={0.35} fade>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 8 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
                 Payment Successful!
               </div>
-              <div style={{ fontSize: 15, color: "#71717a", lineHeight: 1.5 }}>
-                Your order has been confirmed. You'll receive a confirmation email shortly.
+              <div style={{ fontSize: 11, color: "#71717a", lineHeight: 1.5 }}>
+                Your order has been confirmed.
               </div>
             </div>
           </ScaleIn>
           <ScaleIn from={0.95} duration={0.3} delay={0.45} fade>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               <div
                 style={{
                   flex: 1,
-                  padding: "14px 0",
+                  padding: "8px 0",
                   background: "transparent",
                   color: "#fff",
                   border: "1px solid #3f3f46",
-                  borderRadius: 12,
+                  borderRadius: 8,
                   textAlign: "center",
-                  fontSize: 15,
+                  fontSize: 10,
                   fontWeight: 600,
                 }}
               >
@@ -517,12 +516,12 @@ export const PopupModal: Story = {
               <div
                 style={{
                   flex: 1,
-                  padding: "14px 0",
+                  padding: "8px 0",
                   background: "#10b981",
                   color: "#fff",
-                  borderRadius: 12,
+                  borderRadius: 8,
                   textAlign: "center",
-                  fontSize: 15,
+                  fontSize: 10,
                   fontWeight: 600,
                 }}
               >

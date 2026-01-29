@@ -66,7 +66,7 @@ export const TextShimmer: Story = {
     ),
   ],
   render: () => (
-    <div style={{ fontSize: 48, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
+    <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
       <ShimmerText
         baseColor="#666"
         highlightColor="#fff"
@@ -104,7 +104,7 @@ export const GoldTextShimmer: Story = {
     ),
   ],
   render: () => (
-    <div style={{ fontSize: 56, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
+    <div style={{ fontSize: 32, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
       <ShimmerText
         baseColor="#b8860b"
         highlightColor="#ffd700"
@@ -126,12 +126,12 @@ export const MultiLineShimmer: Story = {
   ],
   render: () => (
     <div style={{ textAlign: "center", fontFamily: "Inter, system-ui" }}>
-      <div style={{ fontSize: 64, fontWeight: 800, marginBottom: 8 }}>
+      <div style={{ fontSize: 36, fontWeight: 800, marginBottom: 6 }}>
         <ShimmerText baseColor="#444" highlightColor="#fff" duration={1.8}>
           LOADING
         </ShimmerText>
       </div>
-      <div style={{ fontSize: 20, fontWeight: 500 }}>
+      <div style={{ fontSize: 12, fontWeight: 500 }}>
         <ShimmerText baseColor="#333" highlightColor="#888" duration={1.8}>
           Please wait while we prepare your content...
         </ShimmerText>
@@ -159,18 +159,18 @@ export const PremiumHeroText: Story = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 16,
+        gap: 8,
       }}
     >
-      <div style={{ fontSize: 16, fontWeight: 600, letterSpacing: 4, color: "#6366f1" }}>
+      <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: 3, color: "#6366f1" }}>
         INTRODUCING
       </div>
-      <div style={{ fontSize: 80, fontWeight: 800, fontFamily: "Inter, system-ui" }}>
+      <div style={{ fontSize: 44, fontWeight: 800, fontFamily: "Inter, system-ui" }}>
         <ShimmerText baseColor="#fff" highlightColor="#a5b4fc" duration={2}>
           The Future
         </ShimmerText>
       </div>
-      <div style={{ fontSize: 80, fontWeight: 800, fontFamily: "Inter, system-ui", marginTop: -16 }}>
+      <div style={{ fontSize: 44, fontWeight: 800, fontFamily: "Inter, system-ui", marginTop: -8 }}>
         <ShimmerText baseColor="#6366f1" highlightColor="#c4b5fd" duration={2}>
           Is Here
         </ShimmerText>
@@ -194,23 +194,23 @@ export const LuxuryBrandReveal: Story = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 24,
+        gap: 12,
       }}
     >
-      <div style={{ fontSize: 14, letterSpacing: 8, color: "#666" }}>LUXURY COLLECTION</div>
-      <div style={{ fontSize: 72, fontWeight: 300, fontFamily: "Georgia, serif", letterSpacing: 8 }}>
+      <div style={{ fontSize: 9, letterSpacing: 6, color: "#666" }}>LUXURY COLLECTION</div>
+      <div style={{ fontSize: 40, fontWeight: 300, fontFamily: "Georgia, serif", letterSpacing: 5 }}>
         <ShimmerText baseColor="#8b7355" highlightColor="#d4af37" duration={2.5}>
           ELEGANCE
         </ShimmerText>
       </div>
       <div
         style={{
-          width: 120,
+          width: 80,
           height: 1,
           background: "linear-gradient(90deg, transparent, #d4af37, transparent)",
         }}
       />
-      <div style={{ fontSize: 14, letterSpacing: 6, color: "#555", marginTop: 8 }}>
+      <div style={{ fontSize: 9, letterSpacing: 4, color: "#555", marginTop: 4 }}>
         <ShimmerText baseColor="#555" highlightColor="#888" duration={2.5}>
           SINCE 1924
         </ShimmerText>
@@ -228,58 +228,58 @@ export const AppLoadingState: Story = {
     ),
   ],
   render: () => (
-    <AbsoluteFill style={{ padding: 40 }}>
-      <div style={{ display: "flex", gap: 24, height: "100%" }}>
+    <AbsoluteFill style={{ padding: 20 }}>
+      <div style={{ display: "flex", gap: 12, height: "100%" }}>
         {/* Sidebar skeleton */}
         <div
           style={{
-            width: 240,
+            width: 120,
             background: "#fff",
-            borderRadius: 20,
-            padding: 24,
-            boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+            borderRadius: 12,
+            padding: 12,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
           }}
         >
-          <Shimmer width={80} height={24} style={{ borderRadius: 6, marginBottom: 32 }} />
-          {[180, 140, 160, 120, 150].map((w, i) => (
-            <Shimmer key={i} width={w} height={14} style={{ borderRadius: 4, marginBottom: 20 }} />
+          <Shimmer width={50} height={14} style={{ borderRadius: 4, marginBottom: 16 }} />
+          {[90, 70, 80, 60, 75].map((w, i) => (
+            <Shimmer key={i} width={w} height={8} style={{ borderRadius: 3, marginBottom: 10 }} />
           ))}
         </div>
         {/* Main content skeleton */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12 }}>
           {/* Header */}
           <div
             style={{
               background: "#fff",
-              borderRadius: 16,
-              padding: 24,
+              borderRadius: 10,
+              padding: 12,
               display: "flex",
               justifyContent: "space-between",
-              boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             }}
           >
             <div>
-              <Shimmer width={200} height={28} style={{ borderRadius: 6, marginBottom: 12 }} />
-              <Shimmer width={140} height={14} style={{ borderRadius: 4 }} />
+              <Shimmer width={100} height={16} style={{ borderRadius: 4, marginBottom: 6 }} />
+              <Shimmer width={70} height={8} style={{ borderRadius: 3 }} />
             </div>
-            <Shimmer width={44} height={44} style={{ borderRadius: "50%" }} />
+            <Shimmer width={28} height={28} style={{ borderRadius: "50%" }} />
           </div>
           {/* Stats cards */}
-          <div style={{ display: "flex", gap: 16 }}>
+          <div style={{ display: "flex", gap: 8 }}>
             {[1, 2, 3].map((_, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
                   background: "#fff",
-                  borderRadius: 16,
-                  padding: 24,
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+                  borderRadius: 10,
+                  padding: 12,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                 }}
               >
-                <Shimmer width={60} height={12} style={{ borderRadius: 4, marginBottom: 16 }} />
-                <Shimmer width={100} height={32} style={{ borderRadius: 6, marginBottom: 8 }} />
-                <Shimmer width={50} height={12} style={{ borderRadius: 4 }} />
+                <Shimmer width={40} height={8} style={{ borderRadius: 3, marginBottom: 8 }} />
+                <Shimmer width={60} height={18} style={{ borderRadius: 4, marginBottom: 4 }} />
+                <Shimmer width={30} height={8} style={{ borderRadius: 3 }} />
               </div>
             ))}
           </div>
@@ -288,13 +288,13 @@ export const AppLoadingState: Story = {
             style={{
               flex: 1,
               background: "#fff",
-              borderRadius: 16,
-              padding: 24,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+              borderRadius: 10,
+              padding: 12,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
             }}
           >
-            <Shimmer width={120} height={20} style={{ borderRadius: 6, marginBottom: 24 }} />
-            <Shimmer width="100%" height={200} style={{ borderRadius: 12 }} />
+            <Shimmer width={60} height={12} style={{ borderRadius: 4, marginBottom: 12 }} />
+            <Shimmer width="100%" height={100} style={{ borderRadius: 8 }} />
           </div>
         </div>
       </div>
@@ -320,11 +320,11 @@ export const ChromeTextEffect: Story = {
     >
       <div
         style={{
-          fontSize: 96,
+          fontSize: 52,
           fontWeight: 800,
           fontFamily: "Inter, system-ui",
           textTransform: "uppercase",
-          letterSpacing: -2,
+          letterSpacing: -1,
         }}
       >
         <ShimmerText baseColor="#888" highlightColor="#fff" duration={1.5} angle={15}>
@@ -351,26 +351,26 @@ export const NotificationCardSkeleton: Story = {
         justifyContent: "center",
       }}
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 380 }}>
-        {[1, 2, 3, 4].map((_, i) => (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 260 }}>
+        {[1, 2, 3].map((_, i) => (
           <div
             key={i}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 16,
-              padding: 16,
+              gap: 10,
+              padding: 10,
               background: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+              borderRadius: 10,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
             }}
           >
-            <Shimmer width={44} height={44} style={{ borderRadius: 12, flexShrink: 0 }} />
+            <Shimmer width={30} height={30} style={{ borderRadius: 8, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <Shimmer width={120} height={14} style={{ borderRadius: 4, marginBottom: 8 }} />
-              <Shimmer width={180} height={12} style={{ borderRadius: 4 }} />
+              <Shimmer width={80} height={10} style={{ borderRadius: 3, marginBottom: 6 }} />
+              <Shimmer width={120} height={8} style={{ borderRadius: 3 }} />
             </div>
-            <Shimmer width={40} height={10} style={{ borderRadius: 4 }} />
+            <Shimmer width={28} height={8} style={{ borderRadius: 3 }} />
           </div>
         ))}
       </div>
@@ -393,29 +393,29 @@ export const AwardBadgeShimmer: Story = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 24,
+        gap: 14,
       }}
     >
       <div
         style={{
-          width: 140,
-          height: 140,
+          width: 80,
+          height: 80,
           borderRadius: "50%",
           background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 20px 50px rgba(251, 191, 36, 0.4)",
+          boxShadow: "0 12px 30px rgba(251, 191, 36, 0.4)",
         }}
       >
-        <div style={{ fontSize: 64 }}>🏆</div>
+        <div style={{ fontSize: 36 }}>🏆</div>
       </div>
-      <div style={{ fontSize: 48, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
+      <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
         <ShimmerText baseColor="#fbbf24" highlightColor="#fef08a" duration={1.8}>
           Winner
         </ShimmerText>
       </div>
-      <div style={{ fontSize: 18, color: "#94a3b8", letterSpacing: 2 }}>
+      <div style={{ fontSize: 11, color: "#94a3b8", letterSpacing: 2 }}>
         <ShimmerText baseColor="#64748b" highlightColor="#94a3b8" duration={1.8}>
           BEST IN CLASS 2024
         </ShimmerText>

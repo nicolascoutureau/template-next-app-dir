@@ -183,18 +183,18 @@ export const HeroReveal: Story = {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 24,
-        padding: 60,
+        gap: 14,
+        padding: 30,
       }}
     >
       {/* Badge */}
-      <FadeIn direction="down" distance={20} duration={0.5} delay={0}>
+      <FadeIn direction="down" distance={15} duration={0.5} delay={0}>
         <div
           style={{
-            padding: "8px 20px",
+            padding: "5px 14px",
             background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
             borderRadius: 100,
-            fontSize: 13,
+            fontSize: 9,
             fontWeight: 600,
             color: "#fff",
             letterSpacing: 1,
@@ -205,15 +205,15 @@ export const HeroReveal: Story = {
         </div>
       </FadeIn>
       {/* Main Title */}
-      <FadeIn direction="up" distance={40} duration={0.7} delay={0.15} blur blurAmount={8}>
+      <FadeIn direction="up" distance={25} duration={0.7} delay={0.15} blur blurAmount={6}>
         <div
           style={{
-            fontSize: 72,
+            fontSize: 40,
             fontWeight: 800,
             color: "#fff",
             textAlign: "center",
             lineHeight: 1.1,
-            letterSpacing: -2,
+            letterSpacing: -1,
           }}
         >
           Motion Design
@@ -224,29 +224,29 @@ export const HeroReveal: Story = {
         </div>
       </FadeIn>
       {/* Subtitle */}
-      <FadeIn direction="up" distance={30} duration={0.6} delay={0.35}>
+      <FadeIn direction="up" distance={20} duration={0.6} delay={0.35}>
         <div
           style={{
-            fontSize: 20,
+            fontSize: 12,
             color: "#71717a",
             textAlign: "center",
-            maxWidth: 500,
-            lineHeight: 1.6,
+            maxWidth: 320,
+            lineHeight: 1.5,
           }}
         >
-          Create stunning animations with our professional-grade primitives library
+          Create stunning animations with our professional-grade primitives
         </div>
       </FadeIn>
       {/* CTA Buttons */}
-      <FadeIn direction="up" distance={30} duration={0.5} delay={0.5}>
-        <div style={{ display: "flex", gap: 16, marginTop: 16 }}>
+      <FadeIn direction="up" distance={20} duration={0.5} delay={0.5}>
+        <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
           <div
             style={{
-              padding: "16px 32px",
+              padding: "10px 20px",
               background: "#fff",
               color: "#0a0a0f",
-              borderRadius: 12,
-              fontSize: 16,
+              borderRadius: 8,
+              fontSize: 11,
               fontWeight: 600,
             }}
           >
@@ -254,11 +254,11 @@ export const HeroReveal: Story = {
           </div>
           <div
             style={{
-              padding: "16px 32px",
+              padding: "10px 20px",
               background: "transparent",
               color: "#fff",
-              borderRadius: 12,
-              fontSize: 16,
+              borderRadius: 8,
+              fontSize: 11,
               fontWeight: 600,
               border: "1px solid #333",
             }}
@@ -281,10 +281,10 @@ export const FeatureCards: Story = {
   ],
   render: () => {
     const features = [
-      { icon: "⚡", title: "Lightning Fast", desc: "60fps animations", color: "#fbbf24" },
-      { icon: "🎨", title: "Customizable", desc: "Full control over timing", color: "#ec4899" },
-      { icon: "🧩", title: "Composable", desc: "Mix and match effects", color: "#6366f1" },
-      { icon: "📦", title: "Production Ready", desc: "Battle-tested components", color: "#10b981" },
+      { icon: "⚡", title: "Fast", desc: "60fps", color: "#fbbf24" },
+      { icon: "🎨", title: "Custom", desc: "Full control", color: "#ec4899" },
+      { icon: "🧩", title: "Composable", desc: "Mix & match", color: "#6366f1" },
+      { icon: "📦", title: "Production", desc: "Battle-tested", color: "#10b981" },
     ];
     return (
       <AbsoluteFill
@@ -293,50 +293,50 @@ export const FeatureCards: Story = {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 40,
-          padding: 60,
+          gap: 20,
+          padding: 30,
         }}
       >
-        <FadeIn direction="up" distance={30} duration={0.6}>
-          <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
+        <FadeIn direction="up" distance={20} duration={0.6}>
+          <div style={{ fontSize: 10, color: "#6366f1", fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
             Features
           </div>
         </FadeIn>
-        <FadeIn direction="up" distance={40} duration={0.7} delay={0.1}>
-          <div style={{ fontSize: 48, fontWeight: 700, color: "#1a1a1a", textAlign: "center" }}>
+        <FadeIn direction="up" distance={25} duration={0.7} delay={0.1}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: "#1a1a1a", textAlign: "center" }}>
             Why Choose Us
           </div>
         </FadeIn>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, width: "100%", maxWidth: 900 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, width: "100%", maxWidth: 560 }}>
           {features.map((f, i) => (
-            <FadeIn key={i} direction="up" distance={40} duration={0.5} delay={0.2 + i * 0.1}>
+            <FadeIn key={i} direction="up" distance={25} duration={0.5} delay={0.2 + i * 0.08}>
               <div
                 style={{
                   background: "#fff",
-                  borderRadius: 20,
-                  padding: 28,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
+                  borderRadius: 12,
+                  padding: 14,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 16,
+                  gap: 8,
                 }}
               >
                 <div
                   style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 14,
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
                     background: `${f.color}20`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 24,
+                    fontSize: 16,
                   }}
                 >
                   {f.icon}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 600, color: "#1a1a1a" }}>{f.title}</div>
-                <div style={{ fontSize: 14, color: "#71717a" }}>{f.desc}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#1a1a1a" }}>{f.title}</div>
+                <div style={{ fontSize: 10, color: "#71717a" }}>{f.desc}</div>
               </div>
             </FadeIn>
           ))}
@@ -360,55 +360,55 @@ export const TestimonialReveal: Story = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 80,
+        padding: 40,
       }}
     >
       <div
         style={{
-          maxWidth: 700,
+          maxWidth: 420,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 32,
+          gap: 16,
         }}
       >
         <FadeIn duration={0.5}>
-          <div style={{ fontSize: 64, opacity: 0.3 }}>"</div>
+          <div style={{ fontSize: 36, opacity: 0.3 }}>"</div>
         </FadeIn>
-        <FadeIn direction="up" distance={30} duration={0.7} delay={0.1} blur blurAmount={6}>
+        <FadeIn direction="up" distance={20} duration={0.7} delay={0.1} blur blurAmount={4}>
           <div
             style={{
-              fontSize: 32,
+              fontSize: 18,
               fontWeight: 500,
               color: "#fff",
               textAlign: "center",
               lineHeight: 1.5,
             }}
           >
-            This library completely transformed how we approach motion design. 
-            The primitives are intuitive and the results are{" "}
+            This library transformed how we approach motion design. 
+            The results are{" "}
             <span style={{ color: "#6366f1" }}>stunning</span>.
           </div>
         </FadeIn>
-        <FadeIn direction="up" distance={20} duration={0.5} delay={0.4}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <FadeIn direction="up" distance={15} duration={0.5} delay={0.4}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div
               style={{
-                width: 56,
-                height: 56,
+                width: 36,
+                height: 36,
                 borderRadius: "50%",
                 background: "linear-gradient(135deg, #6366f1, #ec4899)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 24,
+                fontSize: 16,
               }}
             >
               👨‍💻
             </div>
             <div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: "#fff" }}>Alex Chen</div>
-              <div style={{ fontSize: 14, color: "#64748b" }}>Senior Motion Designer at Acme</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>Alex Chen</div>
+              <div style={{ fontSize: 10, color: "#64748b" }}>Motion Designer at Acme</div>
             </div>
           </div>
         </FadeIn>
@@ -431,70 +431,68 @@ export const ProductShowcase: Story = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 60,
+        padding: 30,
       }}
     >
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 80,
-          maxWidth: 1000,
+          gap: 40,
         }}
       >
         {/* Left: Product Image */}
-        <FadeIn direction="left" distance={60} duration={0.8} blur blurAmount={10}>
+        <FadeIn direction="left" distance={40} duration={0.8} blur blurAmount={10}>
           <div
             style={{
-              width: 400,
-              height: 400,
-              borderRadius: 40,
+              width: 200,
+              height: 200,
+              borderRadius: 24,
               background: "linear-gradient(145deg, #f8fafc, #e2e8f0)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 25px 60px rgba(0,0,0,0.12)",
+              boxShadow: "0 15px 40px rgba(0,0,0,0.12)",
             }}
           >
             <div
               style={{
-                width: 200,
-                height: 200,
-                borderRadius: 32,
+                width: 100,
+                height: 100,
+                borderRadius: 20,
                 background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)",
-                boxShadow: "0 20px 40px rgba(99, 102, 241, 0.4)",
+                boxShadow: "0 12px 30px rgba(99, 102, 241, 0.4)",
               }}
             />
           </div>
         </FadeIn>
         {/* Right: Info */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
-          <FadeIn direction="right" distance={40} duration={0.6} delay={0.2}>
-            <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, letterSpacing: 1, textTransform: "uppercase" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 280 }}>
+          <FadeIn direction="right" distance={30} duration={0.6} delay={0.2}>
+            <div style={{ fontSize: 10, color: "#6366f1", fontWeight: 600, letterSpacing: 1, textTransform: "uppercase" }}>
               New Release
             </div>
           </FadeIn>
-          <FadeIn direction="right" distance={40} duration={0.6} delay={0.3}>
-            <div style={{ fontSize: 48, fontWeight: 700, color: "#0f172a", lineHeight: 1.2 }}>
+          <FadeIn direction="right" distance={30} duration={0.6} delay={0.3}>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "#0f172a", lineHeight: 1.2 }}>
               The Ultimate
               <br />Motion Toolkit
             </div>
           </FadeIn>
-          <FadeIn direction="right" distance={30} duration={0.5} delay={0.4}>
-            <div style={{ fontSize: 18, color: "#64748b", lineHeight: 1.6 }}>
-              50+ animation primitives, infinite possibilities. Build beautiful, 
-              performant animations with ease.
+          <FadeIn direction="right" distance={20} duration={0.5} delay={0.4}>
+            <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>
+              50+ animation primitives, infinite possibilities.
             </div>
           </FadeIn>
-          <FadeIn direction="right" distance={30} duration={0.5} delay={0.5}>
-            <div style={{ display: "flex", gap: 16, marginTop: 8 }}>
+          <FadeIn direction="right" distance={20} duration={0.5} delay={0.5}>
+            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
               <div
                 style={{
-                  padding: "14px 28px",
+                  padding: "8px 16px",
                   background: "#0f172a",
                   color: "#fff",
-                  borderRadius: 10,
-                  fontSize: 15,
+                  borderRadius: 8,
+                  fontSize: 11,
                   fontWeight: 600,
                 }}
               >
@@ -502,13 +500,13 @@ export const ProductShowcase: Story = {
               </div>
               <div
                 style={{
-                  padding: "14px 28px",
+                  padding: "8px 16px",
                   background: "transparent",
                   color: "#0f172a",
-                  borderRadius: 10,
-                  fontSize: 15,
+                  borderRadius: 8,
+                  fontSize: 11,
                   fontWeight: 600,
-                  border: "2px solid #e2e8f0",
+                  border: "1px solid #e2e8f0",
                 }}
               >
                 Learn More
@@ -531,9 +529,9 @@ export const PricingTable: Story = {
   ],
   render: () => {
     const plans = [
-      { name: "Starter", price: "Free", features: ["5 animations", "Basic support", "Community access"], popular: false },
-      { name: "Pro", price: "$29", features: ["50+ animations", "Priority support", "All templates", "Custom easings"], popular: true },
-      { name: "Team", price: "$99", features: ["Unlimited", "Dedicated support", "Custom builds", "SLA"], popular: false },
+      { name: "Starter", price: "Free", features: ["5 anims", "Basic"], popular: false },
+      { name: "Pro", price: "$29", features: ["50+ anims", "Priority", "Templates"], popular: true },
+      { name: "Team", price: "$99", features: ["Unlimited", "Dedicated", "SLA"], popular: false },
     ];
     return (
       <AbsoluteFill
@@ -542,30 +540,30 @@ export const PricingTable: Story = {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          gap: 48,
-          padding: 60,
+          gap: 24,
+          padding: 30,
         }}
       >
-        <FadeIn direction="up" distance={30} duration={0.6}>
-          <div style={{ fontSize: 44, fontWeight: 700, color: "#fff", textAlign: "center" }}>
-            Simple, Transparent Pricing
+        <FadeIn direction="up" distance={20} duration={0.6}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: "#fff", textAlign: "center" }}>
+            Simple Pricing
           </div>
         </FadeIn>
-        <div style={{ display: "flex", gap: 24 }}>
+        <div style={{ display: "flex", gap: 12 }}>
           {plans.map((plan, i) => (
-            <FadeIn key={i} direction="up" distance={50} duration={0.6} delay={0.15 + i * 0.12}>
+            <FadeIn key={i} direction="up" distance={30} duration={0.6} delay={0.15 + i * 0.1}>
               <div
                 style={{
-                  width: 280,
-                  padding: 32,
-                  borderRadius: 24,
+                  width: 150,
+                  padding: 16,
+                  borderRadius: 14,
                   background: plan.popular ? "linear-gradient(135deg, #6366f1, #8b5cf6)" : "#18181b",
                   border: plan.popular ? "none" : "1px solid #27272a",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 24,
-                  transform: plan.popular ? "scale(1.05)" : "none",
-                  boxShadow: plan.popular ? "0 20px 50px rgba(99, 102, 241, 0.3)" : "none",
+                  gap: 12,
+                  transform: plan.popular ? "scale(1.03)" : "none",
+                  boxShadow: plan.popular ? "0 10px 30px rgba(99, 102, 241, 0.3)" : "none",
                 }}
               >
                 {plan.popular && (
@@ -573,30 +571,29 @@ export const PricingTable: Story = {
                     style={{
                       background: "#fff",
                       color: "#6366f1",
-                      padding: "6px 16px",
+                      padding: "3px 10px",
                       borderRadius: 100,
-                      fontSize: 12,
+                      fontSize: 8,
                       fontWeight: 700,
                       alignSelf: "flex-start",
                       textTransform: "uppercase",
-                      letterSpacing: 1,
                     }}
                   >
-                    Most Popular
+                    Popular
                   </div>
                 )}
                 <div>
-                  <div style={{ fontSize: 18, color: plan.popular ? "rgba(255,255,255,0.8)" : "#71717a", marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: plan.popular ? "rgba(255,255,255,0.8)" : "#71717a", marginBottom: 4 }}>
                     {plan.name}
                   </div>
-                  <div style={{ fontSize: 48, fontWeight: 700, color: "#fff" }}>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: "#fff" }}>
                     {plan.price}
-                    {plan.price !== "Free" && <span style={{ fontSize: 16, fontWeight: 400, opacity: 0.6 }}>/mo</span>}
+                    {plan.price !== "Free" && <span style={{ fontSize: 10, fontWeight: 400, opacity: 0.6 }}>/mo</span>}
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {plan.features.map((f, j) => (
-                    <div key={j} style={{ fontSize: 14, color: plan.popular ? "rgba(255,255,255,0.9)" : "#a1a1aa", display: "flex", alignItems: "center", gap: 8 }}>
+                    <div key={j} style={{ fontSize: 9, color: plan.popular ? "rgba(255,255,255,0.9)" : "#a1a1aa", display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ color: plan.popular ? "#fff" : "#6366f1" }}>✓</span> {f}
                     </div>
                   ))}
@@ -604,13 +601,13 @@ export const PricingTable: Story = {
                 <div
                   style={{
                     marginTop: "auto",
-                    padding: "14px 24px",
+                    padding: "8px 14px",
                     background: plan.popular ? "#fff" : "transparent",
                     color: plan.popular ? "#6366f1" : "#fff",
                     border: plan.popular ? "none" : "1px solid #3f3f46",
-                    borderRadius: 12,
+                    borderRadius: 8,
                     textAlign: "center",
-                    fontSize: 15,
+                    fontSize: 10,
                     fontWeight: 600,
                   }}
                 >
@@ -635,10 +632,9 @@ export const NotificationStack: Story = {
   ],
   render: () => {
     const notifications = [
-      { icon: "💬", title: "New message", desc: "Sarah sent you a message", time: "Just now", color: "#6366f1" },
-      { icon: "🎉", title: "Goal achieved!", desc: "You reached 1000 followers", time: "2m ago", color: "#10b981" },
-      { icon: "📦", title: "Order shipped", desc: "Your package is on the way", time: "5m ago", color: "#f59e0b" },
-      { icon: "❤️", title: "New follower", desc: "@design_master started following you", time: "12m ago", color: "#ec4899" },
+      { icon: "💬", title: "New message", desc: "Sarah sent you a message", color: "#6366f1" },
+      { icon: "🎉", title: "Goal achieved!", desc: "You reached 1000 followers", color: "#10b981" },
+      { icon: "📦", title: "Order shipped", desc: "Your package is on the way", color: "#f59e0b" },
     ];
     return (
       <AbsoluteFill
@@ -646,42 +642,42 @@ export const NotificationStack: Story = {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: 30,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 380 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 280 }}>
           {notifications.map((n, i) => (
-            <FadeIn key={i} direction="right" distance={60} duration={0.5} delay={i * 0.15}>
+            <FadeIn key={i} direction="right" distance={40} duration={0.5} delay={i * 0.12}>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 16,
-                  padding: 16,
+                  gap: 10,
+                  padding: 10,
                   background: "#fff",
-                  borderRadius: 16,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                  borderLeft: `4px solid ${n.color}`,
+                  borderRadius: 10,
+                  boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+                  borderLeft: `3px solid ${n.color}`,
                 }}
               >
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 12,
+                    width: 30,
+                    height: 30,
+                    borderRadius: 8,
                     background: `${n.color}15`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 20,
+                    fontSize: 14,
                   }}
                 >
                   {n.icon}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "#0f172a" }}>{n.title}</div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>{n.desc}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#0f172a" }}>{n.title}</div>
+                  <div style={{ fontSize: 9, color: "#64748b" }}>{n.desc}</div>
                 </div>
-                <div style={{ fontSize: 11, color: "#94a3b8" }}>{n.time}</div>
               </div>
             </FadeIn>
           ))}
