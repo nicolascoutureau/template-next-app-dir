@@ -351,8 +351,8 @@ export const SaaSLandingPage: Story = {
     theme: "dark",
     url: "acme.io/dashboard",
     shadow: true,
-    width: 900,
-    height: 560,
+    width: 680,
+    height: 420,
   },
   render: (args) => (
     <BrowserMockup {...args}>
@@ -368,25 +368,25 @@ export const SaaSLandingPage: Story = {
         {/* Sidebar */}
         <div
           style={{
-            width: 220,
+            width: 140,
             background: "#18181b",
             borderRight: "1px solid #27272a",
-            padding: 20,
+            padding: 12,
             display: "flex",
             flexDirection: "column",
           }}
         >
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 32 }}>Acme</div>
-          {["📊 Dashboard", "📁 Projects", "👥 Team", "📈 Analytics", "⚙️ Settings"].map((item, i) => (
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 20 }}>Acme</div>
+          {["📊 Dashboard", "📁 Projects", "👥 Team", "⚙️ Settings"].map((item, i) => (
             <div
               key={i}
               style={{
-                padding: "10px 12px",
-                borderRadius: 8,
+                padding: "6px 8px",
+                borderRadius: 6,
                 background: i === 0 ? "rgba(99, 102, 241, 0.15)" : "transparent",
                 color: i === 0 ? "#818cf8" : "#71717a",
-                fontSize: 14,
-                marginBottom: 4,
+                fontSize: 10,
+                marginBottom: 2,
               }}
             >
               {item}
@@ -394,31 +394,30 @@ export const SaaSLandingPage: Story = {
           ))}
         </div>
         {/* Main content */}
-        <div style={{ flex: 1, padding: 24 }}>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "#fff" }}>Dashboard</div>
-            <div style={{ fontSize: 14, color: "#71717a", marginTop: 4 }}>Welcome back, Alex!</div>
+        <div style={{ flex: 1, padding: 14 }}>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Dashboard</div>
+            <div style={{ fontSize: 10, color: "#71717a", marginTop: 2 }}>Welcome back!</div>
           </div>
           {/* Stats */}
-          <div style={{ display: "flex", gap: 16, marginBottom: 24 }}>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
             {[
-              { label: "Revenue", value: "$45,231", change: "+20.1%", color: "#10b981" },
-              { label: "Users", value: "2,350", change: "+15.2%", color: "#6366f1" },
-              { label: "Orders", value: "1,280", change: "+12.5%", color: "#f59e0b" },
+              { label: "Revenue", value: "$45K", color: "#10b981" },
+              { label: "Users", value: "2.3K", color: "#6366f1" },
+              { label: "Orders", value: "1.2K", color: "#f59e0b" },
             ].map((stat, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
                   background: "#18181b",
-                  borderRadius: 12,
-                  padding: 16,
+                  borderRadius: 8,
+                  padding: 10,
                   border: "1px solid #27272a",
                 }}
               >
-                <div style={{ fontSize: 12, color: "#71717a", marginBottom: 8 }}>{stat.label}</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: "#fff" }}>{stat.value}</div>
-                <div style={{ fontSize: 12, color: stat.color, marginTop: 4 }}>{stat.change}</div>
+                <div style={{ fontSize: 9, color: "#71717a", marginBottom: 4 }}>{stat.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{stat.value}</div>
               </div>
             ))}
           </div>
@@ -426,23 +425,23 @@ export const SaaSLandingPage: Story = {
           <div
             style={{
               background: "#18181b",
-              borderRadius: 12,
-              padding: 20,
+              borderRadius: 8,
+              padding: 12,
               border: "1px solid #27272a",
-              height: 200,
+              height: 120,
               display: "flex",
               alignItems: "flex-end",
-              gap: 8,
+              gap: 4,
             }}
           >
-            {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((h, i) => (
+            {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95].map((h, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
                   height: `${h}%`,
                   background: "linear-gradient(180deg, #6366f1 0%, #4f46e5 100%)",
-                  borderRadius: 4,
+                  borderRadius: 3,
                 }}
               />
             ))}
@@ -476,8 +475,8 @@ export const PortfolioWebsite: Story = {
     theme: "light",
     url: "alexchen.design",
     shadow: true,
-    width: 900,
-    height: 560,
+    width: 680,
+    height: 420,
   },
   render: (args) => (
     <BrowserMockup {...args}>
@@ -495,40 +494,40 @@ export const PortfolioWebsite: Story = {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "20px 40px",
+            padding: "12px 24px",
             borderBottom: "1px solid #f1f5f9",
           }}
         >
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>Alex Chen</div>
-          <div style={{ display: "flex", gap: 32 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>Alex Chen</div>
+          <div style={{ display: "flex", gap: 20 }}>
             {["Work", "About", "Contact"].map((item, i) => (
-              <div key={i} style={{ fontSize: 14, color: "#64748b", fontWeight: 500 }}>
+              <div key={i} style={{ fontSize: 11, color: "#64748b", fontWeight: 500 }}>
                 {item}
               </div>
             ))}
           </div>
         </div>
         {/* Hero */}
-        <div style={{ padding: "60px 40px", maxWidth: 600 }}>
-          <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, marginBottom: 12 }}>
+        <div style={{ padding: "32px 24px", maxWidth: 400 }}>
+          <div style={{ fontSize: 10, color: "#6366f1", fontWeight: 600, marginBottom: 8 }}>
             PRODUCT DESIGNER
           </div>
-          <div style={{ fontSize: 48, fontWeight: 700, color: "#0f172a", lineHeight: 1.1, marginBottom: 20 }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: "#0f172a", lineHeight: 1.1, marginBottom: 12 }}>
             Crafting Digital
             <br />Experiences
           </div>
-          <div style={{ fontSize: 16, color: "#64748b", lineHeight: 1.6, marginBottom: 32 }}>
-            I help startups and companies create beautiful, functional products that users love.
+          <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.6, marginBottom: 20 }}>
+            I help startups create beautiful, functional products.
           </div>
           <div
             style={{
               display: "inline-block",
-              padding: "14px 28px",
+              padding: "10px 20px",
               background: "#0f172a",
               color: "#fff",
-              borderRadius: 10,
+              borderRadius: 8,
               fontWeight: 600,
-              fontSize: 14,
+              fontSize: 11,
             }}
           >
             View My Work
@@ -563,8 +562,8 @@ export const EcommerceStore: Story = {
     url: "store.example.com/products",
     tabTitle: "Shop - Premium Store",
     shadow: true,
-    width: 900,
-    height: 560,
+    width: 680,
+    height: 420,
   },
   render: (args) => (
     <BrowserMockup {...args}>
@@ -583,18 +582,18 @@ export const EcommerceStore: Story = {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "16px 32px",
+            padding: "10px 20px",
             borderBottom: "1px solid #f1f5f9",
           }}
         >
-          <div style={{ fontSize: 18, fontWeight: 700, color: "#0f172a" }}>STORE</div>
-          <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-            <div style={{ fontSize: 14, color: "#64748b" }}>🔍</div>
-            <div style={{ fontSize: 14, color: "#64748b" }}>🛒</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#0f172a" }}>STORE</div>
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <div style={{ fontSize: 12, color: "#64748b" }}>🔍</div>
+            <div style={{ fontSize: 12, color: "#64748b" }}>🛒</div>
             <div
               style={{
-                width: 32,
-                height: 32,
+                width: 22,
+                height: 22,
                 borderRadius: "50%",
                 background: "linear-gradient(135deg, #6366f1, #ec4899)",
               }}
@@ -602,28 +601,28 @@ export const EcommerceStore: Story = {
           </div>
         </div>
         {/* Products Grid */}
-        <div style={{ padding: "24px 32px" }}>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "#0f172a", marginBottom: 20 }}>
+        <div style={{ padding: "14px 20px" }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a", marginBottom: 12 }}>
             New Arrivals
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
             {[
-              { name: "Premium Jacket", price: "$299", color: "#6366f1" },
-              { name: "Designer Bag", price: "$189", color: "#ec4899" },
-              { name: "Smart Watch", price: "$399", color: "#10b981" },
-              { name: "Sunglasses", price: "$149", color: "#f59e0b" },
+              { name: "Jacket", price: "$299", color: "#6366f1" },
+              { name: "Bag", price: "$189", color: "#ec4899" },
+              { name: "Watch", price: "$399", color: "#10b981" },
+              { name: "Glasses", price: "$149", color: "#f59e0b" },
             ].map((product, i) => (
               <div key={i}>
                 <div
                   style={{
-                    height: 180,
-                    borderRadius: 12,
+                    height: 100,
+                    borderRadius: 8,
                     background: `linear-gradient(135deg, ${product.color}20, ${product.color}10)`,
-                    marginBottom: 12,
+                    marginBottom: 8,
                   }}
                 />
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{product.name}</div>
-                <div style={{ fontSize: 14, color: "#64748b", marginTop: 4 }}>{product.price}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#0f172a" }}>{product.name}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{product.price}</div>
               </div>
             ))}
           </div>
@@ -656,8 +655,8 @@ export const DeveloperDocumentation: Story = {
     theme: "dark",
     url: "docs.remotion.dev/getting-started",
     shadow: true,
-    width: 900,
-    height: 560,
+    width: 680,
+    height: 420,
   },
   render: (args) => (
     <BrowserMockup {...args}>
@@ -673,21 +672,21 @@ export const DeveloperDocumentation: Story = {
         {/* Sidebar */}
         <div
           style={{
-            width: 240,
+            width: 150,
             background: "#0a0a0f",
             borderRight: "1px solid #1f1f23",
-            padding: 20,
+            padding: 12,
           }}
         >
-          <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 24 }}>
-            📖 Documentation
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 16 }}>
+            📖 Docs
           </div>
-          {["Getting Started", "Installation", "Basic Concepts", "Components", "API Reference", "Examples"].map((item, i) => (
+          {["Getting Started", "Installation", "Components", "API", "Examples"].map((item, i) => (
             <div
               key={i}
               style={{
-                padding: "8px 12px",
-                fontSize: 13,
+                padding: "5px 8px",
+                fontSize: 10,
                 color: i === 0 ? "#6366f1" : "#71717a",
                 fontWeight: i === 0 ? 600 : 400,
               }}
@@ -697,25 +696,25 @@ export const DeveloperDocumentation: Story = {
           ))}
         </div>
         {/* Content */}
-        <div style={{ flex: 1, padding: 32, overflow: "hidden" }}>
-          <div style={{ fontSize: 12, color: "#6366f1", marginBottom: 8 }}>GETTING STARTED</div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: "#fff", marginBottom: 16 }}>
+        <div style={{ flex: 1, padding: 16, overflow: "hidden" }}>
+          <div style={{ fontSize: 9, color: "#6366f1", marginBottom: 6 }}>GETTING STARTED</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 10 }}>
             Quick Start Guide
           </div>
-          <div style={{ fontSize: 15, color: "#94a3b8", lineHeight: 1.7, marginBottom: 24 }}>
-            Learn how to get up and running with our library in just a few minutes.
+          <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.6, marginBottom: 14 }}>
+            Get up and running in minutes.
           </div>
           {/* Code block */}
           <div
             style={{
               background: "#18181b",
-              borderRadius: 12,
-              padding: 20,
+              borderRadius: 8,
+              padding: 12,
               border: "1px solid #27272a",
             }}
           >
-            <div style={{ fontSize: 12, color: "#71717a", marginBottom: 12 }}>Terminal</div>
-            <div style={{ fontFamily: "monospace", fontSize: 14, color: "#10b981" }}>
+            <div style={{ fontSize: 9, color: "#71717a", marginBottom: 8 }}>Terminal</div>
+            <div style={{ fontFamily: "monospace", fontSize: 11, color: "#10b981" }}>
               $ npm install @remotion/base
             </div>
           </div>

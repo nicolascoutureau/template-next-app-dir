@@ -346,8 +346,6 @@ export const AppLaunchHero: Story = {
       <RemotionWrapper 
         durationInFrames={120} 
         backgroundColor="#0a0a0f"
-        width={1920}
-        height={1080}
       >
         <Story />
       </RemotionWrapper>
@@ -361,11 +359,12 @@ export const AppLaunchHero: Story = {
         justifyContent: "center",
         width: "100%",
         height: "100%",
-        gap: 100,
+        gap: 60,
+        padding: 40,
       }}
     >
       {/* Left: Phone */}
-      <PhoneMockup device="iphone-15" color="black" shadow scale={0.9}>
+      <PhoneMockup device="iphone-15" color="black" shadow scale={0.55}>
         <div
           style={{
             width: "100%",
@@ -375,70 +374,53 @@ export const AppLaunchHero: Story = {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: 32,
+            padding: 20,
           }}
         >
-          <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: "#fff", textAlign: "center" }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>✨</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#fff", textAlign: "center" }}>
             Premium App
           </div>
-          <div style={{ fontSize: 14, color: "rgba(255,255,255,0.8)", marginTop: 8, textAlign: "center" }}>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", marginTop: 6, textAlign: "center" }}>
             Your journey starts here
-          </div>
-          <div
-            style={{
-              marginTop: 24,
-              padding: "12px 32px",
-              background: "#fff",
-              borderRadius: 12,
-              color: "#4f46e5",
-              fontWeight: 600,
-              fontSize: 14,
-            }}
-          >
-            Get Started
           </div>
         </div>
       </PhoneMockup>
       {/* Right: Text content */}
-      <div style={{ maxWidth: 500 }}>
-        <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, letterSpacing: 2, marginBottom: 16 }}>
+      <div style={{ maxWidth: 320 }}>
+        <div style={{ fontSize: 11, color: "#6366f1", fontWeight: 600, letterSpacing: 2, marginBottom: 12 }}>
           MOBILE APP
         </div>
-        <div style={{ fontSize: 56, fontWeight: 800, color: "#fff", lineHeight: 1.1, marginBottom: 24 }}>
+        <div style={{ fontSize: 32, fontWeight: 800, color: "#fff", lineHeight: 1.1, marginBottom: 16 }}>
           The Future of
           <br />
           <span style={{ color: "#6366f1" }}>Productivity</span>
         </div>
-        <div style={{ fontSize: 18, color: "#71717a", lineHeight: 1.6, marginBottom: 32 }}>
-          Download now and experience the next generation of mobile apps. Available on iOS and Android.
+        <div style={{ fontSize: 13, color: "#71717a", lineHeight: 1.6, marginBottom: 20 }}>
+          Download now and experience the next generation of mobile apps.
         </div>
-        <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ display: "flex", gap: 12 }}>
           <div
             style={{
-              padding: "16px 28px",
+              padding: "10px 16px",
               background: "#fff",
-              borderRadius: 12,
+              borderRadius: 8,
               color: "#0a0a0f",
               fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
+              fontSize: 12,
             }}
           >
             🍎 App Store
           </div>
           <div
             style={{
-              padding: "16px 28px",
+              padding: "10px 16px",
               background: "transparent",
               border: "1px solid #333",
-              borderRadius: 12,
+              borderRadius: 8,
               color: "#fff",
               fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
+              fontSize: 12,
             }}
           >
             🤖 Play Store
@@ -455,8 +437,6 @@ export const FeatureShowcase: Story = {
       <RemotionWrapper 
         durationInFrames={120} 
         backgroundColor="#fafafa"
-        width={1920}
-        height={1080}
       >
         <Story />
       </RemotionWrapper>
@@ -470,8 +450,8 @@ export const FeatureShowcase: Story = {
         justifyContent: "center",
         width: "100%",
         height: "100%",
-        gap: 60,
-        padding: 80,
+        gap: 16,
+        padding: 40,
       }}
     >
       {/* Three phones with different screens */}
@@ -483,11 +463,11 @@ export const FeatureShowcase: Story = {
         <div
           key={i}
           style={{
-            transform: i === 1 ? "scale(1.1)" : "scale(0.95)",
+            transform: i === 1 ? "scale(1.05)" : "scale(0.9)",
             zIndex: i === 1 ? 2 : 1,
           }}
         >
-          <PhoneMockup device="iphone-15" color={i === 1 ? "white" : "black"} shadow scale={0.65}>
+          <PhoneMockup device="iphone-15" color={i === 1 ? "white" : "black"} shadow scale={0.45}>
             <div
               style={{
                 width: "100%",
@@ -497,11 +477,11 @@ export const FeatureShowcase: Story = {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: 24,
+                padding: 16,
               }}
             >
-              <div style={{ fontSize: 40, marginBottom: 12 }}>{item.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{item.screen}</div>
+              <div style={{ fontSize: 28, marginBottom: 8 }}>{item.icon}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{item.screen}</div>
             </div>
           </PhoneMockup>
         </div>
@@ -516,8 +496,6 @@ export const DarkModeShowcase: Story = {
       <RemotionWrapper 
         durationInFrames={120} 
         backgroundColor="#000"
-        width={1920}
-        height={1080}
       >
         <Story />
       </RemotionWrapper>
@@ -532,54 +510,55 @@ export const DarkModeShowcase: Story = {
         justifyContent: "center",
         width: "100%",
         height: "100%",
-        gap: 40,
+        gap: 20,
+        padding: 30,
       }}
     >
-      <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, letterSpacing: 4 }}>
+      <div style={{ fontSize: 11, color: "#6366f1", fontWeight: 600, letterSpacing: 3 }}>
         DARK MODE
       </div>
-      <div style={{ fontSize: 48, fontWeight: 800, color: "#fff", textAlign: "center" }}>
+      <div style={{ fontSize: 28, fontWeight: 800, color: "#fff", textAlign: "center" }}>
         Beautiful in the Dark
       </div>
-      <PhoneMockup device="iphone-15" color="black" shadow reflection={0.2} scale={0.8}>
+      <PhoneMockup device="iphone-15" color="black" shadow reflection={0.2} scale={0.5}>
         <div
           style={{
             width: "100%",
             height: "100%",
             background: "#0f0f0f",
-            padding: 20,
+            padding: 16,
             fontFamily: "Inter, system-ui",
           }}
         >
           {/* Dark mode UI */}
-          <div style={{ marginTop: 40 }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "#fff", marginBottom: 20 }}>
+          <div style={{ marginTop: 30 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 14 }}>
               Good evening 👋
             </div>
             <div
               style={{
                 background: "#1a1a1a",
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 12,
+                borderRadius: 12,
+                padding: 14,
+                marginBottom: 10,
               }}
             >
-              <div style={{ fontSize: 12, color: "#6366f1", marginBottom: 8 }}>BALANCE</div>
-              <div style={{ fontSize: 32, fontWeight: 700, color: "#fff" }}>$24,580</div>
-              <div style={{ fontSize: 13, color: "#10b981", marginTop: 4 }}>+12.5% this month</div>
+              <div style={{ fontSize: 10, color: "#6366f1", marginBottom: 6 }}>BALANCE</div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>$24,580</div>
+              <div style={{ fontSize: 10, color: "#10b981", marginTop: 4 }}>+12.5% this month</div>
             </div>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 8 }}>
               {["Send", "Request", "More"].map((action, i) => (
                 <div
                   key={i}
                   style={{
                     flex: 1,
                     background: i === 0 ? "#6366f1" : "#1a1a1a",
-                    borderRadius: 12,
-                    padding: "12px 0",
+                    borderRadius: 8,
+                    padding: "8px 0",
                     textAlign: "center",
                     color: "#fff",
-                    fontSize: 13,
+                    fontSize: 10,
                     fontWeight: 600,
                   }}
                 >
@@ -600,8 +579,6 @@ export const SocialProofSection: Story = {
       <RemotionWrapper 
         durationInFrames={120} 
         backgroundColor="#f0f4ff"
-        width={1920}
-        height={1080}
       >
         <Story />
       </RemotionWrapper>
@@ -615,75 +592,75 @@ export const SocialProofSection: Story = {
         justifyContent: "center",
         width: "100%",
         height: "100%",
-        padding: 80,
+        padding: 40,
+        gap: 40,
       }}
     >
-      <div style={{ maxWidth: 400 }}>
-        <div style={{ display: "flex", marginBottom: 16 }}>
+      <div style={{ maxWidth: 280 }}>
+        <div style={{ display: "flex", marginBottom: 12 }}>
           {[1, 2, 3, 4, 5].map((_, i) => (
-            <span key={i} style={{ fontSize: 24 }}>⭐</span>
+            <span key={i} style={{ fontSize: 16 }}>⭐</span>
           ))}
         </div>
-        <div style={{ fontSize: 28, fontWeight: 700, color: "#0f172a", lineHeight: 1.4, marginBottom: 20 }}>
-          "This app completely changed how I manage my daily tasks. Absolutely love it!"
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#0f172a", lineHeight: 1.4, marginBottom: 16 }}>
+          "This app completely changed how I manage my daily tasks!"
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div
             style={{
-              width: 56,
-              height: 56,
+              width: 36,
+              height: 36,
               borderRadius: "50%",
               background: "linear-gradient(135deg, #6366f1, #ec4899)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 28,
+              fontSize: 18,
             }}
           >
             👩‍💻
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: "#0f172a" }}>Sarah Miller</div>
-            <div style={{ fontSize: 14, color: "#64748b" }}>Product Designer</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a" }}>Sarah Miller</div>
+            <div style={{ fontSize: 11, color: "#64748b" }}>Product Designer</div>
           </div>
         </div>
       </div>
-      <div style={{ marginLeft: 80 }}>
-        <PhoneMockup device="iphone-15" color="white" shadow scale={0.75}>
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              background: "#fff",
-              display: "flex",
-              flexDirection: "column",
-              padding: 20,
-              fontFamily: "Inter, system-ui",
-            }}
-          >
-            <div style={{ marginTop: 40, textAlign: "center" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>Task Complete!</div>
-              <div style={{ fontSize: 14, color: "#64748b", marginTop: 8 }}>
-                You've finished 12 tasks today
-              </div>
-              <div
-                style={{
-                  marginTop: 24,
-                  background: "#10b981",
-                  color: "#fff",
-                  padding: "14px 32px",
-                  borderRadius: 12,
-                  fontWeight: 600,
-                  display: "inline-block",
-                }}
-              >
-                Continue
-              </div>
+      <PhoneMockup device="iphone-15" color="white" shadow scale={0.5}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            background: "#fff",
+            display: "flex",
+            flexDirection: "column",
+            padding: 16,
+            fontFamily: "Inter, system-ui",
+          }}
+        >
+          <div style={{ marginTop: 30, textAlign: "center" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>Task Complete!</div>
+            <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>
+              You've finished 12 tasks today
+            </div>
+            <div
+              style={{
+                marginTop: 16,
+                background: "#10b981",
+                color: "#fff",
+                padding: "10px 20px",
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 12,
+                display: "inline-block",
+              }}
+            >
+              Continue
             </div>
           </div>
-        </PhoneMockup>
-      </div>
+        </div>
+      </PhoneMockup>
     </div>
   ),
 };
