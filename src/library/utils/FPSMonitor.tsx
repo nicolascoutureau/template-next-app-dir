@@ -87,13 +87,15 @@ export const FPSMonitor: React.FC<FPSMonitorProps> = ({
       const maxFps = Math.max(...fpsValuesRef.current);
       const avgFps = Math.round(
         fpsValuesRef.current.reduce((a, b) => a + b, 0) /
-          fpsValuesRef.current.length
+          fpsValuesRef.current.length,
       );
 
       // Get memory if available (Chrome only)
       let memory: number | undefined;
       if ("memory" in performance) {
-        const perfMemory = (performance as unknown as { memory: { usedJSHeapSize: number } }).memory;
+        const perfMemory = (
+          performance as unknown as { memory: { usedJSHeapSize: number } }
+        ).memory;
         memory = Math.round(perfMemory.usedJSHeapSize / 1048576); // Convert to MB
       }
 
@@ -317,16 +319,25 @@ export const useFPS = (): Stats => {
         const maxFps = Math.max(...fpsValuesRef.current);
         const avgFps = Math.round(
           fpsValuesRef.current.reduce((a, b) => a + b, 0) /
-            fpsValuesRef.current.length
+            fpsValuesRef.current.length,
         );
 
         let memory: number | undefined;
         if ("memory" in performance) {
-          const perfMemory = (performance as unknown as { memory: { usedJSHeapSize: number } }).memory;
+          const perfMemory = (
+            performance as unknown as { memory: { usedJSHeapSize: number } }
+          ).memory;
           memory = Math.round(perfMemory.usedJSHeapSize / 1048576);
         }
 
-        setStats({ fps: currentFps, frameTime, memory, minFps, maxFps, avgFps });
+        setStats({
+          fps: currentFps,
+          frameTime,
+          memory,
+          minFps,
+          maxFps,
+          avgFps,
+        });
 
         frameCountRef.current = 0;
         lastTimeRef.current = now;

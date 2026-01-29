@@ -38,7 +38,7 @@ const preview: Preview = {
         React.Fragment,
         null,
         showFps && React.createElement(FPSMonitor, { position: "top-right" }),
-        React.createElement(Story)
+        React.createElement(Story),
       );
     },
   ],

@@ -105,4 +105,79 @@ export { ColorBarHeader, type ColorBarHeaderProps } from "./decorative";
 export { AsymmetricLayout, type AsymmetricLayoutProps } from "./layouts";
 
 // Transition components
-export { VerticalStripReveal, type VerticalStripRevealProps } from "./transitions";
+export {
+  VerticalStripReveal,
+  type VerticalStripRevealProps,
+  // Flip Under Transition (3D flip on X axis + zoom blur)
+  FlipUnderTransition,
+  FlipUnderExit,
+  ZoomBlurEnter,
+  useFlipUnderTransition,
+  type FlipUnderTransitionProps,
+  type FlipUnderTransitionConfig,
+  type FlipUnderTransitionResult,
+} from "./transitions";
+
+// Effects components
+export { Glow, type GlowProps, Shimmer, type ShimmerProps } from "./effects";
+
+// Scene components (camera movement & animations)
+export {
+  // Animation (Ken Burns style zoom/drift)
+  SceneAnimation,
+  SceneAnimation2D,
+  useSceneAnimation,
+  type SceneAnimationProps,
+  type SceneAnimationConfig,
+  type SceneAnimationResult,
+  // Scene Transition (fade in/out)
+  SceneTransition,
+  SceneTransition2D,
+  useSceneTransition,
+  type SceneTransitionProps,
+  type SceneTransitionConfig,
+  type SceneTransitionResult,
+  // Combined convenience component
+  SceneContainer,
+  type SceneContainerProps,
+} from "./scenes";
+
+// Sequence components (declarative scene sequencing)
+export {
+  // SceneStack - LLM-friendly API (recommended)
+  SceneStack,
+  SceneTransitionRenderer,
+  type SceneStackProps,
+  type SceneTransitionRendererProps,
+  type TransitionSpec,
+  type SceneSpec,
+  type Segment,
+  // Sequence3D - Original API
+  Sequence3D,
+  Scene,
+  // Types
+  type AnimationWrapper,
+  type AnimationWrapperProps,
+  type SceneProps,
+  type Sequence3DProps,
+  // Exit animations
+  SlideDownExit,
+  SlideUpExit,
+  SlideLeftExit,
+  SlideRightExit,
+  FadeExit,
+  ScaleExit,
+  NoExit,
+  // Entry animations
+  ZoomInEntry,
+  FadeEntry,
+  SlideUpEntry,
+  SlideDownEntry,
+  ScaleEntry,
+  NoEntry,
+  // Presets
+  slideDownZoomPreset,
+  crossfadePreset,
+  scalePreset,
+  cutPreset,
+} from "./sequence";
