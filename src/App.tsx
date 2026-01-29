@@ -1,11 +1,8 @@
-"use client";
-
-import type { NextPage } from "next";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { composition } from "../remotion/compositions";
+import { composition } from "./remotion/compositions";
 
-const Home: NextPage = () => {
+export const App = () => {
   const [playerSize, setPlayerSize] = useState<React.CSSProperties>({
     width: "100%",
     height: "100%",
@@ -72,5 +69,3 @@ const Home: NextPage = () => {
     </div>
   );
 };
-
-export default Home;
