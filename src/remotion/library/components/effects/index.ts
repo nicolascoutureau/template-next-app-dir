@@ -96,7 +96,11 @@ export {
   type GradientPalette,
   type AnimatedGradientProps,
 } from "./FourColorGradient";
-export { Noise, type NoiseProps, type NoiseBlendMode } from "./Noise";
+export {
+  Noise,
+  type NoiseProps,
+  type NoiseBlendMode,
+} from "./Noise";
 export { Liquid, type LiquidProps } from "./Liquid";
 export { GradientMesh, type GradientMeshProps } from "./GradientMesh";
 export { Glass, type GlassProps } from "./Glass";
@@ -106,6 +110,7 @@ export { StarField, type StarFieldProps } from "./StarField";
 export { SpeedLines, type SpeedLinesProps } from "./SpeedLines";
 export { LensFlare, type LensFlareProps } from "./LensFlare";
 export { Pixelate, type PixelateProps } from "./Pixelate";
+export { SimpleGlitch, type SimpleGlitchProps } from "./SimpleGlitch";
 
 // SVG Effects
 export * from "./svg";
