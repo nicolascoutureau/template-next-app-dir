@@ -1,563 +1,825 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, Easing } from "remotion";
+import { AbsoluteFill } from "remotion";
+import {
+  TransitionSeries,
+  linearTiming,
+  springTiming,
+  type TransitionPresentation,
+  type TransitionTiming,
+} from "@remotion/transitions";
+import { fade } from "@remotion/transitions/fade";
+import { wipe } from "@remotion/transitions/wipe";
+import { slide } from "@remotion/transitions/slide";
+import { flip } from "@remotion/transitions/flip";
+import { clockWipe } from "@remotion/transitions/clock-wipe";
+
+// Re-export TransitionSeries and timing functions for direct use
+export { TransitionSeries, linearTiming, springTiming };
 
 /**
- * Professional transition types - cinematic quality.
+ * Transition types available.
+ * Some use built-in @remotion/transitions presentations,
+ * others use custom presentations.
  */
 export type TransitionType =
-  // Simple
-  | "none"
-  | "cut"
-  // Dissolves
-  | "crossDissolve"
-  | "additiveDissolve"
-  | "luminanceDissolve"
-  // Blur-based
-  | "blurDissolve"
-  | "directionalBlur"
-  | "zoomBlur"
-  | "spinBlur"
-  // Movement
+  // Built-in presentations
+  | "fade"
+  | "wipe"
+  | "slide"
+  | "flip"
+  | "clockWipe"
+  // Slide directions
   | "slideLeft"
   | "slideRight"
   | "slideUp"
   | "slideDown"
-  | "pushLeft"
-  | "pushRight"
-  // Zoom
+  // Wipe directions
+  | "wipeLeft"
+  | "wipeRight"
+  | "wipeUp"
+  | "wipeDown"
+  // Custom presentations
+  | "crossDissolve"
+  | "blurDissolve"
   | "zoomIn"
   | "zoomOut"
-  | "zoomThrough"
-  // Reveals
   | "circleWipe"
-  | "rectWipe"
-  | "clockWipe"
-  | "starWipe"
-  | "hexWipe"
-  | "diagonalWipe"
-  | "splitHorizontal"
-  | "splitVertical"
-  // 3D
+  | "pushLeft"
+  | "pushRight"
   | "cube"
-  | "flip"
   | "doorway"
   | "swing"
   // Cinematic
   | "whipPan"
-  | "lightLeak"
-  | "filmBurn"
   | "flashWhite"
   | "flashBlack"
-  | "glitch"
-  | "rgbSplit";
+  | "glitch";
 
 /**
- * Props for Transition component.
+ * Timing types for transitions.
  */
+export type TimingType = "linear" | "spring" | "smooth" | "snappy" | "expo";
+
+/**
+ * Create a TransitionTiming based on type and duration.
+ */
+export function createTiming(
+  type: TimingType,
+  durationInFrames: number
+): TransitionTiming {
+  switch (type) {
+    case "spring":
+      return springTiming({ config: { damping: 200 } });
+    case "smooth":
+      return springTiming({ config: { damping: 20, stiffness: 80 } });
+    case "snappy":
+      return springTiming({ config: { damping: 30, stiffness: 300 } });
+    case "expo":
+      return springTiming({ config: { damping: 15, stiffness: 100 } });
+    case "linear":
+    default:
+      return linearTiming({ durationInFrames });
+  }
+}
+
+// ============================================================================
+// CUSTOM PRESENTATIONS
+// ============================================================================
+
+// Custom presentation props type
+type CustomProps = Record<string, never>;
+
+// Component props interface
+interface PresentationComponentProps {
+  children: React.ReactNode;
+  presentationDirection: "entering" | "exiting";
+  presentationProgress: number;
+  passedProps: CustomProps;
+}
+
+/**
+ * Cross dissolve with smoother opacity curve.
+ */
+function crossDissolve(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      return (
+        <AbsoluteFill
+          style={{
+            opacity: isEntering ? smoothProgress : 1 - smoothProgress,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Blur dissolve transition - content fades with blur.
+ */
+function blurDissolve(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      // Peak blur at middle of transition
+      const blurAmount = Math.sin(progress * Math.PI) * 20;
+      const opacity = isEntering ? smoothProgress : 1 - smoothProgress;
+      
+      return (
+        <AbsoluteFill
+          style={{
+            opacity,
+            filter: `blur(${blurAmount}px)`,
+            transform: `scale(${1 + blurAmount * 0.002})`,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Zoom in transition.
+ */
+function zoomIn(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      if (isEntering) {
+        const scale = 0.3 + smoothProgress * 0.7;
+        const blur = (1 - smoothProgress) * 10;
+        return (
+          <AbsoluteFill
+            style={{
+              opacity: smoothProgress,
+              transform: `scale(${scale})`,
+              filter: `blur(${blur}px)`,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      return (
+        <AbsoluteFill style={{ opacity: 1 - smoothProgress }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Zoom out transition.
+ */
+function zoomOut(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      if (isEntering) {
+        const scale = 1.5 - smoothProgress * 0.5;
+        const blur = (1 - smoothProgress) * 10;
+        return (
+          <AbsoluteFill
+            style={{
+              opacity: smoothProgress,
+              transform: `scale(${scale})`,
+              filter: `blur(${blur}px)`,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      return (
+        <AbsoluteFill style={{ opacity: 1 - smoothProgress }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Circle wipe transition.
+ */
+function circleWipePresentation(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      
+      if (isEntering) {
+        const circleSize = progress * 150;
+        return (
+          <AbsoluteFill
+            style={{
+              clipPath: `circle(${circleSize}% at 50% 50%)`,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      return (
+        <AbsoluteFill>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Push transition - pushes the previous scene while entering.
+ */
+function push(direction: "left" | "right"): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      const multiplier = direction === "left" ? 1 : -1;
+      
+      if (isEntering) {
+        const translateX = (1 - smoothProgress) * 100 * multiplier;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `translateX(${translateX}%) scale(${0.95 + smoothProgress * 0.05})`,
+              filter: `brightness(${0.7 + smoothProgress * 0.3})`,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      const translateX = smoothProgress * -100 * multiplier;
+      return (
+        <AbsoluteFill
+          style={{
+            transform: `translateX(${translateX}%) scale(${1 - smoothProgress * 0.05})`,
+            filter: `brightness(${1 - smoothProgress * 0.3})`,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * 3D Cube rotation transition.
+ */
+function cube(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      if (isEntering) {
+        const rotateY = (1 - smoothProgress) * -90;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `perspective(1000px) rotateY(${rotateY}deg)`,
+              transformOrigin: "right center",
+              opacity: smoothProgress,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      const rotateY = smoothProgress * 90;
+      return (
+        <AbsoluteFill
+          style={{
+            transform: `perspective(1000px) rotateY(${rotateY}deg)`,
+            transformOrigin: "left center",
+            opacity: 1 - smoothProgress,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Doorway opening transition.
+ */
+function doorway(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      if (isEntering) {
+        const rotateY = (1 - smoothProgress) * 90;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `perspective(800px) rotateY(${rotateY}deg)`,
+              transformOrigin: "left center",
+              opacity: smoothProgress,
+              filter: `brightness(${0.5 + smoothProgress * 0.5})`,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      return (
+        <AbsoluteFill style={{ opacity: 1 - smoothProgress }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Swing down transition.
+ */
+function swing(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      const smoothProgress = progress * progress * (3 - 2 * progress);
+      
+      if (isEntering) {
+        const rotateX = (1 - smoothProgress) * 60;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `perspective(800px) rotateX(${rotateX}deg)`,
+              transformOrigin: "top center",
+              opacity: smoothProgress,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      return (
+        <AbsoluteFill style={{ opacity: 1 - smoothProgress }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Whip pan cinematic transition.
+ */
+function whipPan(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      
+      const blur = Math.sin(progress * Math.PI) * 60;
+      
+      if (isEntering) {
+        const offset = (1 - progress) * -100;
+        const opacity = progress < 0.1 ? progress * 10 : 1;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `translateX(${offset}%)`,
+              filter: `blur(${blur}px)`,
+              opacity,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      const offset = progress * 100;
+      const opacity = progress > 0.9 ? (1 - progress) * 10 : 1;
+      return (
+        <AbsoluteFill
+          style={{
+            transform: `translateX(${offset}%)`,
+            filter: `blur(${blur}px)`,
+            opacity,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Flash to white transition.
+ */
+function flashWhite(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      
+      // Flash intensity peaks at the middle
+      const flashIntensity = progress < 0.3 
+        ? progress / 0.3 
+        : progress < 0.5 
+          ? 1 
+          : Math.max(0, 1 - (progress - 0.5) / 0.2);
+      
+      if (isEntering) {
+        const opacity = progress > 0.3 ? (progress - 0.3) / 0.7 : 0;
+        return (
+          <>
+            <AbsoluteFill style={{ opacity }}>
+              {children}
+            </AbsoluteFill>
+            {flashIntensity > 0 && (
+              <AbsoluteFill
+                style={{
+                  backgroundColor: `rgba(255, 255, 255, ${flashIntensity})`,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+          </>
+        );
+      }
+      
+      const opacity = progress < 0.3 ? 1 - progress / 0.3 : 0;
+      return (
+        <AbsoluteFill style={{ opacity }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Flash to black transition.
+ */
+function flashBlack(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      
+      const flashIntensity = progress < 0.3 
+        ? progress / 0.3 
+        : progress < 0.5 
+          ? 1 
+          : Math.max(0, 1 - (progress - 0.5) / 0.2);
+      
+      if (isEntering) {
+        const opacity = progress > 0.4 ? (progress - 0.4) / 0.6 : 0;
+        return (
+          <>
+            <AbsoluteFill style={{ opacity }}>
+              {children}
+            </AbsoluteFill>
+            {flashIntensity > 0 && (
+              <AbsoluteFill
+                style={{
+                  backgroundColor: `rgba(0, 0, 0, ${flashIntensity})`,
+                  pointerEvents: "none",
+                }}
+              />
+            )}
+          </>
+        );
+      }
+      
+      const opacity = progress < 0.4 ? 1 - progress / 0.4 : 0;
+      return (
+        <AbsoluteFill style={{ opacity }}>
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+/**
+ * Glitch effect transition.
+ */
+function glitchTransition(): TransitionPresentation<CustomProps> {
+  return {
+    component: ({ children, presentationDirection, presentationProgress }: PresentationComponentProps) => {
+      const isEntering = presentationDirection === "entering";
+      const progress = presentationProgress;
+      
+      const glitchIntensity = Math.sin(progress * Math.PI);
+      // Using progress as a pseudo-random seed for glitch effect
+      const glitchOffset = Math.sin(progress * 50) * glitchIntensity * 20;
+      const glitchSkew = Math.sin(progress * 70) * glitchIntensity * 5;
+      const hueShift = Math.sin(progress * 30) * glitchIntensity * 30;
+      
+      if (isEntering) {
+        const opacity = progress > 0.1 ? 1 : progress * 10;
+        return (
+          <AbsoluteFill
+            style={{
+              transform: `translateX(${glitchOffset}px) skewX(${glitchSkew}deg)`,
+              opacity,
+              filter: glitchIntensity > 0.3 ? `hue-rotate(${hueShift}deg)` : undefined,
+            }}
+          >
+            {children}
+          </AbsoluteFill>
+        );
+      }
+      
+      const opacity = progress < 0.9 ? 1 : (1 - progress) * 10;
+      return (
+        <AbsoluteFill
+          style={{
+            transform: `translateX(${-glitchOffset}px) skewX(${-glitchSkew}deg)`,
+            opacity,
+            filter: glitchIntensity > 0.3 ? `hue-rotate(${-hueShift}deg)` : undefined,
+          }}
+        >
+          {children}
+        </AbsoluteFill>
+      );
+    },
+    props: {} as CustomProps,
+  };
+}
+
+// ============================================================================
+// PRESENTATION FACTORY
+// ============================================================================
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyPresentation = TransitionPresentation<any>;
+
+/**
+ * Get a TransitionPresentation based on transition type.
+ */
+export function getPresentation(type: TransitionType): AnyPresentation {
+  switch (type) {
+    // Built-in presentations
+    case "fade":
+      return fade();
+    case "wipe":
+    case "wipeRight":
+      return wipe({ direction: "from-left" });
+    case "wipeLeft":
+      return wipe({ direction: "from-right" });
+    case "wipeUp":
+      return wipe({ direction: "from-bottom" });
+    case "wipeDown":
+      return wipe({ direction: "from-top" });
+    case "slide":
+    case "slideLeft":
+      return slide({ direction: "from-right" });
+    case "slideRight":
+      return slide({ direction: "from-left" });
+    case "slideUp":
+      return slide({ direction: "from-bottom" });
+    case "slideDown":
+      return slide({ direction: "from-top" });
+    case "flip":
+      return flip();
+    case "clockWipe":
+      return clockWipe({ width: 1920, height: 1080 });
+    
+    // Custom presentations
+    case "crossDissolve":
+      return crossDissolve();
+    case "blurDissolve":
+      return blurDissolve();
+    case "zoomIn":
+      return zoomIn();
+    case "zoomOut":
+      return zoomOut();
+    case "circleWipe":
+      return circleWipePresentation();
+    case "pushLeft":
+      return push("left");
+    case "pushRight":
+      return push("right");
+    case "cube":
+      return cube();
+    case "doorway":
+      return doorway();
+    case "swing":
+      return swing();
+    case "whipPan":
+      return whipPan();
+    case "flashWhite":
+      return flashWhite();
+    case "flashBlack":
+      return flashBlack();
+    case "glitch":
+      return glitchTransition();
+    
+    default:
+      return fade();
+  }
+}
+
+// ============================================================================
+// TRANSITION COMPONENT (Simplified wrapper)
+// ============================================================================
+
 export interface TransitionProps {
-  children: ReactNode;
-  /** Transition type */
+  /** The scenes to transition between */
+  children: ReactNode[];
+  /** Duration of each scene in frames */
+  durationInFrames: number;
+  /** Transition type to use between scenes */
   type?: TransitionType;
-  /** Duration in seconds */
-  duration?: number;
-  /** Delay before starting */
-  delay?: number;
-  /** Whether this is an exit transition */
-  exit?: boolean;
-  /** Custom easing */
-  ease?: "smooth" | "snappy" | "expo" | "circ" | "linear";
-  /** Additional styles */
+  /** Duration of the transition in frames */
+  transitionDurationInFrames?: number;
+  /** Timing type for the transition */
+  timing?: TimingType;
+  /** Additional styles for the container */
   style?: CSSProperties;
+  /** CSS class name */
   className?: string;
 }
 
 /**
- * Professional easing curves.
- */
-function getEasing(ease: string): (t: number) => number {
-  switch (ease) {
-    case "smooth":
-      return Easing.bezier(0.25, 0.1, 0.25, 1); // Apple-style
-    case "snappy":
-      return Easing.bezier(0.16, 1, 0.3, 1); // Quick settle
-    case "expo":
-      return Easing.bezier(0.16, 1, 0.3, 1); // Exponential
-    case "circ":
-      return Easing.bezier(0.075, 0.82, 0.165, 1); // Circular
-    case "linear":
-      return (t) => t;
-    default:
-      return Easing.bezier(0.25, 0.1, 0.25, 1);
-  }
-}
-
-/**
- * Advanced interpolation with custom curves.
- */
-function smoothStep(t: number): number {
-  return t * t * (3 - 2 * t);
-}
-
-function smootherStep(t: number): number {
-  return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-/**
- * Generate professional transition styles.
- */
-function getTransitionStyles(
-  type: TransitionType,
-  progress: number,
-  exit: boolean,
-  fps: number,
-  frame: number
-): { content: CSSProperties; overlay?: CSSProperties } {
-  const p = exit ? 1 - progress : progress;
-  const rp = 1 - p;
-  const sp = smoothStep(p); // Smoother curve
-  const srp = 1 - sp;
-
-  switch (type) {
-    case "none":
-    case "cut":
-      return { content: { opacity: p > 0.5 ? 1 : 0 } };
-
-    // === DISSOLVES ===
-    case "crossDissolve":
-      return {
-        content: {
-          opacity: smootherStep(p),
-        },
-      };
-
-    case "additiveDissolve":
-      return {
-        content: {
-          opacity: p,
-          mixBlendMode: p < 0.5 ? "screen" : "normal",
-          filter: p < 0.5 ? `brightness(${1 + (0.5 - p) * 0.5})` : undefined,
-        },
-      };
-
-    case "luminanceDissolve":
-      // Bright areas appear first
-      const lumThreshold = rp * 100;
-      return {
-        content: {
-          opacity: 1,
-          filter: `contrast(${1 + rp * 2}) brightness(${0.8 + p * 0.4})`,
-          clipPath: p < 1 ? `inset(0)` : undefined,
-          maskImage: `linear-gradient(to bottom, black ${lumThreshold}%, transparent ${lumThreshold + 20}%)`,
-          WebkitMaskImage: `linear-gradient(to bottom, black ${lumThreshold}%, transparent ${lumThreshold + 20}%)`,
-        },
-      };
-
-    // === BLUR-BASED ===
-    case "blurDissolve":
-      const blurAmount = Math.sin(p * Math.PI) * 25; // Peak blur at middle
-      return {
-        content: {
-          opacity: smootherStep(p),
-          filter: `blur(${blurAmount}px)`,
-          transform: `scale(${1 + blurAmount * 0.002})`, // Slight scale to hide edges
-        },
-      };
-
-    case "directionalBlur":
-      // Simulated motion blur with multiple layers would need actual shader
-      // This is a CSS approximation
-      const dirBlur = srp * 30;
-      return {
-        content: {
-          opacity: sp,
-          filter: `blur(${dirBlur}px)`,
-          transform: `translateX(${srp * 50}px) scale(${1 + srp * 0.05})`,
-        },
-      };
-
-    case "zoomBlur":
-      const zBlur = srp * 20;
-      const zScale = 1 + srp * 0.3;
-      return {
-        content: {
-          opacity: sp,
-          filter: `blur(${zBlur}px)`,
-          transform: `scale(${zScale})`,
-        },
-      };
-
-    case "spinBlur":
-      const spinBlur = srp * 15;
-      const spinAngle = srp * 5;
-      return {
-        content: {
-          opacity: sp,
-          filter: `blur(${spinBlur}px)`,
-          transform: `rotate(${spinAngle}deg) scale(${1 + srp * 0.1})`,
-        },
-      };
-
-    // === MOVEMENT ===
-    case "slideLeft":
-      return {
-        content: {
-          transform: `translateX(${srp * 100}%)`,
-          opacity: 1,
-        },
-      };
-
-    case "slideRight":
-      return {
-        content: {
-          transform: `translateX(${-srp * 100}%)`,
-          opacity: 1,
-        },
-      };
-
-    case "slideUp":
-      return {
-        content: {
-          transform: `translateY(${srp * 100}%)`,
-          opacity: 1,
-        },
-      };
-
-    case "slideDown":
-      return {
-        content: {
-          transform: `translateY(${-srp * 100}%)`,
-          opacity: 1,
-        },
-      };
-
-    case "pushLeft":
-      return {
-        content: {
-          transform: `translateX(${srp * 100}%) scale(${0.95 + sp * 0.05})`,
-          filter: `brightness(${0.7 + sp * 0.3})`,
-        },
-      };
-
-    case "pushRight":
-      return {
-        content: {
-          transform: `translateX(${-srp * 100}%) scale(${0.95 + sp * 0.05})`,
-          filter: `brightness(${0.7 + sp * 0.3})`,
-        },
-      };
-
-    // === ZOOM ===
-    case "zoomIn":
-      return {
-        content: {
-          transform: `scale(${0.3 + sp * 0.7})`,
-          opacity: sp,
-          filter: `blur(${srp * 10}px)`,
-        },
-      };
-
-    case "zoomOut":
-      return {
-        content: {
-          transform: `scale(${1 + srp * 0.5})`,
-          opacity: sp,
-          filter: `blur(${srp * 10}px)`,
-        },
-      };
-
-    case "zoomThrough":
-      // Zoom past camera effect
-      const ztScale = p < 0.5 ? 1 + p * 2 : 3 - p * 2;
-      const ztOpacity = p < 0.4 ? p / 0.4 : p > 0.6 ? 1 : 1;
-      const ztBlur = Math.abs(p - 0.5) < 0.2 ? (0.2 - Math.abs(p - 0.5)) * 50 : 0;
-      return {
-        content: {
-          transform: `scale(${ztScale})`,
-          opacity: ztOpacity,
-          filter: `blur(${ztBlur}px)`,
-        },
-      };
-
-    // === REVEALS ===
-    case "circleWipe":
-      const circleSize = sp * 150;
-      return {
-        content: {
-          clipPath: `circle(${circleSize}% at 50% 50%)`,
-        },
-      };
-
-    case "rectWipe":
-      const rectInset = srp * 50;
-      return {
-        content: {
-          clipPath: `inset(${rectInset}% ${rectInset}% ${rectInset}% ${rectInset}%)`,
-        },
-      };
-
-    case "clockWipe":
-      const angle = sp * 360;
-      // Create a conic gradient mask effect
-      return {
-        content: {
-          clipPath: `polygon(50% 50%, 50% 0%, ${angle > 90 ? '100% 0%, 100% 100%' : `${50 + Math.tan((angle * Math.PI) / 180) * 50}% 0%`}${angle > 180 ? ', 0% 100%' : ''}${angle > 270 ? ', 0% 0%' : ''}, 50% 50%)`,
-          opacity: 1,
-        },
-      };
-
-    case "starWipe":
-      const starSize = sp * 200;
-      const points = 5;
-      const starPath = Array.from({ length: points * 2 }, (_, i) => {
-        const angle = (i * Math.PI) / points - Math.PI / 2;
-        const r = i % 2 === 0 ? starSize : starSize * 0.4;
-        return `${50 + r * Math.cos(angle)}% ${50 + r * Math.sin(angle)}%`;
-      }).join(", ");
-      return {
-        content: {
-          clipPath: `polygon(${starPath})`,
-        },
-      };
-
-    case "hexWipe":
-      const hexSize = sp * 130;
-      const hexPoints = Array.from({ length: 6 }, (_, i) => {
-        const angle = (i * Math.PI) / 3 - Math.PI / 6;
-        return `${50 + hexSize * Math.cos(angle)}% ${50 + hexSize * Math.sin(angle)}%`;
-      }).join(", ");
-      return {
-        content: {
-          clipPath: `polygon(${hexPoints})`,
-        },
-      };
-
-    case "diagonalWipe":
-      const diagOffset = sp * 200;
-      return {
-        content: {
-          clipPath: `polygon(${diagOffset - 100}% 0%, ${diagOffset}% 0%, ${diagOffset - 100}% 100%, ${diagOffset - 200}% 100%)`,
-        },
-      };
-
-    case "splitHorizontal":
-      const splitH = srp * 50;
-      return {
-        content: {
-          clipPath: `polygon(0% ${splitH}%, 100% ${splitH}%, 100% ${100 - splitH}%, 0% ${100 - splitH}%)`,
-        },
-      };
-
-    case "splitVertical":
-      const splitV = srp * 50;
-      return {
-        content: {
-          clipPath: `polygon(${splitV}% 0%, ${100 - splitV}% 0%, ${100 - splitV}% 100%, ${splitV}% 100%)`,
-        },
-      };
-
-    // === 3D ===
-    case "cube":
-      const cubeRotate = srp * 90;
-      const cubeTranslate = srp * 50;
-      return {
-        content: {
-          transform: `perspective(1000px) rotateY(${cubeRotate}deg) translateZ(${cubeTranslate}px)`,
-          opacity: sp,
-          transformOrigin: "left center",
-        },
-      };
-
-    case "flip":
-      return {
-        content: {
-          transform: `perspective(1000px) rotateY(${srp * 180}deg)`,
-          opacity: p > 0.5 ? 1 : 0,
-          backfaceVisibility: "hidden",
-        },
-      };
-
-    case "doorway":
-      const doorAngle = srp * 90;
-      return {
-        content: {
-          transform: `perspective(800px) rotateY(${doorAngle}deg)`,
-          transformOrigin: "left center",
-          opacity: sp,
-          filter: `brightness(${0.5 + sp * 0.5})`,
-        },
-      };
-
-    case "swing":
-      const swingAngle = srp * 60;
-      return {
-        content: {
-          transform: `perspective(800px) rotateX(${swingAngle}deg)`,
-          transformOrigin: "top center",
-          opacity: sp,
-        },
-      };
-
-    // === CINEMATIC ===
-    case "whipPan":
-      const whipBlur = Math.sin(p * Math.PI) * 60;
-      const whipOffset = (p < 0.5 ? p * 2 : 2 - p * 2) * 100 - 50;
-      return {
-        content: {
-          transform: `translateX(${whipOffset}%)`,
-          filter: `blur(${whipBlur}px)`,
-          opacity: p < 0.1 || p > 0.9 ? (p < 0.1 ? p * 10 : (1 - p) * 10) : 1,
-        },
-      };
-
-    case "lightLeak":
-      const leakBrightness = 1 + Math.sin(p * Math.PI) * 1.5;
-      const leakSaturation = 1 + Math.sin(p * Math.PI) * 0.5;
-      return {
-        content: {
-          opacity: smootherStep(p),
-          filter: `brightness(${leakBrightness}) saturate(${leakSaturation}) contrast(${1 + srp * 0.2})`,
-        },
-        overlay: {
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(ellipse at ${30 + p * 40}% ${20 + p * 30}%, rgba(255,200,100,${Math.sin(p * Math.PI) * 0.4}) 0%, transparent 70%)`,
-          mixBlendMode: "screen",
-          pointerEvents: "none",
-        },
-      };
-
-    case "filmBurn":
-      const burnIntensity = Math.sin(p * Math.PI);
-      return {
-        content: {
-          opacity: smootherStep(p),
-          filter: `brightness(${1 + burnIntensity * 0.8}) contrast(${1 + burnIntensity * 0.3}) saturate(${1 + burnIntensity * 0.5})`,
-        },
-        overlay: {
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(ellipse at ${50 + Math.sin(frame * 0.1) * 20}% ${50 + Math.cos(frame * 0.1) * 20}%, rgba(255,150,50,${burnIntensity * 0.3}) 0%, rgba(255,100,0,${burnIntensity * 0.1}) 50%, transparent 80%)`,
-          mixBlendMode: "overlay",
-          pointerEvents: "none",
-        },
-      };
-
-    case "flashWhite":
-      const flashW = p < 0.15 ? p / 0.15 : p < 0.3 ? 1 : 1 - (p - 0.3) / 0.2;
-      return {
-        content: {
-          opacity: p > 0.3 ? smoothStep((p - 0.3) / 0.7) : 0,
-        },
-        overlay: p < 0.5
-          ? {
-              position: "absolute",
-              inset: 0,
-              backgroundColor: `rgba(255,255,255,${Math.max(0, flashW)})`,
-              pointerEvents: "none",
-            }
-          : undefined,
-      };
-
-    case "flashBlack":
-      const flashB = p < 0.2 ? p / 0.2 : p < 0.4 ? 1 : 1 - (p - 0.4) / 0.2;
-      return {
-        content: {
-          opacity: p > 0.4 ? smoothStep((p - 0.4) / 0.6) : 0,
-        },
-        overlay: p < 0.6
-          ? {
-              position: "absolute",
-              inset: 0,
-              backgroundColor: `rgba(0,0,0,${Math.max(0, flashB)})`,
-              pointerEvents: "none",
-            }
-          : undefined,
-      };
-
-    case "glitch":
-      const glitchIntensity = Math.sin(p * Math.PI);
-      const glitchOffset = Math.sin(frame * 2) * glitchIntensity * 20;
-      const glitchSkew = Math.sin(frame * 3) * glitchIntensity * 5;
-      return {
-        content: {
-          transform: `translateX(${glitchOffset}px) skewX(${glitchSkew}deg)`,
-          opacity: p > 0.1 ? 1 : p * 10,
-          filter: glitchIntensity > 0.3 ? `hue-rotate(${Math.sin(frame) * glitchIntensity * 30}deg)` : undefined,
-        },
-      };
-
-    case "rgbSplit":
-      const splitAmount = Math.sin(p * Math.PI) * 10;
-      return {
-        content: {
-          opacity: smootherStep(p),
-          filter: splitAmount > 1
-            ? `drop-shadow(${splitAmount}px 0 0 rgba(255,0,0,0.5)) drop-shadow(${-splitAmount}px 0 0 rgba(0,255,255,0.5))`
-            : undefined,
-        },
-      };
-
-    default:
-      return { content: { opacity: smootherStep(p) } };
-  }
-}
-
-/**
- * Professional cinematic transition component.
+ * Simplified Transition component that wraps TransitionSeries.
+ * Pass an array of children as scenes to transition between.
+ * 
+ * @example
+ * ```tsx
+ * <Transition
+ *   durationInFrames={60}
+ *   type="fade"
+ *   transitionDurationInFrames={30}
+ * >
+ *   <SceneA />
+ *   <SceneB />
+ *   <SceneC />
+ * </Transition>
+ * ```
  */
 export const Transition: React.FC<TransitionProps> = ({
   children,
-  type = "crossDissolve",
-  duration = 0.6,
-  delay = 0,
-  exit = false,
-  ease = "smooth",
+  durationInFrames,
+  type = "fade",
+  transitionDurationInFrames = 30,
+  timing = "linear",
   style,
   className,
 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
-  const delayFrames = Math.round(delay * fps);
-  const durationFrames = Math.round(duration * fps);
-  const easing = getEasing(ease);
-
-  const progress = useMemo(() => {
-    const effectiveFrame = frame - delayFrames;
-    if (effectiveFrame <= 0) return 0;
-    if (effectiveFrame >= durationFrames) return 1;
-
-    return interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
-      easing,
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
-  }, [frame, delayFrames, durationFrames, easing]);
-
-  const { content: contentStyles, overlay: overlayStyles } = useMemo(
-    () => getTransitionStyles(type, progress, exit, fps, frame),
-    [type, progress, exit, fps, frame]
+  const scenes = React.Children.toArray(children);
+  const presentation = useMemo(() => getPresentation(type), [type]);
+  const transitionTiming = useMemo(
+    () => createTiming(timing, transitionDurationInFrames),
+    [timing, transitionDurationInFrames]
   );
-
-  // Don't render if not started (enter) or fully exited
-  if (progress === 0 && !exit) return null;
-  if (progress === 1 && exit) return null;
-
-  return (
-    <>
-      <AbsoluteFill
-        className={className}
-        style={{
-          ...style,
-          ...contentStyles,
-          willChange: "transform, opacity, filter, clip-path",
-        }}
-      >
-        {children}
+  
+  if (scenes.length === 0) {
+    return null;
+  }
+  
+  if (scenes.length === 1) {
+    return (
+      <AbsoluteFill style={style} className={className}>
+        {scenes[0]}
       </AbsoluteFill>
-      {overlayStyles && <div style={overlayStyles as CSSProperties} />}
-    </>
+    );
+  }
+  
+  return (
+    <TransitionSeries style={style} className={className}>
+      {scenes.map((scene, index) => (
+        <React.Fragment key={index}>
+          <TransitionSeries.Sequence durationInFrames={durationInFrames}>
+            {scene}
+          </TransitionSeries.Sequence>
+          {index < scenes.length - 1 && (
+            <TransitionSeries.Transition
+              presentation={presentation}
+              timing={transitionTiming}
+            />
+          )}
+        </React.Fragment>
+      ))}
+    </TransitionSeries>
   );
 };
+
+// ============================================================================
+// SCENE TRANSITION HELPER
+// ============================================================================
+
+export interface SceneProps {
+  /** Content of the scene */
+  children: ReactNode;
+  /** Duration of this scene in frames */
+  durationInFrames: number;
+}
+
+/**
+ * Scene component for use within TransitionSeries.
+ * This is an alias for TransitionSeries.Sequence with a cleaner name.
+ */
+export const Scene: React.FC<SceneProps> = ({ children, durationInFrames }) => {
+  return (
+    <TransitionSeries.Sequence durationInFrames={durationInFrames}>
+      {children}
+    </TransitionSeries.Sequence>
+  );
+};
+
+// ============================================================================
+// UTILITY TYPES AND EXPORTS
+// ============================================================================
+
+/**
+ * All available transition types.
+ */
+export const TRANSITION_TYPES: TransitionType[] = [
+  "fade",
+  "wipe",
+  "slide",
+  "flip",
+  "clockWipe",
+  "slideLeft",
+  "slideRight",
+  "slideUp",
+  "slideDown",
+  "wipeLeft",
+  "wipeRight",
+  "wipeUp",
+  "wipeDown",
+  "crossDissolve",
+  "blurDissolve",
+  "zoomIn",
+  "zoomOut",
+  "circleWipe",
+  "pushLeft",
+  "pushRight",
+  "cube",
+  "doorway",
+  "swing",
+  "whipPan",
+  "flashWhite",
+  "flashBlack",
+  "glitch",
+];
+
+/**
+ * All available timing types.
+ */
+export const TIMING_TYPES: TimingType[] = [
+  "linear",
+  "spring",
+  "smooth",
+  "snappy",
+  "expo",
+];
 
 export default Transition;

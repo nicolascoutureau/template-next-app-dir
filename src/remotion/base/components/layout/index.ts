@@ -4,8 +4,18 @@
 
 export {
   Transition,
+  TransitionSeries,
+  Scene,
+  linearTiming,
+  springTiming,
+  getPresentation,
+  createTiming,
+  TRANSITION_TYPES,
+  TIMING_TYPES,
   type TransitionProps,
   type TransitionType,
+  type TimingType,
+  type SceneProps,
 } from "./Transition";
 export { SplitScreen, type SplitScreenProps, type SplitLayout } from "./SplitScreen";
 export { Grid, type GridProps } from "./Grid";
