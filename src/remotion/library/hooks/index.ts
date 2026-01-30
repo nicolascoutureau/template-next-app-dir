@@ -9,3 +9,5 @@ export * from "./useGsapTimeline";
 export * from "./useSpring";
 export * from "./useSequence";
 export * from "./useStagger";
+export * from "./useKeyframes";
+export * from "./useMultiKeyframes";
