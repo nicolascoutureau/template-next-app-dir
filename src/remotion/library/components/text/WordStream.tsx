@@ -52,7 +52,7 @@ export interface WordStreamProps {
    * Total duration of the animation in frames.
    * If not provided, it uses the composition's duration.
    */
-  totalDuration?: number;
+  duration?: number;
 }
 
 /**
@@ -71,14 +71,14 @@ export const WordStream: React.FC<WordStreamProps> = ({
   style,
   withSkew = true,
   transitionDuration = 10,
-  totalDuration,
+  duration: durationProp,
 }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
   const words = useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
 
-  const duration = totalDuration ?? durationInFrames;
+  const duration = durationProp ?? durationInFrames;
   const durationPerWord = duration / words.length;
   const currentIndex = Math.floor(frame / durationPerWord);
   

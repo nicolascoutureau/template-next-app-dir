@@ -26,7 +26,7 @@ export interface KineticStreamProps {
    * Total duration of the animation in frames.
    * If not provided, it uses the composition's duration.
    */
-  totalDuration?: number;
+  duration?: number;
 }
 
 /**
@@ -46,11 +46,11 @@ const useWordGroups = (text: string, count: number) => {
 /**
  * Helper to get timing info
  */
-const useStreamTiming = (totalGroups: number, transitionDuration: number, totalDuration?: number) => {
+const useStreamTiming = (totalGroups: number, transitionDuration: number, totalDurationProp?: number) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   
-  const duration = totalDuration ?? durationInFrames;
+  const duration = totalDurationProp ?? durationInFrames;
   const durationPerGroup = duration / totalGroups;
   const currentIndex = Math.floor(frame / durationPerGroup);
   
@@ -100,10 +100,10 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
   style,
   transitionDuration = 12,
   direction = 'alternate',
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -198,10 +198,10 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 8,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -286,10 +286,10 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 10,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -372,10 +372,10 @@ export const StompStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 10,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   
@@ -459,10 +459,10 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 15,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -535,10 +535,10 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 20,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   
@@ -620,10 +620,10 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 12,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -698,10 +698,10 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
   className,
   style,
   transitionDuration = 15,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -806,10 +806,10 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 8,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   
@@ -891,10 +891,10 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 10,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -974,10 +974,10 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 15,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -1049,10 +1049,10 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 8,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const prevGroup = groups[prevIndex];
@@ -1124,10 +1124,10 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 15,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   
@@ -1207,10 +1207,10 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   className,
   style,
   transitionDuration = 20,
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   
@@ -1287,10 +1287,10 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
   className,
   style,
   transitionDuration = 5, // Short transition, mostly about the effect
-  totalDuration,
+  duration,
 }) => {
   const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, totalDuration);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration);
   
   const currentGroup = groups[currentIndex];
   const frame = useCurrentFrame();

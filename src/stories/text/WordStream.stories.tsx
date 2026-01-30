@@ -37,6 +37,7 @@ export const DefaultUp: Story = {
     text: text,
     direction: "up",
     fontSize: 80,
+    totalDuration: 3
   },
 };
 

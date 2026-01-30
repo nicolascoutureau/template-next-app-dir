@@ -31,6 +31,8 @@ export interface KineticTextProps {
   /** Additional styles */
   style?: React.CSSProperties;
   className?: string;
+  /** Total duration of the animation in frames (optional) */
+  duration?: number;
 }
 
 /**
@@ -53,10 +55,19 @@ export const KineticText: React.FC<KineticTextProps> = ({
   skew = 0,
   style,
   className,
+  duration,
 }) => {
   const frame = useCurrentFrame();
-  const { fps, width } = useVideoConfig();
+  const { fps, width, durationInFrames } = useVideoConfig();
   const time = frame / fps;
+  
+  // Use provided duration or fallback to composition duration
+  // This is primarily for external control if needed, 
+  // though speed is the main driver for these continuous animations.
+  // We can use duration to normalize speed if we wanted "1 full loop in X frames".
+  // But currently this component is speed-based.
+  // Let's just make it available for potential future use or consistency.
+  const actualDuration = duration ?? durationInFrames;
 
   // Path Text Implementation - Memoize ID unconditionally
   const pathId = useMemo(() => `path-${Math.random().toString(36).substr(2, 9)}`, []);

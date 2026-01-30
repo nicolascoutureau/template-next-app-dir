@@ -229,7 +229,7 @@ export const CustomDuration: Story = {
     text: "This animation finishes in 100 frames regardless of total video length",
     wordsPerGroup: 2,
     fontSize: 60,
-    totalDuration: 100, // Finish early
+    duration: 100, // Finish early
   },
   decorators: [
     (Story) => (
