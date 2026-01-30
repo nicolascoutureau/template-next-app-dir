@@ -7,10 +7,11 @@ export const useGsapTimeline = <T extends HTMLElement>(
   deps: React.DependencyList = [],
 ) => {
   const animationScopeRef = useRef<T>(null);
-  const timelineRef = useRef<gsap.core.Timeline>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoizedTimelineFactory = useCallback(gsapTimelineFactory, deps);
 
   useEffect(() => {
@@ -18,14 +19,17 @@ export const useGsapTimeline = <T extends HTMLElement>(
       timelineRef.current = memoizedTimelineFactory();
       timelineRef.current.pause();
     }, animationScopeRef);
-    return () => ctx.revert();
+    return () => {
+      timelineRef.current = null;
+      ctx.revert();
+    };
   }, [memoizedTimelineFactory]);
 
-  useEffect(() => {
-    if (timelineRef.current) {
-      timelineRef.current.seek(frame / fps);
-    }
-  }, [frame, fps]);
+  // Seek to current frame - this is the hot path, keep it minimal
+  const tl = timelineRef.current;
+  if (tl) {
+    tl.seek(frame / fps);
+  }
 
   return animationScopeRef;
 };

@@ -1,7 +1,7 @@
 import { useGsapTimeline } from "../../hooks/useGsapTimeline";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { useCallback, useMemo, useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
 gsap.registerPlugin(SplitText);
@@ -81,14 +81,21 @@ export const TextAnimation: React.FC<TextAnimationProps> = ({
 }) => {
   const textRef = useRef<HTMLDivElement>(null);
 
-  const animationContainerRef = useGsapTimeline<HTMLDivElement>(() => {
+  // Memoize the factory to avoid recreating on every render
+  // Users should pass a stable createTimeline function (via useCallback) if they need dependency tracking
+  const timelineFactory = useCallback(() => {
     const tl = gsap.timeline();
     return createTimeline({
       textRef,
       tl,
       SplitText,
     });
-  });
+  }, [createTimeline]);
+
+  const animationContainerRef = useGsapTimeline<HTMLDivElement>(
+    timelineFactory,
+    [timelineFactory]
+  );
 
   return (
     <div ref={animationContainerRef} className={className} style={style}>
@@ -131,19 +138,22 @@ export const FadeInChars: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, { opacity: 0, y: 20, duration, stagger, ease });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Fade in text word by word.
@@ -158,19 +168,22 @@ export const FadeInWords: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "words" });
       tl.from(split.words, { opacity: 0, y: 15, duration, stagger, ease });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Reveal text line by line.
@@ -188,19 +201,22 @@ export const RevealLines: React.FC<TextAnimationPresetProps> = ({
   ease = "power3.out",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "lines" });
       tl.from(split.lines, { opacity: 0, y: 30, duration, stagger, ease });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Scramble/decode text effect - characters appear to scramble before revealing.
@@ -215,11 +231,9 @@ export const ScrambleText: React.FC<TextAnimationPresetProps> = ({
   ease = "none",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
         opacity: 0,
@@ -230,11 +244,16 @@ export const ScrambleText: React.FC<TextAnimationPresetProps> = ({
         ease,
       });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Elastic bounce in effect for each character.
@@ -249,11 +268,9 @@ export const BounceChars: React.FC<TextAnimationPresetProps> = ({
   ease = "elastic.out(1, 0.3)",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
         opacity: 0,
@@ -264,11 +281,16 @@ export const BounceChars: React.FC<TextAnimationPresetProps> = ({
         ease,
       });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Wave animation - characters animate in a wave pattern.
@@ -283,11 +305,9 @@ export const WaveText: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.inOut",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
         opacity: 0,
@@ -301,11 +321,16 @@ export const WaveText: React.FC<TextAnimationPresetProps> = ({
         ease,
       });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Slide in from left effect.
@@ -320,11 +345,9 @@ export const SlideInText: React.FC<TextAnimationPresetProps> = ({
   ease = "power3.out",
   className,
   style,
-}) => (
-  <TextAnimation
-    className={className}
-    style={style}
-    createTimeline={({ textRef, tl, SplitText }) => {
+}) => {
+  const createTimeline = useCallback(
+    ({ textRef, tl, SplitText }: TimelineContext) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
         opacity: 0,
@@ -334,11 +357,16 @@ export const SlideInText: React.FC<TextAnimationPresetProps> = ({
         ease,
       });
       return tl;
-    }}
-  >
-    {children}
-  </TextAnimation>
-);
+    },
+    [duration, stagger, ease]
+  );
+
+  return (
+    <TextAnimation className={className} style={style} createTimeline={createTimeline}>
+      {children}
+    </TextAnimation>
+  );
+};
 
 /**
  * Props for TypewriterText component.
@@ -382,30 +410,35 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  // Convert children to string
-  const text = typeof children === "string" ? children : String(children);
+  // Memoize text conversion to avoid recomputing on every frame
+  const text = useMemo(
+    () => (typeof children === "string" ? children : String(children)),
+    [children]
+  );
   
   // Calculate how many characters should be visible based on current frame
-  const charsToShow = Math.floor(frame / (speed * fps));
-  const visibleText = text.slice(0, Math.min(charsToShow, text.length));
-  const isComplete = charsToShow >= text.length;
+  // These are cheap calculations, no need to memoize
+  const framesPerChar = speed * fps;
+  const charsToShow = Math.floor(frame / framesPerChar);
+  const charCount = Math.min(charsToShow, text.length);
+  const visibleText = text.slice(0, charCount);
   
-  // Blinking cursor animation based on frame
-  const cursorVisible = Math.floor(frame / (fps * 0.4)) % 2 === 0;
+  // Blinking cursor animation based on frame (every 0.4 seconds)
+  const cursorVisible = cursor && Math.floor(frame / (fps * 0.4)) % 2 === 0;
+  
+  // Memoize cursor style to avoid creating new object on every render
+  const cursorStyle = useMemo(
+    () => ({
+      color: cursorColor,
+      opacity: cursorVisible ? 1 : 0,
+    }),
+    [cursorColor, cursorVisible]
+  );
   
   return (
     <span className={className} style={style}>
       {visibleText}
-      {cursor && (
-        <span
-          style={{
-            color: cursorColor,
-            opacity: cursorVisible ? 1 : 0,
-          }}
-        >
-          {cursorChar}
-        </span>
-      )}
+      {cursor && <span style={cursorStyle}>{cursorChar}</span>}
     </span>
   );
 };
