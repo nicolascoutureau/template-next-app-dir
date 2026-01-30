@@ -21,12 +21,6 @@ export const Main: React.FC = () => {
           key={hmrKey}
           className="text-5xl font-bold text-center"
           style={{ fontFamily }}
-          text={
-            <>
-              welcome to{" "}
-              <span className="text-blue-400 font-light">Motionabl</span>
-            </>
-          }
           createTimeline={({ textRef, tl }) => {
             // Split the text into individual characters using the ref
             const splitText = new SplitText(textRef.current, {
@@ -34,22 +28,23 @@ export const Main: React.FC = () => {
               charsClass: "char",
             });
 
-            // Set initial state - characters are invisible and moved down
-            gsap.set(splitText.chars, {
-              opacity: 0,
-              y: 50,
-              rotationX: 90,
-            });
-
-            // Animate characters appearing with stagger effect
-            tl.to(splitText.chars, {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              duration: 0.8,
-              stagger: 0.05,
-              ease: "back.out(1.7)",
-            });
+            // Use fromTo to ensure initial state is part of the timeline
+            tl.fromTo(
+              splitText.chars,
+              {
+                opacity: 0,
+                y: 50,
+                rotationX: 90,
+              },
+              {
+                opacity: 1,
+                y: 0,
+                rotationX: 0,
+                duration: 0.8,
+                stagger: 0.05,
+                ease: "back.out(1.7)",
+              }
+            );
 
             // Optional: Add a subtle hover effect that scales characters
             tl.to(
@@ -62,12 +57,14 @@ export const Main: React.FC = () => {
                 repeat: 1,
                 ease: "power2.inOut",
               },
-              "+=0.5",
+              "+=0.5"
             );
 
             return tl;
           }}
-        />
+        >
+          welcome to <span className="text-blue-400 font-light">Motionabl</span>
+        </TextAnimation>
       </AbsoluteFill>
     </>
   );
