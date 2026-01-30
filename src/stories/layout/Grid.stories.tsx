@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Grid } from "../../remotion/base/components/layout";
+import { Grid } from "../../remotion/library/components/layout";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof Grid> = {

@@ -1,0 +1,11 @@
+export { blurDissolve } from "./blurDissolve";
+export { crossDissolve } from "./crossDissolve";
+export { flashBlack } from "./flashBlack";
+export { flashWhite } from "./flashWhite";
+export { glitch } from "./glitch";
+export { push } from "./push";
+export { whipPan } from "./whipPan";
+export { zoomIn } from "./zoomIn";
+export { zoomOut } from "./zoomOut";
+export { slideOver } from "./slideOver";
+export type { CustomProps, PresentationComponentProps } from "./types";

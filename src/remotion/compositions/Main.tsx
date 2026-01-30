@@ -1,7 +1,7 @@
 import { AbsoluteFill, Artifact, useCurrentFrame } from "remotion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { TextAnimation } from "../base/components/text/TextAnimation";
+import { TextAnimation } from "../library/components/text/TextAnimation";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
 // This re-runs on every HMR update of this file
@@ -43,7 +43,7 @@ export const Main: React.FC = () => {
                 duration: 0.8,
                 stagger: 0.05,
                 ease: "back.out(1.7)",
-              }
+              },
             );
 
             // Optional: Add a subtle hover effect that scales characters
@@ -57,7 +57,7 @@ export const Main: React.FC = () => {
                 repeat: 1,
                 ease: "power2.inOut",
               },
-              "+=0.5"
+              "+=0.5",
             );
 
             return tl;

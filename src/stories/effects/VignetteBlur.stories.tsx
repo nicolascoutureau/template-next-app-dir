@@ -6,7 +6,7 @@ import {
   DreamyBlur,
   SubtleVignette,
   TunnelVision,
-} from "../../remotion/base/components/effects";
+} from "../../remotion/library/components/effects";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof VignetteBlur> = {

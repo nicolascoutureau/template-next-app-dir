@@ -6,7 +6,7 @@ import {
   GlossyPill,
   GlossyCard,
   GlossyBlob,
-} from "../../remotion/base/components/effects";
+} from "../../remotion/library/components/effects";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof GlossyShape> = {

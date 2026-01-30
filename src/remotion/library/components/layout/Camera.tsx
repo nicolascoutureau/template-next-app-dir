@@ -1,0 +1,593 @@
+import React, { useMemo, type CSSProperties, type ReactNode } from "react";
+import { noise2D } from "@remotion/noise";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  Easing,
+  AbsoluteFill,
+} from "remotion";
+
+/**
+ * A keyframe for camera animation.
+ */
+export interface CameraKeyframe {
+  /** Frame number for this keyframe */
+  frame: number;
+  /** X position (pixels or percentage string like "50%") */
+  x?: number | string;
+  /** Y position (pixels or percentage string like "50%") */
+  y?: number | string;
+  /** Scale/zoom level (1 = 100%, 2 = 200%, etc.) */
+  scale?: number;
+  /** Rotation in degrees */
+  rotation?: number;
+  /** Easing function to use when transitioning TO this keyframe */
+  easing?: (t: number) => number;
+}
+
+/**
+ * Easing presets for camera movements.
+ */
+export const cameraEasings = {
+  /** Smooth start and end - great for subtle movements */
+  smooth: Easing.inOut(Easing.cubic),
+  /** Quick start, slow end - cinematic push-in */
+  pushIn: Easing.out(Easing.cubic),
+  /** Slow start, quick end - dramatic pull-out */
+  pullOut: Easing.in(Easing.cubic),
+  /** Bouncy end - energetic movements */
+  bounce: Easing.out(Easing.bounce),
+  /** Elastic end - playful overshoots */
+  elastic: Easing.out(Easing.elastic(1)),
+  /** Linear - constant speed, mechanical feel */
+  linear: Easing.linear,
+  /** Dramatic slow-mo feel */
+  dramatic: Easing.bezier(0.25, 0.1, 0.25, 1),
+  /** Snappy, quick movements */
+  snappy: Easing.bezier(0.68, -0.55, 0.265, 1.55),
+  /** Very smooth, almost imperceptible start/end */
+  gentle: Easing.bezier(0.4, 0, 0.2, 1),
+};
+
+/**
+ * Props for Camera component.
+ */
+export interface CameraProps {
+  /** Scene content to apply camera to */
+  children: ReactNode;
+  /** Array of keyframes defining camera movement */
+  keyframes?: CameraKeyframe[];
+  /** Static X position (if not using keyframes) */
+  x?: number | string;
+  /** Static Y position (if not using keyframes) */
+  y?: number | string;
+  /** Static scale/zoom (if not using keyframes) */
+  scale?: number;
+  /** Static rotation (if not using keyframes) */
+  rotation?: number;
+  /** Transform origin for zoom (e.g., "center", "top left", "50% 30%") */
+  origin?: string;
+  /** Default easing for all keyframe transitions */
+  defaultEasing?: (t: number) => number;
+  /** Handheld camera motion intensity (0 = none, 1 = heavy) */
+  wiggle?: number;
+  /** Wiggle speed (default 1) */
+  wiggleSpeed?: number;
+  /** Additional styles */
+  style?: CSSProperties;
+  className?: string;
+}
+
+/**
+ * Parse position value to pixels.
+ */
+function parsePosition(
+  value: number | string | undefined,
+  dimension: number,
+): number {
+  if (value === undefined) return 0;
+  if (typeof value === "number") return value;
+  if (value.endsWith("%")) {
+    return (parseFloat(value) / 100) * dimension;
+  }
+  return parseFloat(value) || 0;
+}
+
+/**
+ * Interpolate between keyframes.
+ */
+function interpolateKeyframes(
+  frame: number,
+  keyframes: CameraKeyframe[],
+  property: "x" | "y" | "scale" | "rotation",
+  defaultValue: number,
+  defaultEasing: (t: number) => number,
+  dimension: number,
+): number {
+  if (keyframes.length === 0) return defaultValue;
+  if (keyframes.length === 1) {
+    const kf = keyframes[0];
+    const value = kf[property];
+    if (value === undefined) return defaultValue;
+    if (property === "x" || property === "y") {
+      return parsePosition(value as number | string, dimension);
+    }
+    return value as number;
+  }
+
+  // Sort keyframes by frame
+  const sorted = [...keyframes].sort((a, b) => a.frame - b.frame);
+
+  // Find surrounding keyframes
+  let prevKf = sorted[0];
+  let nextKf = sorted[sorted.length - 1];
+
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (frame >= sorted[i].frame && frame <= sorted[i + 1].frame) {
+      prevKf = sorted[i];
+      nextKf = sorted[i + 1];
+      break;
+    }
+  }
+
+  // If before first keyframe
+  if (frame <= sorted[0].frame) {
+    const value = sorted[0][property];
+    if (value === undefined) return defaultValue;
+    if (property === "x" || property === "y") {
+      return parsePosition(value as number | string, dimension);
+    }
+    return value as number;
+  }
+
+  // If after last keyframe
+  if (frame >= sorted[sorted.length - 1].frame) {
+    const value = sorted[sorted.length - 1][property];
+    if (value === undefined) return defaultValue;
+    if (property === "x" || property === "y") {
+      return parsePosition(value as number | string, dimension);
+    }
+    return value as number;
+  }
+
+  // Get values
+  const prevValue = prevKf[property];
+  const nextValue = nextKf[property];
+
+  const prevParsed =
+    prevValue !== undefined
+      ? property === "x" || property === "y"
+        ? parsePosition(prevValue as number | string, dimension)
+        : (prevValue as number)
+      : defaultValue;
+
+  const nextParsed =
+    nextValue !== undefined
+      ? property === "x" || property === "y"
+        ? parsePosition(nextValue as number | string, dimension)
+        : (nextValue as number)
+      : defaultValue;
+
+  // Interpolate
+  const easing = nextKf.easing || defaultEasing;
+  return interpolate(
+    frame,
+    [prevKf.frame, nextKf.frame],
+    [prevParsed, nextParsed],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing,
+    },
+  );
+}
+
+/**
+ * Camera component that mimics After Effects' null object technique.
+ * Wrap your scene content to apply zoom, pan, and rotation effects.
+ *
+ * @example
+ * // Simple zoom in
+ * <Camera scale={1.5} origin="center">
+ *   <MyScene />
+ * </Camera>
+ *
+ * @example
+ * // Animated pan and zoom with keyframes
+ * <Camera
+ *   keyframes={[
+ *     { frame: 0, x: 0, y: 0, scale: 1 },
+ *     { frame: 30, x: -100, y: -50, scale: 1.5, easing: cameraEasings.pushIn },
+ *     { frame: 90, x: 100, y: 0, scale: 1, easing: cameraEasings.smooth },
+ *   ]}
+ *   origin="center"
+ * >
+ *   <MyScene />
+ * </Camera>
+ *
+ * @example
+ * // Handheld feel
+ * <Camera wiggle={1}>
+ *   <MyScene />
+ * </Camera>
+ */
+export const Camera: React.FC<CameraProps> = ({
+  children,
+  keyframes = [],
+  x: staticX,
+  y: staticY,
+  scale: staticScale,
+  rotation: staticRotation,
+  origin = "center",
+  defaultEasing = cameraEasings.smooth,
+  wiggle = 0,
+  wiggleSpeed = 1,
+  style,
+  className,
+}) => {
+  const frame = useCurrentFrame();
+  const { width, height, fps } = useVideoConfig();
+
+  // Calculate current values from keyframes
+  const keyframeValues = useMemo(() => {
+    if (keyframes.length === 0) {
+      return {
+        x: parsePosition(staticX, width),
+        y: parsePosition(staticY, height),
+        scale: staticScale ?? 1,
+        rotation: staticRotation ?? 0,
+      };
+    }
+
+    return {
+      x: interpolateKeyframes(frame, keyframes, "x", 0, defaultEasing, width),
+      y: interpolateKeyframes(frame, keyframes, "y", 0, defaultEasing, height),
+      scale: interpolateKeyframes(
+        frame,
+        keyframes,
+        "scale",
+        1,
+        defaultEasing,
+        1,
+      ),
+      rotation: interpolateKeyframes(
+        frame,
+        keyframes,
+        "rotation",
+        0,
+        defaultEasing,
+        1,
+      ),
+    };
+  }, [
+    frame,
+    keyframes,
+    staticX,
+    staticY,
+    staticScale,
+    staticRotation,
+    defaultEasing,
+    width,
+    height,
+  ]);
+
+  // Calculate handheld wiggle using Simplex noise
+  const wiggleValues = useMemo(() => {
+    if (wiggle <= 0) return { x: 0, y: 0, rotation: 0 };
+
+    const time = (frame / fps) * wiggleSpeed;
+    
+    // Scale wiggle intensity relative to resolution
+    const positionIntensity = wiggle * 10; 
+    const rotationIntensity = wiggle * 0.5;
+
+    // Use different seeds/offsets for each axis to avoid linear movement
+    const x = noise2D('camera-x', time * 0.5, 0) * positionIntensity;
+    const y = noise2D('camera-y', time * 0.5 + 100, 0) * positionIntensity;
+    const rot = noise2D('camera-rot', time * 0.3 + 200, 0) * rotationIntensity;
+
+    return { x, y, rotation: rot };
+  }, [frame, fps, wiggle, wiggleSpeed]);
+
+  // Combine values
+  const currentValues = {
+    x: keyframeValues.x + wiggleValues.x,
+    y: keyframeValues.y + wiggleValues.y,
+    scale: keyframeValues.scale,
+    rotation: keyframeValues.rotation + wiggleValues.rotation,
+  };
+
+  const transform = useMemo(() => {
+    const parts: string[] = [];
+
+    // Apply in order: translate, rotate, scale
+    if (currentValues.x !== 0 || currentValues.y !== 0) {
+      parts.push(`translate(${-currentValues.x}px, ${-currentValues.y}px)`);
+    }
+    if (currentValues.rotation !== 0) {
+      parts.push(`rotate(${-currentValues.rotation}deg)`);
+    }
+    if (currentValues.scale !== 1) {
+      parts.push(`scale(${currentValues.scale})`);
+    }
+
+    return parts.length > 0 ? parts.join(" ") : "none";
+  }, [currentValues]);
+
+  return (
+    <AbsoluteFill
+      className={className}
+      style={{
+        transform,
+        transformOrigin: origin,
+        ...style,
+      }}
+    >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
+// ============================================================================
+// Preset Camera Components
+// ============================================================================
+
+export interface ZoomProps {
+  children: ReactNode;
+  /** Starting scale */
+  from?: number;
+  /** Ending scale */
+  to?: number;
+  /** Starting frame */
+  startFrame?: number;
+  /** Ending frame */
+  endFrame?: number;
+  /** Focal point for zoom */
+  origin?: string;
+  /** Easing function */
+  easing?: (t: number) => number;
+  style?: CSSProperties;
+}
+
+/**
+ * Simple zoom effect (Ken Burns style).
+ */
+export const Zoom: React.FC<ZoomProps> = ({
+  children,
+  from = 1,
+  to = 1.2,
+  startFrame = 0,
+  endFrame,
+  origin = "center",
+  easing = cameraEasings.linear,
+  style,
+}) => {
+  const { durationInFrames } = useVideoConfig();
+  const effectiveEndFrame = endFrame ?? durationInFrames;
+
+  return (
+    <Camera
+      keyframes={[
+        { frame: startFrame, scale: from },
+        { frame: effectiveEndFrame, scale: to, easing },
+      ]}
+      origin={origin}
+      style={style}
+    >
+      {children}
+    </Camera>
+  );
+};
+
+export interface PanProps {
+  children: ReactNode;
+  /** Starting X position */
+  fromX?: number | string;
+  /** Starting Y position */
+  fromY?: number | string;
+  /** Ending X position */
+  toX?: number | string;
+  /** Ending Y position */
+  toY?: number | string;
+  /** Starting frame */
+  startFrame?: number;
+  /** Ending frame */
+  endFrame?: number;
+  /** Easing function */
+  easing?: (t: number) => number;
+  style?: CSSProperties;
+}
+
+/**
+ * Simple pan effect.
+ */
+export const Pan: React.FC<PanProps> = ({
+  children,
+  fromX = 0,
+  fromY = 0,
+  toX = 0,
+  toY = 0,
+  startFrame = 0,
+  endFrame,
+  easing = cameraEasings.smooth,
+  style,
+}) => {
+  const { durationInFrames } = useVideoConfig();
+  const effectiveEndFrame = endFrame ?? durationInFrames;
+
+  return (
+    <Camera
+      keyframes={[
+        { frame: startFrame, x: fromX, y: fromY },
+        { frame: effectiveEndFrame, x: toX, y: toY, easing },
+      ]}
+      style={style}
+    >
+      {children}
+    </Camera>
+  );
+};
+
+export interface PushInProps {
+  children: ReactNode;
+  /** Target scale to push into */
+  targetScale?: number;
+  /** Target X position */
+  targetX?: number | string;
+  /** Target Y position */
+  targetY?: number | string;
+  /** Duration in frames */
+  duration?: number;
+  /** Starting frame */
+  startFrame?: number;
+  /** Focal point */
+  origin?: string;
+  /** Easing function */
+  easing?: (t: number) => number;
+  style?: CSSProperties;
+}
+
+/**
+ * Cinematic push-in effect (zoom + optional pan).
+ */
+export const PushIn: React.FC<PushInProps> = ({
+  children,
+  targetScale = 1.5,
+  targetX = 0,
+  targetY = 0,
+  duration = 60,
+  startFrame = 0,
+  origin = "center",
+  easing = cameraEasings.pushIn,
+  style,
+}) => {
+  return (
+    <Camera
+      keyframes={[
+        { frame: startFrame, x: 0, y: 0, scale: 1 },
+        {
+          frame: startFrame + duration,
+          x: targetX,
+          y: targetY,
+          scale: targetScale,
+          easing,
+        },
+      ]}
+      origin={origin}
+      style={style}
+    >
+      {children}
+    </Camera>
+  );
+};
+
+export interface PullOutProps {
+  children: ReactNode;
+  /** Starting scale */
+  startScale?: number;
+  /** Starting X position */
+  startX?: number | string;
+  /** Starting Y position */
+  startY?: number | string;
+  /** Duration in frames */
+  duration?: number;
+  /** Starting frame */
+  startFrame?: number;
+  /** Focal point */
+  origin?: string;
+  /** Easing function */
+  easing?: (t: number) => number;
+  style?: CSSProperties;
+}
+
+/**
+ * Pull-out/reveal effect.
+ */
+export const PullOut: React.FC<PullOutProps> = ({
+  children,
+  startScale = 1.5,
+  startX = 0,
+  startY = 0,
+  duration = 60,
+  startFrame = 0,
+  origin = "center",
+  easing = cameraEasings.pullOut,
+  style,
+}) => {
+  return (
+    <Camera
+      keyframes={[
+        { frame: startFrame, x: startX, y: startY, scale: startScale },
+        { frame: startFrame + duration, x: 0, y: 0, scale: 1, easing },
+      ]}
+      origin={origin}
+      style={style}
+    >
+      {children}
+    </Camera>
+  );
+};
+
+export interface ShakeProps {
+  children: ReactNode;
+  /** Intensity of shake (pixels) */
+  intensity?: number;
+  /** Speed of shake (frames per shake cycle) */
+  speed?: number;
+  /** Starting frame */
+  startFrame?: number;
+  /** Duration in frames */
+  duration?: number;
+  style?: CSSProperties;
+}
+
+/**
+ * Camera shake effect.
+ */
+export const Shake: React.FC<ShakeProps> = ({
+  children,
+  intensity = 5,
+  speed = 3,
+  startFrame = 0,
+  duration = 30,
+  style,
+}) => {
+  const frame = useCurrentFrame();
+
+  const isShaking = frame >= startFrame && frame < startFrame + duration;
+
+  const offsetX = useMemo(() => {
+    if (!isShaking) return 0;
+    const t = (frame - startFrame) / speed;
+    return (
+      Math.sin(t * Math.PI * 2) *
+      intensity *
+      (1 - (frame - startFrame) / duration)
+    );
+  }, [frame, startFrame, isShaking, speed, intensity, duration]);
+
+  const offsetY = useMemo(() => {
+    if (!isShaking) return 0;
+    const t = (frame - startFrame) / speed;
+    return (
+      Math.cos(t * Math.PI * 2.5) *
+      intensity *
+      0.7 *
+      (1 - (frame - startFrame) / duration)
+    );
+  }, [frame, startFrame, isShaking, speed, intensity, duration]);
+
+  return (
+    <AbsoluteFill
+      style={{
+        transform: `translate(${offsetX}px, ${offsetY}px)`,
+        ...style,
+      }}
+    >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
+export default Camera;

@@ -1,37 +1,36 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
 import {
-  Transition,
   TransitionSeries,
   linearTiming,
   springTiming,
   getPresentation,
   createTiming,
-  TRANSITION_TYPES,
   type TransitionType,
-  type TimingType,
-} from "../../remotion/base/components/layout";
+} from "../../remotion/library/components/layout";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
-const meta: Meta<typeof Transition> = {
+// Dummy component for Storybook structure, since we removed Transition component
+const TransitionStoryComponent = () => null;
+
+const meta: Meta<typeof TransitionStoryComponent> = {
   title: "Layout/Transition",
-  component: Transition,
+  component: TransitionStoryComponent,
   argTypes: {
-    type: {
-      control: "select",
-      options: TRANSITION_TYPES,
-    },
-    timing: {
-      control: "select",
-      options: ["linear", "spring", "smooth", "snappy", "expo"],
-    },
-    durationInFrames: { control: { type: "range", min: 30, max: 120, step: 10 } },
-    transitionDurationInFrames: { control: { type: "range", min: 10, max: 60, step: 5 } },
+    // We can't really control individual props easily on TransitionSeries via args without a wrapper
+    // So we'll keep it simple for now or just remove controls that depended on the wrapper
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof Transition>;
+type Story = StoryObj<typeof TransitionStoryComponent>;
+
+const getTotalDuration = (
+  sequenceDurations: number[],
+  transitionDurations: number[],
+) =>
+  sequenceDurations.reduce((total, duration) => total + duration, 0) -
+  transitionDurations.reduce((total, duration) => total + duration, 0);
 
 // Premium scene components
 const SceneA = () => (
@@ -85,364 +84,102 @@ const SceneC = () => (
   </AbsoluteFill>
 );
 
-// === BASIC TRANSITIONS USING SIMPLIFIED COMPONENT ===
+// === BASIC TRANSITIONS ===
 
 export const FadeTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="fade"
-      transitionDurationInFrames={30}
-      timing="linear"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("fade")}
+        timing={linearTiming({ durationInFrames: 30 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
 export const CrossDissolve: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="crossDissolve"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("crossDissolve")}
+        timing={createTiming("smooth", 30)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
 export const BlurDissolve: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="blurDissolve"
-      transitionDurationInFrames={30}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("blurDissolve")}
+        timing={linearTiming({ durationInFrames: 30 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
 // === SLIDE TRANSITIONS ===
 
 export const SlideLeft: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="slideLeft"
-      transitionDurationInFrames={20}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const SlideRight: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="slideRight"
-      transitionDurationInFrames={20}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const SlideUp: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="slideUp"
-      transitionDurationInFrames={20}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const SlideDown: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="slideDown"
-      transitionDurationInFrames={20}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === PUSH TRANSITIONS ===
-
-export const PushLeft: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="pushLeft"
-      transitionDurationInFrames={25}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const PushRight: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="pushRight"
-      transitionDurationInFrames={25}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === WIPE TRANSITIONS ===
-
-export const Wipe: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="wipe"
-      transitionDurationInFrames={30}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const ClockWipe: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="clockWipe"
-      transitionDurationInFrames={30}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const CircleWipe: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="circleWipe"
-      transitionDurationInFrames={30}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === ZOOM TRANSITIONS ===
-
-export const ZoomIn: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="zoomIn"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const ZoomOut: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="zoomOut"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === 3D TRANSITIONS ===
-
-export const Flip: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="flip"
-      transitionDurationInFrames={25}
-      timing="snappy"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const Cube: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="cube"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const Doorway: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="doorway"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const Swing: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="swing"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === CINEMATIC TRANSITIONS ===
-
-export const WhipPan: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={50}
-      type="whipPan"
-      transitionDurationInFrames={15}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const FlashWhite: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={50}
-      type="flashWhite"
-      transitionDurationInFrames={20}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const FlashBlack: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={50}
-      type="flashBlack"
-      transitionDurationInFrames={20}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-export const Glitch: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={50}
-      type="glitch"
-      transitionDurationInFrames={15}
-    >
-      <SceneA />
-      <SceneB />
-    </Transition>
-  ),
-};
-
-// === MULTI-SCENE TRANSITIONS ===
-
-export const ThreeSceneTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={240} backgroundColor="#000"><Story /></RemotionWrapper>],
-  render: () => (
-    <Transition
-      durationInFrames={60}
-      type="fade"
-      transitionDurationInFrames={30}
-      timing="smooth"
-    >
-      <SceneA />
-      <SceneB />
-      <SceneC />
-    </Transition>
-  ),
-};
-
-// === DIRECT TRANSITIONSERIES USAGE ===
-
-export const DirectTransitionSeries: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={180} backgroundColor="#000"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <TransitionSeries>
       <TransitionSeries.Sequence durationInFrames={60}>
@@ -450,24 +187,277 @@ export const DirectTransitionSeries: Story = {
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition
         presentation={getPresentation("slideLeft")}
-        timing={linearTiming({ durationInFrames: 20 })}
+        timing={createTiming("snappy", 20)}
       />
       <TransitionSeries.Sequence durationInFrames={60}>
         <SceneB />
-      </TransitionSeries.Sequence>
-      <TransitionSeries.Transition
-        presentation={getPresentation("fade")}
-        timing={springTiming({ config: { damping: 200 } })}
-      />
-      <TransitionSeries.Sequence durationInFrames={60}>
-        <SceneC />
       </TransitionSeries.Sequence>
     </TransitionSeries>
   ),
 };
 
-export const MixedTransitions: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={240} backgroundColor="#000"><Story /></RemotionWrapper>],
+export const SlideRight: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideRight")}
+        timing={createTiming("snappy", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const SlideUp: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideUp")}
+        timing={createTiming("snappy", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const SlideDown: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideDown")}
+        timing={createTiming("snappy", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === SLIDE OVER TRANSITIONS ===
+
+export const SlideOverLeft: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideOverLeft")}
+        timing={createTiming("smooth", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const SlideOverRight: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideOverRight")}
+        timing={createTiming("smooth", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const SlideOverUp: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideOverUp")}
+        timing={createTiming("smooth", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === PUSH TRANSITIONS ===
+
+export const PushLeft: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [25])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("pushLeft")}
+        timing={createTiming("snappy", 25)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const PushRight: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [25])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("pushRight")}
+        timing={createTiming("snappy", 25)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === WIPE TRANSITIONS ===
+
+export const Wipe: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("wipeRight")}
+        timing={linearTiming({ durationInFrames: 30 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === ZOOM TRANSITIONS ===
+
+export const ZoomIn: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <TransitionSeries>
       <TransitionSeries.Sequence durationInFrames={60}>
@@ -480,9 +470,175 @@ export const MixedTransitions: Story = {
       <TransitionSeries.Sequence durationInFrames={60}>
         <SceneB />
       </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const ZoomOut: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
       <TransitionSeries.Transition
-        presentation={getPresentation("cube")}
-        timing={createTiming("snappy", 25)}
+        presentation={getPresentation("zoomOut")}
+        timing={createTiming("smooth", 30)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === CINEMATIC TRANSITIONS ===
+
+export const WhipPan: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [15])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("whipPan")}
+        timing={createTiming("linear", 15)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const FlashWhite: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("flashWhite")}
+        timing={createTiming("linear", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const FlashBlack: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("flashBlack")}
+        timing={createTiming("linear", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const Glitch: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [15])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("glitch")}
+        timing={createTiming("linear", 15)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === MULTI-SCENE TRANSITIONS ===
+
+export const ThreeSceneTransition: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60, 60], [30, 30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("fade")}
+        timing={createTiming("smooth", 30)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("fade")}
+        timing={createTiming("smooth", 30)}
       />
       <TransitionSeries.Sequence durationInFrames={60}>
         <SceneC />
@@ -512,38 +668,47 @@ const GalleryItem = ({ type, label }: { type: TransitionType; label: string }) =
   
   return (
     <div style={{ position: "relative", borderRadius: 8, overflow: "hidden", aspectRatio: "16/9" }}>
-      <Transition
-        durationInFrames={45}
-        type={type}
-        transitionDurationInFrames={20}
-        timing="smooth"
-      >
-        <MiniSceneA />
-        <MiniSceneB />
-      </Transition>
+      <TransitionSeries>
+        <TransitionSeries.Sequence durationInFrames={45}>
+          <MiniSceneA />
+        </TransitionSeries.Sequence>
+        <TransitionSeries.Transition
+          presentation={getPresentation(type)}
+          timing={createTiming("smooth", 20)}
+        />
+        <TransitionSeries.Sequence durationInFrames={45}>
+          <MiniSceneB />
+        </TransitionSeries.Sequence>
+      </TransitionSeries>
     </div>
   );
 };
 
 export const TransitionGallery: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={180} backgroundColor="#0a0a0a"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([45, 45], [20])}
+        backgroundColor="#0a0a0a"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => {
     const transitions: { type: TransitionType; label: string }[] = [
       { type: "fade", label: "Fade" },
       { type: "crossDissolve", label: "Dissolve" },
       { type: "blurDissolve", label: "Blur" },
-      { type: "slideLeft", label: "Slide" },
-      { type: "pushLeft", label: "Push" },
-      { type: "wipe", label: "Wipe" },
-      { type: "clockWipe", label: "Clock" },
-      { type: "circleWipe", label: "Circle" },
+      { type: "slideLeft", label: "Slide L" },
+      { type: "slideOverLeft", label: "Cover L" },
+      { type: "pushLeft", label: "Push L" },
+      { type: "wipeRight", label: "Wipe" },
       { type: "zoomIn", label: "Zoom In" },
       { type: "zoomOut", label: "Zoom Out" },
-      { type: "flip", label: "Flip" },
-      { type: "cube", label: "Cube" },
-      { type: "doorway", label: "Doorway" },
       { type: "whipPan", label: "Whip Pan" },
-      { type: "flashWhite", label: "Flash" },
+      { type: "flashWhite", label: "Flash W" },
+      { type: "flashBlack", label: "Flash B" },
       { type: "glitch", label: "Glitch" },
     ];
     
@@ -623,17 +788,29 @@ const ProductShowcase = () => (
 );
 
 export const ProductShowcaseTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0f"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [25])}
+        backgroundColor="#0a0a0f"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="blurDissolve"
-      transitionDurationInFrames={25}
-      timing="smooth"
-    >
-      <ProductTeaser />
-      <ProductShowcase />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <ProductTeaser />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("blurDissolve")}
+        timing={createTiming("smooth", 25)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <ProductShowcase />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
@@ -693,17 +870,29 @@ const CTAScene = () => (
 );
 
 export const TestimonialToCTA: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#0f0f1a"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [25])}
+        backgroundColor="#0f0f1a"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="doorway"
-      transitionDurationInFrames={25}
-      timing="smooth"
-    >
-      <TestimonialScene />
-      <CTAScene />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <TestimonialScene />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("zoomOut")}
+        timing={createTiming("smooth", 25)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <CTAScene />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
@@ -743,17 +932,29 @@ const Feature2 = () => (
 );
 
 export const FeatureSlideTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120} backgroundColor="#0a0a0f"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [15])}
+        backgroundColor="#0a0a0f"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={50}
-      type="slideLeft"
-      transitionDurationInFrames={15}
-      timing="snappy"
-    >
-      <Feature1 />
-      <Feature2 />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <Feature1 />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideLeft")}
+        timing={createTiming("snappy", 15)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <Feature2 />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
@@ -799,17 +1000,29 @@ const PricingCards = () => (
 );
 
 export const PricingRevealTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={130} backgroundColor="#0a0a0f"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([55, 55], [25])}
+        backgroundColor="#0a0a0f"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={55}
-      type="zoomIn"
-      transitionDurationInFrames={25}
-      timing="expo"
-    >
-      <PricingTeaser />
-      <PricingCards />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={55}>
+        <PricingTeaser />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("zoomIn")}
+        timing={createTiming("expo", 25)}
+      />
+      <TransitionSeries.Sequence durationInFrames={55}>
+        <PricingCards />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
@@ -858,23 +1071,44 @@ const AppInterface = () => (
 );
 
 export const AppDemoTransition: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={140} backgroundColor="#0f172a"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [20])}
+        backgroundColor="#0f172a"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
-    <Transition
-      durationInFrames={60}
-      type="cube"
-      transitionDurationInFrames={20}
-      timing="smooth"
-    >
-      <AppHero />
-      <AppInterface />
-    </Transition>
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <AppHero />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("slideOverUp")}
+        timing={createTiming("smooth", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <AppInterface />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
   ),
 };
 
 // Spring Timing Demo
 export const SpringTimingDemo: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={150} backgroundColor="#000"><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <TransitionSeries>
       <TransitionSeries.Sequence durationInFrames={60}>
@@ -888,6 +1122,7 @@ export const SpringTimingDemo: Story = {
             stiffness: 100,
             mass: 0.5,
           },
+          durationInFrames: 30,
         })}
       />
       <TransitionSeries.Sequence durationInFrames={60}>

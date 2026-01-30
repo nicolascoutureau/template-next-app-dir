@@ -4,7 +4,7 @@ import {
   type ShadowName,
   createColorShadow,
   createNeonGlow,
-} from "../../remotion/base/presets/shadows";
+} from "../../remotion/library/presets/shadows";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const ShadowBox = ({

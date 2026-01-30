@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
-import { ClipReveal } from "../../remotion/base/components/effects";
+import { ClipReveal } from "../../remotion/library/components/effects";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof ClipReveal> = {
@@ -14,8 +14,14 @@ const meta: Meta<typeof ClipReveal> = {
     ),
   ],
   argTypes: {
-    shape: { control: "select", options: ["circle", "inset", "diamond", "polygon", "diagonal", "split"] },
-    direction: { control: "select", options: ["expand", "contract", "left", "right", "up", "down"] },
+    shape: {
+      control: "select",
+      options: ["circle", "inset", "diamond", "polygon", "diagonal", "split"],
+    },
+    direction: {
+      control: "select",
+      options: ["expand", "contract", "left", "right", "up", "down"],
+    },
     duration: { control: { type: "range", min: 0.3, max: 2, step: 0.1 } },
     delay: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
   },
@@ -36,7 +42,14 @@ const Content = () => (
       borderRadius: 16,
     }}
   >
-    <span style={{ color: "white", fontSize: 32, fontWeight: 700, fontFamily: "Inter, system-ui" }}>
+    <span
+      style={{
+        color: "white",
+        fontSize: 32,
+        fontWeight: 700,
+        fontFamily: "Inter, system-ui",
+      }}
+    >
       Revealed!
     </span>
   </div>
@@ -141,7 +154,8 @@ export const CinematicHeroReveal: Story = {
     <ClipReveal shape="circle" direction="expand" duration={1.2} ease="smooth">
       <AbsoluteFill
         style={{
-          background: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+          background:
+            "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -212,19 +226,43 @@ export const ProductImageReveal: Story = {
               width: 200,
               height: 200,
               borderRadius: 40,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)",
+              background:
+                "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)",
               boxShadow: "0 30px 60px rgba(99, 102, 241, 0.4)",
             }}
           />
         </div>
       </ClipReveal>
       {/* Product Info */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 350 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 20,
+          maxWidth: 350,
+        }}
+      >
         <ClipReveal shape="inset" direction="left" duration={0.5} delay={0.3}>
-          <div style={{ fontSize: 14, color: "#6366f1", fontWeight: 600, letterSpacing: 2 }}>NEW RELEASE</div>
+          <div
+            style={{
+              fontSize: 14,
+              color: "#6366f1",
+              fontWeight: 600,
+              letterSpacing: 2,
+            }}
+          >
+            NEW RELEASE
+          </div>
         </ClipReveal>
         <ClipReveal shape="inset" direction="left" duration={0.6} delay={0.4}>
-          <div style={{ fontSize: 44, fontWeight: 700, color: "#0f172a", lineHeight: 1.2 }}>
+          <div
+            style={{
+              fontSize: 44,
+              fontWeight: 700,
+              color: "#0f172a",
+              lineHeight: 1.2,
+            }}
+          >
             Premium Product
           </div>
         </ClipReveal>
@@ -333,7 +371,12 @@ export const LogoUnveil: Story = {
         gap: 32,
       }}
     >
-      <ClipReveal shape="circle" direction="expand" duration={0.8} origin={[0.5, 0.5]}>
+      <ClipReveal
+        shape="circle"
+        direction="expand"
+        duration={0.8}
+        origin={[0.5, 0.5]}
+      >
         <div
           style={{
             width: 160,
@@ -351,8 +394,19 @@ export const LogoUnveil: Story = {
       </ClipReveal>
       <ClipReveal shape="inset" direction="expand" duration={0.6} delay={0.4}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#fff" }}>Acme Studio</div>
-          <div style={{ fontSize: 14, color: "#71717a", letterSpacing: 3, marginTop: 8 }}>CREATIVE AGENCY</div>
+          <div style={{ fontSize: 36, fontWeight: 700, color: "#fff" }}>
+            Acme Studio
+          </div>
+          <div
+            style={{
+              fontSize: 14,
+              color: "#71717a",
+              letterSpacing: 3,
+              marginTop: 8,
+            }}
+          >
+            CREATIVE AGENCY
+          </div>
         </div>
       </ClipReveal>
     </AbsoluteFill>
@@ -385,8 +439,12 @@ export const SplitScreenReveal: Story = {
           }}
         >
           <div style={{ textAlign: "right", paddingRight: 60 }}>
-            <div style={{ fontSize: 56, fontWeight: 800, color: "#fff" }}>BEFORE</div>
-            <div style={{ fontSize: 16, color: "#64748b", marginTop: 12 }}>The old way</div>
+            <div style={{ fontSize: 56, fontWeight: 800, color: "#fff" }}>
+              BEFORE
+            </div>
+            <div style={{ fontSize: 16, color: "#64748b", marginTop: 12 }}>
+              The old way
+            </div>
           </div>
         </div>
       </ClipReveal>
@@ -406,8 +464,18 @@ export const SplitScreenReveal: Story = {
           }}
         >
           <div style={{ textAlign: "left", paddingLeft: 60 }}>
-            <div style={{ fontSize: 56, fontWeight: 800, color: "#fff" }}>AFTER</div>
-            <div style={{ fontSize: 16, color: "rgba(255,255,255,0.7)", marginTop: 12 }}>The new standard</div>
+            <div style={{ fontSize: 56, fontWeight: 800, color: "#fff" }}>
+              AFTER
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                color: "rgba(255,255,255,0.7)",
+                marginTop: 12,
+              }}
+            >
+              The new standard
+            </div>
           </div>
         </div>
       </ClipReveal>
@@ -440,7 +508,13 @@ export const PortfolioCardReveal: Story = {
         }}
       >
         {projects.map((project, i) => (
-          <ClipReveal key={i} shape="inset" direction="up" duration={0.6} delay={i * 0.15}>
+          <ClipReveal
+            key={i}
+            shape="inset"
+            direction="up"
+            duration={0.6}
+            delay={i * 0.15}
+          >
             <div
               style={{
                 width: 280,
@@ -457,10 +531,21 @@ export const PortfolioCardReveal: Story = {
                 }}
               />
               <div style={{ padding: 24 }}>
-                <div style={{ fontSize: 12, color: project.color, fontWeight: 600, marginBottom: 8 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: project.color,
+                    fontWeight: 600,
+                    marginBottom: 8,
+                  }}
+                >
                   {project.category}
                 </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>{project.title}</div>
+                <div
+                  style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}
+                >
+                  {project.title}
+                </div>
               </div>
             </div>
           </ClipReveal>

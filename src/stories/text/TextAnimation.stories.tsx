@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
 import {
   TextAnimation,
-  TypewriterText,
-} from "../../remotion/base/components/text";
+  Typewriter,
+} from "../../remotion/library/components/text";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof TextAnimation> = {
@@ -620,19 +620,18 @@ export const TypewriterEffect: Story = {
         fontFamily: "'SF Mono', 'Fira Code', monospace",
       }}
     >
-      <TypewriterText
+      <Typewriter
+        text="$ npm install motion-primitives --save"
         speed={0.05}
         cursor
         cursorChar="|"
-        cursorColor="#4ade80"
+        cursorStyle={{ color: "#4ade80" }}
         style={{
           fontSize: 24,
           fontWeight: 400,
           color: "#4ade80",
         }}
-      >
-        {"$ npm install motion-primitives --save"}
-      </TypewriterText>
+      />
     </AbsoluteFill>
   ),
 };

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Particles } from "../../remotion/base/components/effects";
+import { Particles } from "../../remotion/library/components/effects";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof Particles> = {

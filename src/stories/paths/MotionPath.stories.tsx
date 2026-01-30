@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
   MotionPath,
   MotionPathWithTrail,
-} from "../../remotion/base/components/paths";
+} from "../../remotion/library/components/paths";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof MotionPath> = {

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Glitch } from "../../remotion/base/components/effects/svg";
+import { Glitch } from "../../remotion/library/components/effects/svg";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof Glitch> = {

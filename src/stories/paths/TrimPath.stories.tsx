@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TrimPath, DrawPath } from "../../remotion/base/components/paths";
+import { TrimPath, DrawPath } from "../../remotion/library/components/paths";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof TrimPath> = {

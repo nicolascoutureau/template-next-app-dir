@@ -15,7 +15,7 @@ import {
   EmeraldTint,
   PurpleTint,
   GoldenTint,
-} from "../../remotion/base/components/effects/Tint";
+} from "../../remotion/library/components/effects/Tint";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof Tint> = {

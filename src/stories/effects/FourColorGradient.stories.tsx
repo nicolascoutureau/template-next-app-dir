@@ -10,8 +10,8 @@ import {
   CandyGradient,
   gradientPositions,
   gradientPalettes,
-} from "../../remotion/base/components/effects/FourColorGradient";
-import { TextAnimation } from "../../remotion/base/components/text/TextAnimation";
+} from "../../remotion/library/components/effects/FourColorGradient";
+import { TextAnimation } from "../../remotion/library/components/text/TextAnimation";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof FourColorGradient> = {

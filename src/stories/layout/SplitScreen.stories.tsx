@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { SplitScreen } from "../../remotion/base/components/layout";
+import { SplitScreen } from "../../remotion/library/components/layout";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof SplitScreen> = {

@@ -16,9 +16,9 @@ import {
   PullOut,
   Shake,
   cameraEasings,
-} from "../../remotion/base/components/layout/Camera";
-import { TextAnimation } from "../../remotion/base/components/text/TextAnimation";
-import { TypewriterText } from "../../remotion/base/components/text/TextAnimation";
+} from "../../remotion/library/components/layout/Camera";
+import { TextAnimation } from "../../remotion/library/components/text/TextAnimation";
+import { Typewriter } from "../../remotion/library/components/text";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof Camera> = {
@@ -667,11 +667,12 @@ const FollowTypewriterScene: React.FC = () => {
               transform: "translateY(-50%)",
             }}
           >
-            <TypewriterText
+            <Typewriter
+              text={text}
               speed={secondsPerChar}
               cursor
               cursorChar="|"
-              cursorColor="#60a5fa"
+              cursorStyle={{ color: "#60a5fa" }}
               style={{
                 fontSize: 32,
                 fontWeight: 600,
@@ -679,9 +680,7 @@ const FollowTypewriterScene: React.FC = () => {
                 fontFamily: "monospace",
                 whiteSpace: "nowrap",
               }}
-            >
-              {text}
-            </TypewriterText>
+            />
           </div>
         </AbsoluteFill>
       </Camera>
@@ -752,20 +751,21 @@ const FollowMultilineScene: React.FC = () => {
             index === 0 ? 0 : index === 1 ? line2Start : line3Start;
           return (
             <Sequence key={index} from={startFrame}>
-              <TypewriterText
+              <Typewriter
+                text={line}
                 speed={secondsPerChar}
                 cursor={index === lines.length - 1}
                 cursorChar="█"
-                cursorColor={index === 2 ? "#4ade80" : "#60a5fa"}
+                cursorStyle={{
+                  color: index === 2 ? "#4ade80" : "#60a5fa",
+                }}
                 style={{
                   fontSize: 28,
                   fontWeight: 500,
                   color: index === 2 ? "#4ade80" : "#e2e8f0",
                   fontFamily: "'SF Mono', 'Fira Code', monospace",
                 }}
-              >
-                {line}
-              </TypewriterText>
+              />
             </Sequence>
           );
         })}
@@ -859,19 +859,18 @@ const CodeEditorFollowScene: React.FC = () => {
               {codeLines.map((line, index) => (
                 <Sequence key={index} from={lineTimings[index].start}>
                   {line.text.length > 0 ? (
-                    <TypewriterText
+                    <Typewriter
+                      text={line.text}
                       speed={secondsPerChar}
                       cursor={index === codeLines.length - 1}
                       cursorChar="|"
-                      cursorColor="#f5e0dc"
+                      cursorStyle={{ color: "#f5e0dc" }}
                       style={{
                         color: line.color,
                         display: "block",
                         height: 36,
                       }}
-                    >
-                      {line.text}
-                    </TypewriterText>
+                    />
                   ) : (
                     <div style={{ height: 36 }} />
                   )}
