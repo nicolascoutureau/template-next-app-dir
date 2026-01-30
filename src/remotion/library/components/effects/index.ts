@@ -3,13 +3,17 @@
  */
 
 export {
+  Shimmer,
+  ShimmerText,
+  type ShimmerProps,
+  type ShimmerTextProps,
+} from "./Shimmer";
+export {
   Glow,
   AnimatedGlow,
   type GlowProps,
   type AnimatedGlowProps,
-  type GlowLayer,
 } from "./Glow";
-export { LightSweep, type LightSweepProps } from "./LightSweep";
 export {
   ClipReveal,
   type ClipRevealProps,
@@ -20,6 +24,7 @@ export {
   Particles,
   type ParticlesProps,
   type ParticleBehavior,
+  type ParticleShape,
 } from "./Particles";
 export {
   AmbianceBackground,
@@ -97,6 +102,14 @@ export {
   type NoiseBlendMode,
 } from "./Noise";
 export { Liquid, type LiquidProps } from "./Liquid";
+export { GradientMesh, type GradientMeshProps } from "./GradientMesh";
+export { Glass, type GlassProps } from "./Glass";
+export { Reflection, type ReflectionProps } from "./Reflection";
+export { Neon, type NeonProps } from "./Neon";
+export { StarField, type StarFieldProps } from "./StarField";
+export { SpeedLines, type SpeedLinesProps } from "./SpeedLines";
+export { LensFlare, type LensFlareProps } from "./LensFlare";
+export { Pixelate, type PixelateProps } from "./Pixelate";
 
 // SVG Effects
 export * from "./svg";

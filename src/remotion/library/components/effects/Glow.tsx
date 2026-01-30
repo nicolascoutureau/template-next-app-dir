@@ -8,8 +8,6 @@ export interface GlowProps {
   children: React.ReactNode;
   /** Glow color */
   color?: string;
-  /** Multi-layer glow configuration */
-  layers?: GlowLayer[];
   /** Glow intensity (blur radius in pixels) */
   intensity?: number;
   /** Enable pulsating animation */
@@ -18,66 +16,18 @@ export interface GlowProps {
   pulseDuration?: number;
   /** Minimum intensity when pulsating (0-1 of intensity) */
   pulseMin?: number;
-  /** Spread of the glow (additional spread beyond blur) */
-  spread?: number;
-  /** Blend mode for glow */
-  blendMode?: CSSProperties["mixBlendMode"];
+  /**
+   * Layer count for rich glow (1 = simple, >1 = layered/cinematic)
+   */
+  layers?: number;
+  /**
+   * Decay factor for layered glow (how fast intensity drops per layer)
+   */
+  decay?: number;
   /** Additional CSS styles */
   style?: CSSProperties;
   /** Additional CSS class names */
   className?: string;
-}
-
-/**
- * Config for multi-layer glow.
- */
-export interface GlowLayer {
-  color?: string;
-  blur?: number;
-  opacity?: number;
-  x?: number;
-  y?: number;
-}
-
-function hexToRgba(hex: string, alpha: number): string {
-  const sanitized = hex.replace("#", "");
-  const full =
-    sanitized.length === 3
-      ? sanitized
-          .split("")
-          .map((c) => c + c)
-          .join("")
-      : sanitized;
-  const r = parseInt(full.substring(0, 2), 16);
-  const g = parseInt(full.substring(2, 4), 16);
-  const b = parseInt(full.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-function applyOpacity(color: string, opacity?: number): string {
-  if (opacity === undefined) return color;
-  if (color.startsWith("#")) return hexToRgba(color, opacity);
-  if (color.startsWith("rgb(")) {
-    return color.replace("rgb(", "rgba(").replace(")", `, ${opacity})`);
-  }
-  if (color.startsWith("rgba(")) {
-    return color.replace(/rgba\(([^)]+),\s*([0-9.]+)\)/, (_, rgb) => {
-      return `rgba(${rgb}, ${opacity})`;
-    });
-  }
-  return color;
-}
-
-function buildGlowFilter(layers: GlowLayer[], fallbackColor: string): string {
-  return layers
-    .map((layer) => {
-      const color = applyOpacity(layer.color ?? fallbackColor, layer.opacity);
-      const x = layer.x ?? 0;
-      const y = layer.y ?? 0;
-      const blur = Math.max(0, layer.blur ?? 0);
-      return `drop-shadow(${x}px ${y}px ${blur}px ${color})`;
-    })
-    .join(" ");
 }
 
 /**
@@ -104,13 +54,13 @@ function buildGlowFilter(layers: GlowLayer[], fallbackColor: string): string {
 export const Glow: React.FC<GlowProps> = ({
   children,
   color = "#3b82f6",
-  layers,
   intensity = 20,
   pulsate = false,
   pulseDuration = 2,
   pulseMin = 0.5,
   spread = 0,
-  blendMode,
+  layers = 1,
+  decay = 2,
   style,
   className,
 }) => {
@@ -131,37 +81,30 @@ export const Glow: React.FC<GlowProps> = ({
     return intensity * scaledIntensity;
   }, [pulsate, intensity, pulseDuration, pulseMin, frame, fps]);
 
-  const computedLayers = useMemo<GlowLayer[]>(() => {
-    if (layers && layers.length > 0) {
-      return layers.map((layer) => ({
-        ...layer,
-        blur: layer.blur ?? currentIntensity,
-        color: layer.color ?? color,
-      }));
+  const dropShadows = useMemo(() => {
+    if (layers <= 1) {
+        return `drop-shadow(0 0 ${currentIntensity}px ${color})${
+            spread > 0 ? ` drop-shadow(0 0 ${spread}px ${color})` : ""
+        }`;
     }
 
-    return [
-      {
-        color,
-        blur: Math.max(0, currentIntensity * 0.6),
-        opacity: 0.6,
-      },
-      {
-        color,
-        blur: Math.max(0, currentIntensity),
-        opacity: 0.35,
-      },
-      {
-        color,
-        blur: Math.max(0, currentIntensity * 1.6 + spread),
-        opacity: 0.2,
-      },
-    ];
-  }, [layers, currentIntensity, color, spread]);
+    let shadows = "";
+    for (let i = 0; i < layers; i++) {
+        const layerIntensity = currentIntensity * Math.pow(decay, i);
+        // We can also increase opacity falloff if we switched to box-shadow, 
+        // but for drop-shadow we just layer them. 
+        // Note: multiple drop-shadows on one element can be expensive, 
+        // but they look great.
+        // To avoid "solid" look, we might vary the color alpha if possible, 
+        // but color is a string. 
+        // Instead, we just stack them with increasing blur.
+        shadows += `drop-shadow(0 0 ${layerIntensity}px ${color}) `;
+    }
+    return shadows.trim();
+  }, [currentIntensity, color, spread, layers, decay]);
 
   const glowStyle: CSSProperties = {
-    filter: currentIntensity > 0 ? buildGlowFilter(computedLayers, color) : undefined,
-    mixBlendMode: blendMode,
+    filter: dropShadows,
     ...style,
   };
 
@@ -195,7 +138,6 @@ export interface AnimatedGlowProps extends Omit<GlowProps, "pulsate"> {
 export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
   children,
   color = "#3b82f6",
-  layers,
   intensity = 20,
   duration = 0.5,
   delay = 0,
@@ -203,7 +145,8 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
   pulseMin = 0.5,
   pulsateAfter = false,
   spread = 0,
-  blendMode,
+  layers = 1,
+  decay = 2,
   style,
   className,
 }) => {
@@ -254,38 +197,25 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
     fps,
   ]);
 
-  const computedLayers = useMemo<GlowLayer[]>(() => {
-    if (layers && layers.length > 0) {
-      return layers.map((layer) => ({
-        ...layer,
-        blur: layer.blur ?? currentIntensity,
-        color: layer.color ?? color,
-      }));
-    }
+  const dropShadows = useMemo(() => {
+      if (currentIntensity <= 0) return undefined;
+      
+      if (layers <= 1) {
+          return `drop-shadow(0 0 ${currentIntensity}px ${color})${
+              spread > 0 ? ` drop-shadow(0 0 ${spread}px ${color})` : ""
+          }`;
+      }
 
-    return [
-      {
-        color,
-        blur: Math.max(0, currentIntensity * 0.6),
-        opacity: 0.6,
-      },
-      {
-        color,
-        blur: Math.max(0, currentIntensity),
-        opacity: 0.35,
-      },
-      {
-        color,
-        blur: Math.max(0, currentIntensity * 1.6 + spread),
-        opacity: 0.2,
-      },
-    ];
-  }, [layers, currentIntensity, color, spread]);
+      let shadows = "";
+      for (let i = 0; i < layers; i++) {
+          const layerIntensity = currentIntensity * Math.pow(decay, i);
+          shadows += `drop-shadow(0 0 ${layerIntensity}px ${color}) `;
+      }
+      return shadows.trim();
+  }, [currentIntensity, color, spread, layers, decay]);
 
   const glowStyle: CSSProperties = {
-    filter:
-      currentIntensity > 0 ? buildGlowFilter(computedLayers, color) : undefined,
-    mixBlendMode: blendMode,
+    filter: dropShadows,
     ...style,
   };
 

@@ -1,7 +1,13 @@
 import { useGsapTimeline } from "../../hooks/useGsapTimeline";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { useRef, type CSSProperties, type ReactNode, type RefObject } from "react";
+import {
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+} from "react";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 
 gsap.registerPlugin(SplitText);
 
@@ -68,16 +74,18 @@ export const TextAnimation: React.FC<TextAnimationProps> = ({
   });
 
   return (
-    <div 
-      ref={animationContainerRef} 
-      className={className} 
+    <div
+      ref={animationContainerRef}
+      className={className}
       style={{
         perspective: `${perspective}px`,
         transformStyle: "preserve-3d",
-        ...style
+        ...style,
       }}
     >
-      <div ref={textRef} style={{ transformStyle: "preserve-3d" }}>{children}</div>
+      <div ref={textRef} style={{ transformStyle: "preserve-3d" }}>
+        {children}
+      </div>
     </div>
   );
 };
@@ -176,6 +184,68 @@ export const RevealLines: React.FC<TextAnimationPresetProps> = ({
 );
 
 /**
+ * Scramble/decode text effect - characters appear to scramble before revealing.
+ */
+export const ScrambleText: React.FC<TextAnimationPresetProps> = ({
+  children,
+  stagger = 0.02,
+  duration = 0.8,
+  ease = "none",
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      tl.from(split.chars, {
+        opacity: 0,
+        scale: 0,
+        rotationX: -90,
+        duration,
+        stagger,
+        ease,
+      });
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
+
+/**
+ * Elastic bounce in effect for each character.
+ */
+export const BounceChars: React.FC<TextAnimationPresetProps> = ({
+  children,
+  stagger = 0.04,
+  duration = 0.8,
+  ease = "elastic.out(1, 0.3)",
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      tl.from(split.chars, {
+        opacity: 0,
+        y: -50,
+        scale: 0.5,
+        duration,
+        stagger,
+        ease,
+      });
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
+
+/**
  * 3D Flip in characters (rotate X).
  */
 export const FlipInChars: React.FC<TextAnimationPresetProps> = ({
@@ -240,12 +310,51 @@ export const RotateInWords: React.FC<TextAnimationPresetProps> = ({
 );
 
 /**
+ * Wave animation - characters animate in with a wave-like stagger pattern.
+ */
+export const WaveText: React.FC<
+  TextAnimationPresetProps & { amplitude?: number }
+> = ({
+  children,
+  stagger = 0.04,
+  duration = 0.5,
+  ease = "back.out(1.7)",
+  amplitude = 30,
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      tl.from(split.chars, {
+        y: amplitude,
+        opacity: 0,
+        scale: 0.8,
+        duration,
+        stagger: {
+          each: stagger,
+          from: "start",
+        },
+        ease,
+      });
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
+
+/**
  * Slide in text from a direction.
  */
-export const SlideInText: React.FC<TextAnimationPresetProps & { 
-  direction?: "left" | "right" | "top" | "bottom";
-  distance?: number;
-}> = ({
+export const SlideInText: React.FC<
+  TextAnimationPresetProps & {
+    direction?: "left" | "right" | "top" | "bottom";
+    distance?: number;
+  }
+> = ({
   children,
   stagger = 0.05,
   duration = 0.6,
@@ -257,15 +366,19 @@ export const SlideInText: React.FC<TextAnimationPresetProps & {
 }) => {
   const getOffset = () => {
     switch (direction) {
-      case "left": return { x: -distance, y: 0 };
-      case "right": return { x: distance, y: 0 };
-      case "top": return { x: 0, y: -distance };
-      case "bottom": return { x: 0, y: distance };
+      case "left":
+        return { x: -distance, y: 0 };
+      case "right":
+        return { x: distance, y: 0 };
+      case "top":
+        return { x: 0, y: -distance };
+      case "bottom":
+        return { x: 0, y: distance };
     }
   };
-  
+
   const offset = getOffset();
-  
+
   return (
     <TextAnimation
       className={className}
@@ -286,5 +399,192 @@ export const SlideInText: React.FC<TextAnimationPresetProps & {
     </TextAnimation>
   );
 };
+
+/**
+ * Matrix / Hacker effect - Cycles random characters before resolving.
+ */
+export const HackerText: React.FC<
+  TextAnimationPresetProps & { chars?: string }
+> = ({
+  children,
+  stagger = 0.02,
+  duration = 1,
+  chars = "01",
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      const charsArray = chars.split("");
+
+      // Animate each character
+      split.chars.forEach((el, i) => {
+        const char = el as HTMLElement;
+        const originalText = char.innerText;
+        const charDuration = duration;
+        const startTime = i * stagger;
+
+        // Random character cycling
+        tl.to(
+          char,
+          {
+            duration: charDuration,
+            onUpdate: function () {
+              // Only update random char during the first 80% of duration
+              if (this.progress() < 0.8) {
+                char.innerText =
+                  charsArray[Math.floor(Math.random() * charsArray.length)];
+              } else {
+                char.innerText = originalText;
+              }
+            },
+            ease: "none", // Constant scrambling speed
+          },
+          startTime,
+        );
+
+        // Reveal opacity/color alongside
+        tl.fromTo(
+          char,
+          { opacity: 0, color: "#0f0" },
+          {
+            opacity: 1,
+            color: "inherit",
+            duration: 0.2,
+            delay: charDuration * 0.8,
+          },
+          startTime,
+        );
+      });
+
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
+
+/**
+ * Props for TypewriterText component.
+ */
+export interface TypewriterTextProps {
+  children: ReactNode;
+  /** Time per character reveal in seconds */
+  speed?: number;
+  /** Show blinking cursor */
+  cursor?: boolean;
+  /** Cursor character */
+  cursorChar?: string;
+  /** Cursor color */
+  cursorColor?: string;
+  /** Additional CSS class names */
+  className?: string;
+  /** Additional CSS styles */
+  style?: CSSProperties;
+}
+
+/**
+ * Typewriter effect - reveals text character by character like typing.
+ */
+export const TypewriterText: React.FC<TypewriterTextProps> = ({
+  children,
+  speed = 0.05,
+  cursor = true,
+  cursorChar = "|",
+  cursorColor = "currentColor",
+  className,
+  style,
+}) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  const text = typeof children === "string" ? children : String(children);
+  const charsToShow = Math.floor(frame / (speed * fps));
+  const visibleText = text.slice(0, Math.min(charsToShow, text.length));
+
+  const cursorVisible = Math.floor(frame / (fps * 0.4)) % 2 === 0;
+
+  return (
+    <span className={className} style={style}>
+      {visibleText}
+      {cursor && (
+        <span
+          style={{
+            color: cursorColor,
+            opacity: cursorVisible ? 1 : 0,
+          }}
+        >
+          {cursorChar}
+        </span>
+      )}
+    </span>
+  );
+};
+
+/**
+ * Blur reveal effect - characters come into focus from a blur.
+ */
+export const BlurReveal: React.FC<TextAnimationPresetProps> = ({
+  children,
+  stagger = 0.05,
+  duration = 0.8,
+  ease = "power2.out",
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      tl.from(split.chars, {
+        opacity: 0,
+        filter: "blur(10px)",
+        scale: 1.2,
+        duration,
+        stagger,
+        ease,
+      });
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
+
+/**
+ * Glitch text effect - erratic scale and opacity before settling.
+ */
+export const GlitchText: React.FC<TextAnimationPresetProps> = ({
+  children,
+  stagger = 0.02,
+  duration = 0.6,
+  ease = "rough({ strength: 2, points: 10, template: none, taper: none, randomize: true, clamp: false })",
+  className,
+  style,
+}) => (
+  <TextAnimation
+    className={className}
+    style={style}
+    createTimeline={({ textRef, tl, SplitText }) => {
+      const split = new SplitText(textRef.current, { type: "chars" });
+      tl.from(split.chars, {
+        opacity: 0,
+        x: () => (Math.random() - 0.5) * 20,
+        y: () => (Math.random() - 0.5) * 20,
+        scale: 0,
+        duration,
+        stagger,
+        ease,
+      });
+      return tl;
+    }}
+  >
+    {children}
+  </TextAnimation>
+);
 
 export default TextAnimation;

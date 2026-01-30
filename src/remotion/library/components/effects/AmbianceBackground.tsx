@@ -2,6 +2,7 @@ import React, { useMemo, type CSSProperties, type ReactNode } from "react";
 import {
   useCurrentFrame,
   useVideoConfig,
+  random,
   AbsoluteFill,
 } from "remotion";
 

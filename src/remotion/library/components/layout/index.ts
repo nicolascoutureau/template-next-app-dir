@@ -38,3 +38,4 @@ export {
   type PullOutProps,
   type ShakeProps,
 } from "./Camera";
+export { MaskedReveal, type MaskedRevealProps, type RevealType } from "./MaskedReveal";

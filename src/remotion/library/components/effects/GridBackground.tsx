@@ -28,10 +28,12 @@ export interface GridBackgroundProps {
   majorGridColor?: string;
   /** Major grid line width */
   majorGridWidth?: number;
-  /** Animate grid (subtle movement) */
+  /** Animate grid (subtle movement or scroll) */
   animate?: boolean;
-  /** Animation speed */
-  animationSpeed?: number;
+  /** Animation speed (pixels per second for scroll) */
+  velocity?: number;
+  /** Scroll direction */
+  direction?: "up" | "down" | "left" | "right";
   /** Fade edges */
   fadeEdges?: boolean;
   /** Perspective tilt (0 = flat, 1 = max tilt) */
@@ -69,17 +71,37 @@ export const GridBackground: React.FC<GridBackgroundProps> = ({
   majorGridColor = "rgba(0, 0, 0, 0.12)",
   majorGridWidth = 1,
   animate = false,
-  animationSpeed = 1,
+  velocity = 40,
+  direction = "down",
   fadeEdges = false,
   perspective = 0,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Animation offset
-  const time = (frame / fps) * animationSpeed;
-  const offsetX = animate ? Math.sin(time * 0.5) * 10 : 0;
-  const offsetY = animate ? Math.cos(time * 0.3) * 10 : 0;
+  // Animation offset for infinite scroll
+  const offset = animate ? (frame / fps) * velocity : 0;
+  
+  let offsetX = 0;
+  let offsetY = 0;
+
+  switch (direction) {
+    case "up":
+      offsetY = offset;
+      break;
+    case "down":
+      offsetY = -offset;
+      break;
+    case "left":
+      offsetX = offset;
+      break;
+    case "right":
+      offsetX = -offset;
+      break;
+  }
+  
+  // Ensure smooth looping by using modulo if needed, but background-repeat handles it mostly.
+  // For precise looping without jumps, we rely on CSS background-repeat.
 
   // Generate grid pattern based on style
   const gridPattern = useMemo(() => {

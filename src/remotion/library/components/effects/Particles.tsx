@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef } from "react";
-import { useCurrentFrame, useVideoConfig } from "remotion";
+import { useCurrentFrame, useVideoConfig, random } from "remotion";
 
 /**
  * Particle behavior types.
@@ -149,6 +149,8 @@ export const Particles: React.FC<ParticlesProps> = ({
         rotation: prng(i, 'rot') * Math.PI * 2,
         rotationSpeed: (prng(i, 'rotSpd') - 0.5) * 0.2,
         phase: prng(i, 'phase') * Math.PI * 2,
+        initialX: x,
+        initialY: y,
       };
     });
   }, [count, seed, size, colors, opacity]);

@@ -21,6 +21,7 @@ import {
   zoomIn,
   zoomOut,
 } from "./transitions/presentations";
+import { flip } from "./transitions/presentations/flip";
 
 // Re-export with explicit assignment to avoid react-docgen parsing issues
 export const TransitionSeries = RemotionTransitionSeries;
@@ -50,7 +51,9 @@ export type TransitionType =
   | "whipPan"
   | "flashWhite"
   | "flashBlack"
-  | "glitch";
+  | "glitch"
+  | "flipHorizontal"
+  | "flipVertical";
 
 export type TimingType = "linear" | "spring" | "smooth" | "snappy" | "expo";
 
@@ -133,6 +136,10 @@ export function getPresentation(type: TransitionType): AnyPresentation {
       return flashBlack();
     case "glitch":
       return glitch();
+    case "flipHorizontal":
+      return flip({ direction: "horizontal" });
+    case "flipVertical":
+      return flip({ direction: "vertical" });
     default:
       return fade();
   }
@@ -162,6 +169,8 @@ export const TRANSITION_TYPES: TransitionType[] = [
   "flashWhite",
   "flashBlack",
   "glitch",
+  "flipHorizontal",
+  "flipVertical",
 ];
 
 export const TIMING_TYPES: TimingType[] = [

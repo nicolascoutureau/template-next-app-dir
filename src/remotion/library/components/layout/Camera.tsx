@@ -20,8 +20,12 @@ export interface CameraKeyframe {
   y?: number | string;
   /** Scale/zoom level (1 = 100%, 2 = 200%, etc.) */
   scale?: number;
-  /** Rotation in degrees */
+  /** Rotation in degrees (Z axis) */
   rotation?: number;
+  /** Rotation X in degrees */
+  rotateX?: number;
+  /** Rotation Y in degrees */
+  rotateY?: number;
   /** Easing function to use when transitioning TO this keyframe */
   easing?: (t: number) => number;
 }
@@ -64,8 +68,14 @@ export interface CameraProps {
   y?: number | string;
   /** Static scale/zoom (if not using keyframes) */
   scale?: number;
-  /** Static rotation (if not using keyframes) */
+  /** Static rotation (Z) */
   rotation?: number;
+  /** Static rotation X */
+  rotateX?: number;
+  /** Static rotation Y */
+  rotateY?: number;
+  /** Perspective depth (pixels) */
+  perspective?: number;
   /** Transform origin for zoom (e.g., "center", "top left", "50% 30%") */
   origin?: string;
   /** Default easing for all keyframe transitions */
@@ -100,7 +110,7 @@ function parsePosition(
 function interpolateKeyframes(
   frame: number,
   keyframes: CameraKeyframe[],
-  property: "x" | "y" | "scale" | "rotation",
+  property: "x" | "y" | "scale" | "rotation" | "rotateX" | "rotateY",
   defaultValue: number,
   defaultEasing: (t: number) => number,
   dimension: number,
@@ -219,7 +229,10 @@ export const Camera: React.FC<CameraProps> = ({
   y: staticY,
   scale: staticScale,
   rotation: staticRotation,
+  rotateX: staticRotateX,
+  rotateY: staticRotateY,
   origin = "center",
+  perspective = 1000,
   defaultEasing = cameraEasings.smooth,
   wiggle = 0,
   wiggleSpeed = 1,
@@ -237,17 +250,33 @@ export const Camera: React.FC<CameraProps> = ({
         y: parsePosition(staticY, height),
         scale: staticScale ?? 1,
         rotation: staticRotation ?? 0,
+        rotateX: staticRotateX ?? 0,
+        rotateY: staticRotateY ?? 0,
       };
     }
 
     return {
-      x: interpolateKeyframes(frame, keyframes, "x", 0, defaultEasing, width),
-      y: interpolateKeyframes(frame, keyframes, "y", 0, defaultEasing, height),
+      x: interpolateKeyframes(
+        frame,
+        keyframes,
+        "x",
+        parsePosition(staticX, width),
+        defaultEasing,
+        width,
+      ),
+      y: interpolateKeyframes(
+        frame,
+        keyframes,
+        "y",
+        parsePosition(staticY, height),
+        defaultEasing,
+        height,
+      ),
       scale: interpolateKeyframes(
         frame,
         keyframes,
         "scale",
-        1,
+        staticScale ?? 1,
         defaultEasing,
         1,
       ),
@@ -255,7 +284,23 @@ export const Camera: React.FC<CameraProps> = ({
         frame,
         keyframes,
         "rotation",
-        0,
+        staticRotation ?? 0,
+        defaultEasing,
+        1,
+      ),
+      rotateX: interpolateKeyframes(
+        frame,
+        keyframes,
+        "rotateX",
+        staticRotateX ?? 0,
+        defaultEasing,
+        1,
+      ),
+      rotateY: interpolateKeyframes(
+        frame,
+        keyframes,
+        "rotateY",
+        staticRotateY ?? 0,
         defaultEasing,
         1,
       ),
@@ -267,6 +312,8 @@ export const Camera: React.FC<CameraProps> = ({
     staticY,
     staticScale,
     staticRotation,
+    staticRotateX,
+    staticRotateY,
     defaultEasing,
     width,
     height,
@@ -274,7 +321,7 @@ export const Camera: React.FC<CameraProps> = ({
 
   // Calculate handheld wiggle using Simplex noise
   const wiggleValues = useMemo(() => {
-    if (wiggle <= 0) return { x: 0, y: 0, rotation: 0 };
+    if (wiggle <= 0) return { x: 0, y: 0, rotation: 0, rotateX: 0, rotateY: 0 };
 
     const time = (frame / fps) * wiggleSpeed;
     
@@ -286,8 +333,10 @@ export const Camera: React.FC<CameraProps> = ({
     const x = noise2D('camera-x', time * 0.5, 0) * positionIntensity;
     const y = noise2D('camera-y', time * 0.5 + 100, 0) * positionIntensity;
     const rot = noise2D('camera-rot', time * 0.3 + 200, 0) * rotationIntensity;
+    const rotX = noise2D('camera-rotX', time * 0.3 + 300, 0) * rotationIntensity;
+    const rotY = noise2D('camera-rotY', time * 0.3 + 400, 0) * rotationIntensity;
 
-    return { x, y, rotation: rot };
+    return { x, y, rotation: rot, rotateX: rotX, rotateY: rotY };
   }, [frame, fps, wiggle, wiggleSpeed]);
 
   // Combine values
@@ -296,17 +345,30 @@ export const Camera: React.FC<CameraProps> = ({
     y: keyframeValues.y + wiggleValues.y,
     scale: keyframeValues.scale,
     rotation: keyframeValues.rotation + wiggleValues.rotation,
+    rotateX: keyframeValues.rotateX + wiggleValues.rotateX,
+    rotateY: keyframeValues.rotateY + wiggleValues.rotateY,
   };
 
   const transform = useMemo(() => {
     const parts: string[] = [];
 
-    // Apply in order: translate, rotate, scale
+    // Apply in order: perspective, translate, rotate, scale
+    // Note: Perspective should be applied to parent or earlier in chain usually, 
+    // but here we apply it to the element itself or we need a wrapper.
+    // CSS perspective property on parent is better.
+    // But we can use transform: perspective() too.
+    
     if (currentValues.x !== 0 || currentValues.y !== 0) {
-      parts.push(`translate(${-currentValues.x}px, ${-currentValues.y}px)`);
+      parts.push(`translate3d(${-currentValues.x}px, ${-currentValues.y}px, 0)`);
     }
     if (currentValues.rotation !== 0) {
-      parts.push(`rotate(${-currentValues.rotation}deg)`);
+      parts.push(`rotateZ(${-currentValues.rotation}deg)`);
+    }
+    if (currentValues.rotateX !== 0) {
+        parts.push(`rotateX(${-currentValues.rotateX}deg)`);
+    }
+    if (currentValues.rotateY !== 0) {
+        parts.push(`rotateY(${-currentValues.rotateY}deg)`);
     }
     if (currentValues.scale !== 1) {
       parts.push(`scale(${currentValues.scale})`);
@@ -319,12 +381,20 @@ export const Camera: React.FC<CameraProps> = ({
     <AbsoluteFill
       className={className}
       style={{
-        transform,
-        transformOrigin: origin,
+        perspective: `${perspective}px`,
+        transformStyle: "preserve-3d",
         ...style,
       }}
     >
-      {children}
+      <div style={{ 
+          width: "100%", 
+          height: "100%", 
+          transform, 
+          transformOrigin: origin,
+          transformStyle: "preserve-3d" 
+      }}>
+        {children}
+      </div>
     </AbsoluteFill>
   );
 };

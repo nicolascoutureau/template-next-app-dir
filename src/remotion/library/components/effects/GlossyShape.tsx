@@ -1,5 +1,5 @@
-import React, { useId, useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig } from "remotion";
+import React, { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 
 /**
  * Shape types for glossy shapes.
@@ -297,7 +297,6 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const uniqueId = useId().replace(/:/g, "-");
 
   // Calculate secondary color if not provided
   const effectiveSecondaryColor = secondaryColor || adjustColor(color, -20);
@@ -385,7 +384,7 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
 
   // For blob shapes, render with SVG clip path
   if (isBlob && blobPath) {
-    const svgId = `blob-${shape}-${uniqueId}`;
+    const svgId = `blob-${shape}-${Math.random().toString(36).substr(2, 9)}`;
 
     return (
       <div

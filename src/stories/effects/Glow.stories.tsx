@@ -126,26 +126,3 @@ export const MultipleColors: Story = {
     </div>
   ),
 };
-
-export const LayeredBloom: Story = {
-  render: () => (
-    <Glow
-      color="#38bdf8"
-      intensity={26}
-      layers={[
-        { blur: 12, opacity: 0.7 },
-        { blur: 28, opacity: 0.35 },
-        { blur: 46, opacity: 0.2 },
-      ]}
-    >
-      <div
-        style={{
-          width: 140,
-          height: 140,
-          borderRadius: 28,
-          background: "#38bdf8",
-        }}
-      />
-    </Glow>
-  ),
-};

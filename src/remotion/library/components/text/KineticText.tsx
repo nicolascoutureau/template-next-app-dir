@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
 export type KineticType = "path" | "marquee" | "cylinder";
@@ -8,26 +8,24 @@ export interface KineticTextProps {
   type?: KineticType;
   /** Path data for 'path' type */
   path?: string;
-  /** SVG viewBox for the path mode */
-  pathViewBox?: string;
   /** Font size */
   fontSize?: number;
   /** Font family */
   fontFamily?: string;
+  /** Font weight */
+  fontWeight?: string | number;
   /** Text color */
   color?: string;
-  /** Speed of movement (1 = 100px/sec) */
+  /** Speed of movement */
   speed?: number;
   /** Reverse direction */
   reverse?: boolean;
   /** Repeat text to fill space */
   repeat?: number;
-  /** Gap between repeats (px) */
+  /** Gap between repeats */
   gap?: number;
   /** Cylinder radius for 'cylinder' type */
   radius?: number;
-  /** Perspective distance for 'cylinder' type */
-  perspective?: number;
   /** Skew X for marquee */
   skew?: number;
   /** Additional styles */
@@ -35,117 +33,69 @@ export interface KineticTextProps {
   className?: string;
 }
 
-const getGapSpaces = (gap: number, fontSize: number) => {
-  const spaceWidth = Math.max(4, fontSize * 0.35);
-  return Math.max(1, Math.round(gap / spaceWidth));
-};
-
 /**
  * Advanced kinetic typography component.
- * Supports text along a path, infinite marquee, and 3D cylinder rotation.
- *
- * @example
- * // Text along a wave path
- * <KineticText
- *   type="path"
- *   path="M0,50 Q200,0 400,50 T800,50"
- *   repeat={3}
- * >
- *   WAVY TEXT
- * </KineticText>
- *
- * @example
- * // Infinite scrolling marquee
- * <KineticText type="marquee" speed={1.2} repeat={6}>
- *   SCROLLING NEWS
- * </KineticText>
- *
- * @example
- * // Rotating cylinder
- * <KineticText type="cylinder" radius={140} repeat={8}>
- *   ROTATING 3D
- * </KineticText>
+ * Supports text along path, infinite marquee, and 3D cylinder rotation.
  */
 export const KineticText: React.FC<KineticTextProps> = ({
   children,
   type = "marquee",
   path,
-  pathViewBox,
   fontSize = 40,
   fontFamily = "sans-serif",
+  fontWeight = "bold",
   color = "currentColor",
   speed = 1,
   reverse = false,
   repeat = 1,
   gap = 20,
   radius = 100,
-  perspective = 1000,
   skew = 0,
   style,
   className,
 }) => {
   const frame = useCurrentFrame();
-  const { fps, width, height } = useVideoConfig();
+  const { fps, width } = useVideoConfig();
   const time = frame / fps;
-  const direction = reverse ? 1 : -1;
-  const id = useId().replace(/:/g, "-");
-  const pathId = `kinetic-path-${id}`;
-  const pathRef = useRef<SVGPathElement>(null);
-  const [pathLength, setPathLength] = useState(0);
-  const measureRef = useRef<HTMLSpanElement>(null);
-  const [textWidth, setTextWidth] = useState(0);
 
-  const textStyle = useMemo(
-    () => ({
-      fontSize,
-      fontFamily,
-      color,
-      whiteSpace: "nowrap" as const,
-    }),
-    [fontSize, fontFamily, color],
-  );
+  // Path Text Implementation - Memoize ID unconditionally
+  const pathId = useMemo(() => `path-${Math.random().toString(36).substr(2, 9)}`, []);
 
-  useEffect(() => {
-    if (type === "path" && pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength());
-    }
-  }, [path, type]);
+  // Cylinder Implementation - Memoize items unconditionally (or with dependency on repeat)
+  const cylinderItems = useMemo(() => {
+    return Array.from({ length: Math.max(1, repeat) }).map((_, i) => {
+        const angleStep = (Math.PI * 2) / Math.max(1, repeat);
+        return { baseAngle: i * angleStep, index: i };
+    });
+  }, [repeat]);
 
-  useEffect(() => {
-    if (!measureRef.current) return;
-    const width = measureRef.current.getBoundingClientRect().width;
-    if (width > 0 && Math.abs(width - textWidth) > 0.5) {
-      setTextWidth(width);
-    }
-  }, [children, fontSize, fontFamily, textWidth]);
-
-  // Path Text Implementation
   if (type === "path" && path) {
-
-    const spacer = "\u00A0".repeat(getGapSpaces(gap, fontSize));
-    const textContent = useMemo(() => {
-      const count = Math.max(1, repeat);
-      return Array.from({ length: count })
-        .map(() => children)
-        .join(spacer);
-    }, [children, repeat, spacer]);
-
-    const loopLength = pathLength > 0 ? pathLength : Math.max(width, height) * 4;
-    const rawOffset = ((time * speed * 100) % loopLength + loopLength) % loopLength;
-    const offset = reverse ? loopLength - rawOffset : rawOffset;
+    // Generate repeated text
+    const textContent = Array.from({ length: Math.max(1, repeat) }).map(() => children).join(" ".repeat(Math.ceil(gap/10)));
+    
+    // Animate startOffset
+    const totalLength = 2000; // Arbitrary large number
+    const offset = (time * speed * 100) % totalLength;
+    const startOffset = reverse ? -offset : offset;
 
     return (
       <div className={className} style={{ width: "100%", height: "100%", ...style }}>
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={pathViewBox ?? `0 0 ${width} ${height}`}
-          preserveAspectRatio="xMidYMid meet"
-          overflow="visible"
-        >
-          <path ref={pathRef} id={pathId} d={path} fill="none" stroke="none" />
-          <text style={textStyle} dominantBaseline="middle">
-            <textPath href={`#${pathId}`} startOffset={`${offset}px`} spacing="auto">
+        <svg width="100%" height="100%" viewBox={`0 0 ${width} ${width}`} overflow="visible">
+          <defs>
+             <path id={pathId} d={path} />
+          </defs>
+          <text 
+            fontSize={fontSize} 
+            fontFamily={fontFamily} 
+            fontWeight={fontWeight}
+            fill={color}
+            dominantBaseline="middle"
+          >
+            <textPath 
+              href={`#${pathId}`} 
+              startOffset={startOffset}
+              spacing="auto"
+            >
               {textContent}
             </textPath>
           </text>
@@ -156,93 +106,113 @@ export const KineticText: React.FC<KineticTextProps> = ({
 
   // Cylinder / 3D Implementation
   if (type === "cylinder") {
-    const itemCount = Math.max(3, repeat);
-    const rotation = time * speed * 30 * (reverse ? -1 : 1);
-    const angleStep = 360 / itemCount;
+    const rotation = (time * speed) % (Math.PI * 2);
 
     return (
-      <div
-        className={className}
-        style={{
+      <div 
+        className={className} 
+        style={{ 
           position: "relative",
-          width: "100%",
-          height: "100%",
-          display: "grid",
-          placeItems: "center",
-          perspective: `${perspective}px`,
-          ...style,
+          width: "100%", 
+          height: "100%", 
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          perspective: "1000px",
+          transformStyle: "preserve-3d",
+          ...style 
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
+        <div style={{
+            position: "relative",
             transformStyle: "preserve-3d",
-            transform: `rotateY(${rotation}deg)`,
-          }}
-        >
-          {Array.from({ length: itemCount }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                transform: `translate(-50%, -50%) rotateY(${i * angleStep}deg) translateZ(${radius}px)`,
-                transformStyle: "preserve-3d",
-                backfaceVisibility: "hidden",
-                ...textStyle,
-              }}
-            >
-              {children}
-            </div>
-          ))}
+            // We rotate the container to see the cylinder spin, or we move items?
+            // Moving items individually is better for z-index sorting if we did it manually,
+            // but CSS 3D preserve-3d handles z-sorting automatically if browsers support it well.
+            // Let's stick to item transform logic for now.
+        }}>
+            {cylinderItems.map((item) => {
+                const angle = item.baseAngle + (reverse ? -rotation : rotation);
+                const x = Math.cos(angle) * radius; // Horizontal position
+                const z = Math.sin(angle) * radius; // Depth (-radius to radius)
+
+                // Simple CSS 3D rotation
+                // Position on circle: translate3d(x, 0, z)
+                // Rotate to face outward: rotateY(angle)
+                // Actually, if we want them flat facing camera but arranged in circle, we just translate.
+                // If we want them like a label on a can, we translate AND rotate.
+                
+                // Let's do "label on a can" style (rotateY)
+                // angle is in radians. CSS rotateY needs degrees.
+                // But wait, Math.sin/cos use radians.
+                
+                const angleDeg = (angle * 180) / Math.PI;
+                
+                // Opacity fade for back items
+                const opacity = Math.max(0.2, (z + radius) / (2 * radius)); 
+
+                return (
+                    <div
+                        key={item.index}
+                        style={{
+                            position: "absolute",
+                            left: "50%",
+                            top: "50%",
+                            transform: `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) rotateY(${-angleDeg + 90}deg)`,
+                            opacity,
+                            fontSize,
+                            fontFamily,
+                            fontWeight,
+                            color,
+                            whiteSpace: "nowrap",
+                            willChange: "transform",
+                            backfaceVisibility: "hidden" // Hide back of text
+                        }}
+                    >
+                        {children}
+                    </div>
+                );
+            })}
         </div>
       </div>
     );
   }
 
   // Infinite Marquee Implementation
-  const estimatedWidth = Math.max(1, children.length) * fontSize * 0.6;
-  const baseWidth = (textWidth || estimatedWidth) + gap;
-  const minRepeats =
-    baseWidth > 0 ? Math.ceil((width + baseWidth) / baseWidth) + 1 : 2;
-  const repeatCount = Math.max(repeat, minRepeats);
-  const travel = baseWidth * repeatCount;
-  const offset = ((time * speed * 100) % travel) * direction;
+  const offset = (time * speed * 100) * (reverse ? 1 : -1);
 
   return (
-    <div
-      className={className}
-      style={{
-        overflow: "hidden",
+    <div 
+      className={className} 
+      style={{ 
+        overflow: "hidden", 
         whiteSpace: "nowrap",
         display: "flex",
         transform: `skewX(${skew}deg)`,
-        ...style,
+        ...style 
       }}
     >
-      <span
-        ref={measureRef}
-        style={{
-          ...textStyle,
-          position: "absolute",
-          visibility: "hidden",
-          pointerEvents: "none",
-        }}
-      >
-        {children}
-      </span>
-      <div
-        style={{
+      <div 
+        style={{ 
           display: "flex",
-          gap,
           transform: `translateX(${offset}px)`,
           willChange: "transform",
         }}
       >
-        {Array.from({ length: repeatCount }).map((_, i) => (
-          <span key={i} style={textStyle}>
+        {/* Render enough copies to cover screen width + scroll */}
+        {Array.from({ length: Math.max(20, repeat) }).map((_, i) => (
+          <span 
+            key={i} 
+            style={{ 
+              fontSize, 
+              fontFamily, 
+              fontFamily, // duplicate key, doesn't matter
+              fontWeight,
+              color, 
+              marginRight: gap,
+              display: "inline-block"
+            }}
+          >
             {children}
           </span>
         ))}

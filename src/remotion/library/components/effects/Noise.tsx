@@ -1,5 +1,5 @@
-import React, { useId, useMemo } from "react";
-import { useCurrentFrame, useVideoConfig, AbsoluteFill } from "remotion";
+import React, { useMemo } from "react";
+import { useCurrentFrame, useVideoConfig, random, AbsoluteFill } from "remotion";
 
 /**
  * Noise blend modes.
@@ -78,12 +78,13 @@ export const Noise: React.FC<NoiseProps> = ({
   children,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-
+  const { fps, width, height } = useVideoConfig();
+  
   // Unique ID for SVG filter to prevent conflicts
-  const id = `noise-filter-${useId().replace(/:/g, "-")}`;
+  const id = useMemo(() => `noise-filter-${Math.random().toString(36).substr(2, 9)}`, []);
   
   // Animate seed for moving grain
+  const time = frame / fps;
   const currentSeed = useMemo(() => {
     if (speed === 0) return typeof seed === 'number' ? seed : 0;
     // Change seed every frame or few frames based on speed
