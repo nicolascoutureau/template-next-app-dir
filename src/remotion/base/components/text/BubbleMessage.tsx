@@ -358,33 +358,39 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
                   {children}
                 </span>
               </div>
-              {/* Tail - rendered outside bubble to avoid overflow clipping */}
+              {/* Tail - iOS style based on samuelkraft.com/blog/ios-chat-bubbles-css */}
               {tailColor && align === "right" && (
                 <svg
-                  width="12"
-                  height="16"
-                  viewBox="0 0 12 16"
+                  width="9"
+                  height="17"
+                  viewBox="0 0 9 17"
                   style={{
                     position: "absolute",
                     bottom: 0,
-                    right: -8,
+                    right: -3,
                   }}
                 >
-                  <path d="M0 16 C0 16 0 0 12 0 L12 16 Z" fill={tailColor} />
+                  <path
+                    d="M0 0 L0 8 C0 12 2 17 9 17 C5 17 3 13 3 8 L3 0 Z"
+                    fill={tailColor}
+                  />
                 </svg>
               )}
               {tailColor && align === "left" && (
                 <svg
-                  width="12"
-                  height="16"
-                  viewBox="0 0 12 16"
+                  width="9"
+                  height="17"
+                  viewBox="0 0 9 17"
                   style={{
                     position: "absolute",
                     bottom: 0,
-                    left: -8,
+                    left: -3,
                   }}
                 >
-                  <path d="M12 16 C12 16 12 0 0 0 L0 16 Z" fill={tailColor} />
+                  <path
+                    d="M9 0 L9 8 C9 12 7 17 0 17 C4 17 6 13 6 8 L6 0 Z"
+                    fill={tailColor}
+                  />
                 </svg>
               )}
             </div>
