@@ -4,7 +4,14 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 /**
  * Cursor style presets.
  */
-export type CursorStyle = "default" | "pointer" | "text" | "grab" | "grabbing" | "crosshair" | "move";
+export type CursorStyle =
+  | "default"
+  | "pointer"
+  | "text"
+  | "grab"
+  | "grabbing"
+  | "crosshair"
+  | "move";
 
 /**
  * Point on a path.
@@ -47,12 +54,12 @@ export interface CursorProps {
 /**
  * macOS-style cursor SVGs - pixel-perfect recreation.
  */
-const DefaultCursor = ({ 
-  size, 
+const DefaultCursor = ({
+  size,
   color,
   cursorStyle,
-}: { 
-  size: number; 
+}: {
+  size: number;
   color: string;
   cursorStyle: CursorStyle;
 }) => {
@@ -190,14 +197,37 @@ const DefaultCursor = ({
     return (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
         {/* Shadow */}
-        <circle cx="12" cy="12" r="9" stroke="rgba(0,0,0,0.15)" strokeWidth={2.5} transform="translate(0, 0.5)" />
-        <path d="M12 2V7M12 17V22M2 12H7M17 12H22" stroke="rgba(0,0,0,0.15)" strokeWidth={2.5} strokeLinecap="round" transform="translate(0, 0.5)" />
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+          stroke="rgba(0,0,0,0.15)"
+          strokeWidth={2.5}
+          transform="translate(0, 0.5)"
+        />
+        <path
+          d="M12 2V7M12 17V22M2 12H7M17 12H22"
+          stroke="rgba(0,0,0,0.15)"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          transform="translate(0, 0.5)"
+        />
         {/* White border */}
         <circle cx="12" cy="12" r="9" stroke="white" strokeWidth={2} />
-        <path d="M12 2V7M12 17V22M2 12H7M17 12H22" stroke="white" strokeWidth={2} strokeLinecap="round" />
+        <path
+          d="M12 2V7M12 17V22M2 12H7M17 12H22"
+          stroke="white"
+          strokeWidth={2}
+          strokeLinecap="round"
+        />
         {/* Fill */}
         <circle cx="12" cy="12" r="9" stroke={color} strokeWidth={1} />
-        <path d="M12 2V7M12 17V22M2 12H7M17 12H22" stroke={color} strokeWidth={1} strokeLinecap="round" />
+        <path
+          d="M12 2V7M12 17V22M2 12H7M17 12H22"
+          stroke={color}
+          strokeWidth={1}
+          strokeLinecap="round"
+        />
         <circle cx="12" cy="12" r="2" fill={color} />
       </svg>
     );
@@ -256,13 +286,13 @@ const DefaultCursor = ({
 /**
  * Click ripple effect - professional double-ring style.
  */
-const ClickRipple = ({ 
-  progress, 
-  color, 
-  size 
-}: { 
-  progress: number; 
-  color: string; 
+const ClickRipple = ({
+  progress,
+  color,
+  size,
+}: {
+  progress: number;
+  color: string;
   size: number;
 }) => {
   const innerScale = 0.3 + progress * 1.5;
@@ -379,12 +409,21 @@ export const Cursor: React.FC<CursorProps> = ({
   const { fps } = useVideoConfig();
 
   // Sort path by frame
-  const sortedPath = useMemo(() => [...path].sort((a, b) => a.frame - b.frame), [path]);
+  const sortedPath = useMemo(
+    () => [...path].sort((a, b) => a.frame - b.frame),
+    [path],
+  );
 
   // Find current position
   const { x, y, cursorStyle, isClicking, clickProgress } = useMemo(() => {
     if (sortedPath.length === 0) {
-      return { x: 0, y: 0, cursorStyle: "default" as CursorStyle, isClicking: false, clickProgress: 0 };
+      return {
+        x: 0,
+        y: 0,
+        cursorStyle: "default" as CursorStyle,
+        isClicking: false,
+        clickProgress: 0,
+      };
     }
 
     // Find surrounding points
@@ -424,14 +463,19 @@ export const Cursor: React.FC<CursorProps> = ({
     const ease = nextPoint.ease || "smooth";
     const easing = getEasing(ease);
     const frameDiff = nextPoint.frame - prevPoint.frame;
-    
+
     let progress = 0;
     if (frameDiff > 0) {
-      progress = interpolate(frame, [prevPoint.frame, nextPoint.frame], [0, 1], {
-        easing,
-        extrapolateLeft: "clamp",
-        extrapolateRight: "clamp",
-      });
+      progress = interpolate(
+        frame,
+        [prevPoint.frame, nextPoint.frame],
+        [0, 1],
+        {
+          easing,
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        },
+      );
     }
 
     const currentX = prevPoint.x + (nextPoint.x - prevPoint.x) * progress;
@@ -464,7 +508,9 @@ export const Cursor: React.FC<CursorProps> = ({
   }, [frame, sortedPath]);
 
   // Click scale animation
-  const clickScale = isClicking ? 1 - Math.sin(clickProgress * Math.PI) * 0.15 : 1;
+  const clickScale = isClicking
+    ? 1 - Math.sin(clickProgress * Math.PI) * 0.15
+    : 1;
 
   return (
     <div

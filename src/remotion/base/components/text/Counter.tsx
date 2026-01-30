@@ -72,7 +72,7 @@ function formatNumber(
   decimals: number,
   separator: string,
   decimalSeparator: string,
-  abbreviate: boolean
+  abbreviate: boolean,
 ): string {
   if (abbreviate && Math.abs(value) >= 1000) {
     const suffixes = ["", "K", "M", "B", "T"];
@@ -88,7 +88,9 @@ function formatNumber(
   // Add thousand separators
   const withSeparators = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
 
-  return decPart ? `${withSeparators}${decimalSeparator}${decPart}` : withSeparators;
+  return decPart
+    ? `${withSeparators}${decimalSeparator}${decPart}`
+    : withSeparators;
 }
 
 /**
@@ -167,7 +169,7 @@ export const Counter: React.FC<CounterProps> = ({
     decimals,
     separator,
     decimalSeparator,
-    abbreviate
+    abbreviate,
   );
 
   // Calculate final value width for fixed width mode
@@ -186,7 +188,10 @@ export const Counter: React.FC<CounterProps> = ({
   // For fixed width, we render a hidden version with the final value to establish width
   if (fixedWidth) {
     return (
-      <span className={className} style={{ ...containerStyle, position: "relative" }}>
+      <span
+        className={className}
+        style={{ ...containerStyle, position: "relative" }}
+      >
         {/* Hidden placeholder to establish width */}
         <span style={{ visibility: "hidden" }}>
           {prefix}
@@ -224,7 +229,8 @@ export const Counter: React.FC<CounterProps> = ({
 /**
  * Rolling digit counter that animates each digit separately.
  */
-export interface RollingCounterProps extends Omit<CounterProps, "animation" | "fixedWidth" | "align"> {
+export interface RollingCounterProps
+  extends Omit<CounterProps, "animation" | "fixedWidth" | "align"> {
   /** Stagger delay between digits in seconds */
   stagger?: number;
 }
@@ -288,15 +294,22 @@ export const RollingCounter: React.FC<RollingCounterProps> = ({
       } else if (effectiveFrame >= durationFrames) {
         result.push(toStr[i]);
       } else {
-        const progress = interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
-          easing,
-          extrapolateLeft: "clamp",
-          extrapolateRight: "clamp",
-        });
+        const progress = interpolate(
+          effectiveFrame,
+          [0, durationFrames],
+          [0, 1],
+          {
+            easing,
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          },
+        );
 
         const fromDigit = parseInt(fromStr[i] || "0", 10);
         const toDigit = parseInt(toStr[i], 10);
-        const currentDigit = Math.round(fromDigit + (toDigit - fromDigit) * progress);
+        const currentDigit = Math.round(
+          fromDigit + (toDigit - fromDigit) * progress,
+        );
         result.push(String(currentDigit));
       }
 
@@ -304,7 +317,18 @@ export const RollingCounter: React.FC<RollingCounterProps> = ({
     }
 
     return result;
-  }, [frame, from, to, decimals, delayFrames, durationFrames, staggerFrames, easing, separator, finalFormatted.length]);
+  }, [
+    frame,
+    from,
+    to,
+    decimals,
+    delayFrames,
+    durationFrames,
+    staggerFrames,
+    easing,
+    separator,
+    finalFormatted.length,
+  ]);
 
   const containerStyle: CSSProperties = {
     fontVariantNumeric: tabularNums ? "tabular-nums" : undefined,

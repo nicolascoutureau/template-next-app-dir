@@ -107,11 +107,16 @@ export const SplitScreen: React.FC<SplitScreenProps> = ({
     if (effectiveFrame <= 0) return fromRatio;
     if (effectiveFrame >= durationFrames) return ratio;
 
-    return interpolate(effectiveFrame, [0, durationFrames], [fromRatio, ratio], {
-      easing,
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
+    return interpolate(
+      effectiveFrame,
+      [0, durationFrames],
+      [fromRatio, ratio],
+      {
+        easing,
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      },
+    );
   }, [animated, ratio, fromRatio, frame, delayFrames, durationFrames, easing]);
 
   const [first, second] = children;
@@ -147,7 +152,15 @@ export const SplitScreen: React.FC<SplitScreenProps> = ({
     const diagonalPercent = currentRatio * 100;
 
     return (
-      <div className={className} style={{ position: "relative", width: "100%", height: "100%", ...style }}>
+      <div
+        className={className}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          ...style,
+        }}
+      >
         <div
           style={{
             position: "absolute",

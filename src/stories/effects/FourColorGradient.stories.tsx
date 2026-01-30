@@ -92,7 +92,9 @@ export const PaletteGallery: Story = {
     ),
   ],
   render: () => {
-    const palettes = Object.keys(gradientPalettes) as Array<keyof typeof gradientPalettes>;
+    const palettes = Object.keys(gradientPalettes) as Array<
+      keyof typeof gradientPalettes
+    >;
 
     return (
       <AbsoluteFill style={{ padding: 20 }}>
@@ -105,7 +107,14 @@ export const PaletteGallery: Story = {
           }}
         >
           {palettes.map((palette) => (
-            <div key={palette} style={{ position: "relative", borderRadius: 12, overflow: "hidden" }}>
+            <div
+              key={palette}
+              style={{
+                position: "relative",
+                borderRadius: 12,
+                overflow: "hidden",
+              }}
+            >
               <FourColorGradient palette={palette} />
               <div
                 style={{
@@ -339,7 +348,14 @@ export const PositionPresets: Story = {
           }}
         >
           {positionPresets.map(({ name, positions }) => (
-            <div key={name} style={{ position: "relative", borderRadius: 16, overflow: "hidden" }}>
+            <div
+              key={name}
+              style={{
+                position: "relative",
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
               <FourColorGradient palette="aurora" positions={positions} />
               <div
                 style={{
@@ -433,7 +449,14 @@ export const WithNoise: Story = {
   ],
   render: () => (
     <AbsoluteFill style={{ display: "flex", gap: 20, padding: 20 }}>
-      <div style={{ flex: 1, borderRadius: 16, overflow: "hidden", position: "relative" }}>
+      <div
+        style={{
+          flex: 1,
+          borderRadius: 16,
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
         <FourColorGradient palette="midnight" noise={0} />
         <div
           style={{
@@ -449,7 +472,14 @@ export const WithNoise: Story = {
           No Noise
         </div>
       </div>
-      <div style={{ flex: 1, borderRadius: 16, overflow: "hidden", position: "relative" }}>
+      <div
+        style={{
+          flex: 1,
+          borderRadius: 16,
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
         <FourColorGradient palette="midnight" noise={0.15} />
         <div
           style={{
@@ -465,7 +495,14 @@ export const WithNoise: Story = {
           15% Noise
         </div>
       </div>
-      <div style={{ flex: 1, borderRadius: 16, overflow: "hidden", position: "relative" }}>
+      <div
+        style={{
+          flex: 1,
+          borderRadius: 16,
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
         <FourColorGradient palette="midnight" noise={0.3} />
         <div
           style={{
@@ -583,7 +620,14 @@ export const AnimationComparison: Story = {
           }}
         >
           {animations.map(({ name, type }) => (
-            <div key={name} style={{ position: "relative", borderRadius: 16, overflow: "hidden" }}>
+            <div
+              key={name}
+              style={{
+                position: "relative",
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
               <FourColorGradient
                 palette="candy"
                 animate

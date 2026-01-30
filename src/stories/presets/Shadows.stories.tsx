@@ -1,8 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { shadows, type ShadowName, createColorShadow, createNeonGlow } from "../../remotion/base/presets/shadows";
+import {
+  shadows,
+  type ShadowName,
+  createColorShadow,
+  createNeonGlow,
+} from "../../remotion/base/presets/shadows";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
-const ShadowBox = ({ shadow, label, dark = false }: { shadow: string; label: string; dark?: boolean }) => (
+const ShadowBox = ({
+  shadow,
+  label,
+  dark = false,
+}: {
+  shadow: string;
+  label: string;
+  dark?: boolean;
+}) => (
   <div style={{ textAlign: "center" }}>
     <div
       style={{
@@ -17,7 +30,13 @@ const ShadowBox = ({ shadow, label, dark = false }: { shadow: string; label: str
         margin: "0 auto 12px",
       }}
     />
-    <div style={{ fontSize: 11, color: dark ? "#fff" : "#666", fontFamily: "monospace" }}>
+    <div
+      style={{
+        fontSize: 11,
+        color: dark ? "#fff" : "#666",
+        fontFamily: "monospace",
+      }}
+    >
       {label}
     </div>
   </div>
@@ -28,7 +47,14 @@ const meta: Meta = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
-        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+            padding: 20,
+          }}
+        >
           <Story />
         </div>
       </RemotionWrapper>
@@ -41,7 +67,14 @@ type Story = StoryObj;
 
 export const SubtleShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.subtle} label="subtle" />
       <ShadowBox shadow={shadows.soft} label="soft" />
       <ShadowBox shadow={shadows.medium} label="medium" />
@@ -51,7 +84,14 @@ export const SubtleShadows: Story = {
 
 export const ElevatedShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows["elevated-1"]} label="elevated-1" />
       <ShadowBox shadow={shadows["elevated-2"]} label="elevated-2" />
       <ShadowBox shadow={shadows["elevated-3"]} label="elevated-3" />
@@ -63,7 +103,14 @@ export const ElevatedShadows: Story = {
 
 export const DiffusedShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.diffused} label="diffused" />
       <ShadowBox shadow={shadows.dreamy} label="dreamy" />
       <ShadowBox shadow={shadows.cloud} label="cloud" />
@@ -73,7 +120,14 @@ export const DiffusedShadows: Story = {
 
 export const SharpShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.sharp} label="sharp" />
       <ShadowBox shadow={shadows.hard} label="hard" />
       <ShadowBox shadow={shadows.crisp} label="crisp" />
@@ -83,7 +137,14 @@ export const SharpShadows: Story = {
 
 export const LayeredShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.layered} label="layered" />
       <ShadowBox shadow={shadows["layered-soft"]} label="layered-soft" />
       <ShadowBox shadow={shadows["layered-color"]} label="layered-color" />
@@ -95,14 +156,28 @@ export const GlowEffects: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={60} backgroundColor="#0f0f23">
-        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+            padding: 20,
+          }}
+        >
           <Story />
         </div>
       </RemotionWrapper>
     ),
   ],
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.glow} label="glow" dark />
       <ShadowBox shadow={shadows["glow-soft"]} label="glow-soft" dark />
       <ShadowBox shadow={shadows["glow-intense"]} label="glow-intense" dark />
@@ -112,7 +187,14 @@ export const GlowEffects: Story = {
 
 export const ColoredShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows["color-blue"]} label="color-blue" />
       <ShadowBox shadow={shadows["color-purple"]} label="color-purple" />
       <ShadowBox shadow={shadows["color-pink"]} label="color-pink" />
@@ -125,7 +207,14 @@ export const ColoredShadows: Story = {
 
 export const DramaticShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.dramatic} label="dramatic" />
       <ShadowBox shadow={shadows.cinematic} label="cinematic" />
       <ShadowBox shadow={shadows.noir} label="noir" />
@@ -135,7 +224,14 @@ export const DramaticShadows: Story = {
 
 export const LongShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 48, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 48,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.long} label="long" />
       <ShadowBox shadow={shadows["long-soft"]} label="long-soft" />
     </div>
@@ -144,7 +240,14 @@ export const LongShadows: Story = {
 
 export const ComponentShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       <ShadowBox shadow={shadows.card} label="card" />
       <ShadowBox shadow={shadows.modal} label="modal" />
       <ShadowBox shadow={shadows.dropdown} label="dropdown" />
@@ -159,14 +262,28 @@ export const NeonGlows: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={60} backgroundColor="#0a0a0a">
-        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+            padding: 20,
+          }}
+        >
           <Story />
         </div>
       </RemotionWrapper>
     ),
   ],
   render: () => (
-    <div style={{ display: "flex", gap: 40, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 40,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       {["#ff00ff", "#00ffff", "#ff0080", "#00ff88", "#ffff00"].map((color) => (
         <div key={color} style={{ textAlign: "center" }}>
           <div
@@ -180,7 +297,9 @@ export const NeonGlows: Story = {
               margin: "0 auto 12px",
             }}
           />
-          <div style={{ fontSize: 11, color: "#888", fontFamily: "monospace" }}>{color}</div>
+          <div style={{ fontSize: 11, color: "#888", fontFamily: "monospace" }}>
+            {color}
+          </div>
         </div>
       ))}
     </div>
@@ -189,7 +308,14 @@ export const NeonGlows: Story = {
 
 export const CustomColorShadows: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 32, flexWrap: "wrap", justifyContent: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 32,
+        flexWrap: "wrap",
+        justifyContent: "center",
+      }}
+    >
       {[
         { color: "#ef4444", label: "Red" },
         { color: "#f97316", label: "Orange" },
@@ -209,7 +335,9 @@ export const CustomColorShadows: Story = {
               margin: "0 auto 12px",
             }}
           />
-          <div style={{ fontSize: 11, color: "#666", fontFamily: "monospace" }}>{label}</div>
+          <div style={{ fontSize: 11, color: "#666", fontFamily: "monospace" }}>
+            {label}
+          </div>
         </div>
       ))}
     </div>

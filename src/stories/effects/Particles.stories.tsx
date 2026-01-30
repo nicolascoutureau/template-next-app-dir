@@ -16,7 +16,10 @@ const meta: Meta<typeof Particles> = {
   ],
   argTypes: {
     count: { control: { type: "range", min: 10, max: 100, step: 5 } },
-    behavior: { control: "select", options: ["float", "confetti", "snow", "sparkle", "rise"] },
+    behavior: {
+      control: "select",
+      options: ["float", "confetti", "snow", "sparkle", "rise"],
+    },
     shape: { control: "select", options: ["circle", "square", "star"] },
     speed: { control: { type: "range", min: 0.5, max: 3, step: 0.1 } },
   },

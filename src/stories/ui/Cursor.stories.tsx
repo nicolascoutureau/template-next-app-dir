@@ -108,7 +108,13 @@ export const FollowPath: Story = {
       <>
         {/* Show path visualization */}
         <svg
-          style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
         >
           <path
             d={`M ${path.map((p) => `${p.x} ${p.y}`).join(" L ")}`}
@@ -147,7 +153,12 @@ export const ClickButton: Story = {
     return (
       <>
         <DemoUI />
-        <Cursor path={path} size={24} color="#000" rippleColor="rgba(59, 130, 246, 0.4)" />
+        <Cursor
+          path={path}
+          size={24}
+          color="#000"
+          rippleColor="rgba(59, 130, 246, 0.4)"
+        />
       </>
     );
   },
@@ -264,7 +275,9 @@ export const NoRipple: Story = {
       { x: 400, y: 180, frame: 140, ease: "smooth" },
     ];
 
-    return <Cursor path={path} size={24} color="#000" showClickRipple={false} />;
+    return (
+      <Cursor path={path} size={24} color="#000" showClickRipple={false} />
+    );
   },
 };
 

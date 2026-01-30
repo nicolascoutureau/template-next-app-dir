@@ -94,13 +94,34 @@ export const MultipleColors: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 40 }}>
       <Glow color="#ef4444" intensity={20}>
-        <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#ef4444" }} />
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "#ef4444",
+          }}
+        />
       </Glow>
       <Glow color="#22c55e" intensity={20}>
-        <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#22c55e" }} />
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "#22c55e",
+          }}
+        />
       </Glow>
       <Glow color="#3b82f6" intensity={20}>
-        <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#3b82f6" }} />
+        <div
+          style={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            background: "#3b82f6",
+          }}
+        />
       </Glow>
     </div>
   ),

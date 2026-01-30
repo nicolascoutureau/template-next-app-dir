@@ -83,7 +83,8 @@ export const GridBackground: React.FC<GridBackgroundProps> = ({
 
   // Generate grid pattern based on style
   const gridPattern = useMemo(() => {
-    const patternSize = majorGridEvery > 0 ? cellSize * majorGridEvery : cellSize;
+    const patternSize =
+      majorGridEvery > 0 ? cellSize * majorGridEvery : cellSize;
 
     switch (style) {
       case "dots":
@@ -112,7 +113,15 @@ export const GridBackground: React.FC<GridBackgroundProps> = ({
           <line x1="0" y1="0" x2="0" y2="${cellSize}" stroke="${color}" stroke-width="${lineWidth}" />
         `;
     }
-  }, [style, cellSize, color, lineWidth, majorGridEvery, majorGridColor, majorGridWidth]);
+  }, [
+    style,
+    cellSize,
+    color,
+    lineWidth,
+    majorGridEvery,
+    majorGridColor,
+    majorGridWidth,
+  ]);
 
   // Create SVG data URL
   const svgPattern = useMemo(() => {
@@ -144,12 +153,13 @@ export const GridBackground: React.FC<GridBackgroundProps> = ({
     : undefined;
 
   // Perspective transform
-  const perspectiveStyle: CSSProperties = perspective > 0
-    ? {
-        transform: `perspective(${1000 / perspective}px) rotateX(${perspective * 60}deg)`,
-        transformOrigin: "center bottom",
-      }
-    : {};
+  const perspectiveStyle: CSSProperties =
+    perspective > 0
+      ? {
+          transform: `perspective(${1000 / perspective}px) rotateX(${perspective * 60}deg)`,
+          transformOrigin: "center bottom",
+        }
+      : {};
 
   return (
     <AbsoluteFill style={{ backgroundColor, overflow: "hidden" }}>
@@ -191,7 +201,9 @@ export const GridBackground: React.FC<GridBackgroundProps> = ({
 /**
  * Preset: Subtle paper grid (like the image).
  */
-export const PaperGrid: React.FC<Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">> = (props) => (
+export const PaperGrid: React.FC<
+  Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">
+> = (props) => (
   <GridBackground
     {...props}
     style="lines"
@@ -206,7 +218,9 @@ export const PaperGrid: React.FC<Omit<GridBackgroundProps, "style" | "color" | "
 /**
  * Preset: Dark tech grid.
  */
-export const TechGrid: React.FC<Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">> = (props) => (
+export const TechGrid: React.FC<
+  Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">
+> = (props) => (
   <GridBackground
     {...props}
     style="lines"
@@ -221,7 +235,9 @@ export const TechGrid: React.FC<Omit<GridBackgroundProps, "style" | "color" | "b
 /**
  * Preset: Minimal dot grid.
  */
-export const DotGrid: React.FC<Omit<GridBackgroundProps, "style">> = (props) => (
+export const DotGrid: React.FC<Omit<GridBackgroundProps, "style">> = (
+  props,
+) => (
   <GridBackground
     {...props}
     style="dots"
@@ -234,7 +250,9 @@ export const DotGrid: React.FC<Omit<GridBackgroundProps, "style">> = (props) => 
 /**
  * Preset: Blueprint style.
  */
-export const BlueprintGrid: React.FC<Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">> = (props) => (
+export const BlueprintGrid: React.FC<
+  Omit<GridBackgroundProps, "style" | "color" | "backgroundColor">
+> = (props) => (
   <GridBackground
     {...props}
     style="lines"

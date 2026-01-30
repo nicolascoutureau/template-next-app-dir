@@ -21,7 +21,10 @@ const meta: Meta<typeof VignetteBlur> = {
     centerX: { control: { type: "range", min: 0, max: 1, step: 0.05 } },
     centerY: { control: { type: "range", min: 0, max: 1, step: 0.05 } },
     animate: { control: "boolean" },
-    animationType: { control: "select", options: ["pulse", "breathe", "fadeIn", "fadeOut"] },
+    animationType: {
+      control: "select",
+      options: ["pulse", "breathe", "fadeIn", "fadeOut"],
+    },
     animationSpeed: { control: { type: "range", min: 0.5, max: 3, step: 0.1 } },
     tintOpacity: { control: { type: "range", min: 0, max: 1, step: 0.05 } },
   },
@@ -207,11 +210,7 @@ export const CircularShape: Story = {
     ),
   ],
   render: () => (
-    <VignetteBlur
-      blurAmount={25}
-      clearRadius={0.3}
-      shape="circle"
-    >
+    <VignetteBlur blurAmount={25} clearRadius={0.3} shape="circle">
       <SampleContent />
     </VignetteBlur>
   ),
@@ -226,12 +225,7 @@ export const HighFalloff: Story = {
     ),
   ],
   render: () => (
-    <VignetteBlur
-      blurAmount={30}
-      clearRadius={0.35}
-      falloff={4}
-      layers={8}
-    >
+    <VignetteBlur blurAmount={30} clearRadius={0.35} falloff={4} layers={8}>
       <SampleContent />
     </VignetteBlur>
   ),

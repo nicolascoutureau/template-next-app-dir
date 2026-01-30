@@ -12,7 +12,10 @@ import { RemotionWrapper } from "../helpers/RemotionWrapper";
 // Import components
 import { TextAnimation } from "../../remotion/base/components/text/TextAnimation";
 import { Counter } from "../../remotion/base/components/text/Counter";
-import { BubbleMessage, ChatConversation } from "../../remotion/base/components/text/BubbleMessage";
+import {
+  BubbleMessage,
+  ChatConversation,
+} from "../../remotion/base/components/text/BubbleMessage";
 import { PhoneMockup } from "../../remotion/base/components/mockups/PhoneMockup";
 import { BrowserMockup } from "../../remotion/base/components/mockups/BrowserMockup";
 import { Button, GlossyButton } from "../../remotion/base/components/ui/Button";
@@ -49,13 +52,29 @@ const ProductLaunchScene: React.FC = () => {
   return (
     <AbsoluteFill>
       <AmbianceBackground preset="aurora" />
-      
+
       {/* Floating shapes */}
       <div style={{ position: "absolute", top: 80, left: 100, opacity: 0.6 }}>
-        <GlossyShape shape="blob1" width={120} height={120} glossStyle="soft" color="#a855f7" animation="float" />
+        <GlossyShape
+          shape="blob1"
+          width={120}
+          height={120}
+          glossStyle="soft"
+          color="#a855f7"
+          animation="float"
+        />
       </div>
-      <div style={{ position: "absolute", bottom: 100, right: 120, opacity: 0.5 }}>
-        <GlossyShape shape="blob2" width={100} height={100} glossStyle="glass" color="#3b82f6" animation="float" />
+      <div
+        style={{ position: "absolute", bottom: 100, right: 120, opacity: 0.5 }}
+      >
+        <GlossyShape
+          shape="blob2"
+          width={100}
+          height={100}
+          glossStyle="glass"
+          color="#3b82f6"
+          animation="float"
+        />
       </div>
 
       {/* Main content */}
@@ -177,9 +196,18 @@ const AppShowcaseScene: React.FC = () => {
   });
 
   return (
-    <AbsoluteFill style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)", overflow: "hidden" }}>
-      <GridBackground color="rgba(99, 102, 241, 0.1)" cellSize={40} backgroundColor="transparent" />
-      
+    <AbsoluteFill
+      style={{
+        background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+        overflow: "hidden",
+      }}
+    >
+      <GridBackground
+        color="rgba(99, 102, 241, 0.1)"
+        cellSize={40}
+        backgroundColor="transparent"
+      />
+
       <div
         style={{
           display: "flex",
@@ -202,7 +230,12 @@ const AppShowcaseScene: React.FC = () => {
               marginBottom: 16,
             }}
             createTimeline={({ textRef, tl }) => {
-              tl.from(textRef.current, { opacity: 0, x: -30, duration: 0.5, delay: 0.67 });
+              tl.from(textRef.current, {
+                opacity: 0,
+                x: -30,
+                duration: 0.5,
+                delay: 0.67,
+              });
               return tl;
             }}
           >
@@ -241,18 +274,36 @@ const AppShowcaseScene: React.FC = () => {
               marginBottom: 30,
             }}
             createTimeline={({ textRef, tl }) => {
-              tl.from(textRef.current, { opacity: 0, y: 20, duration: 0.6, delay: 1.67 });
+              tl.from(textRef.current, {
+                opacity: 0,
+                y: 20,
+                duration: 0.6,
+                delay: 1.67,
+              });
               return tl;
             }}
           >
-            Track spending, set budgets, and reach your financial goals with our intuitive app.
+            Track spending, set budgets, and reach your financial goals with our
+            intuitive app.
           </TextAnimation>
 
           <div style={{ display: "flex", gap: 16 }}>
-            <Button variant="glossy" color="#6366f1" animate animationType="slideUp" delay={2.33}>
+            <Button
+              variant="glossy"
+              color="#6366f1"
+              animate
+              animationType="slideUp"
+              delay={2.33}
+            >
               Download Now
             </Button>
-            <Button variant="outline" color="#6366f1" animate animationType="slideUp" delay={2.43}>
+            <Button
+              variant="outline"
+              color="#6366f1"
+              animate
+              animationType="slideUp"
+              delay={2.43}
+            >
               Learn More
             </Button>
           </div>
@@ -281,7 +332,9 @@ const AppShowcaseScene: React.FC = () => {
                 gap: 16,
               }}
             >
-              <div style={{ color: "white", fontSize: 18, fontWeight: 600 }}>Dashboard</div>
+              <div style={{ color: "white", fontSize: 18, fontWeight: 600 }}>
+                Dashboard
+              </div>
               <div
                 style={{
                   background: "rgba(255,255,255,0.1)",
@@ -289,7 +342,9 @@ const AppShowcaseScene: React.FC = () => {
                   padding: 20,
                 }}
               >
-                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>Total Balance</div>
+                <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
+                  Total Balance
+                </div>
                 <Counter
                   from={0}
                   to={12847}
@@ -338,7 +393,7 @@ const SaaSLandingScene: React.FC = () => {
         colors={["#fdf4ff", "#fae8ff", "#f5d0fe", "#e9d5ff"]}
         speed={0.3}
       />
-      
+
       <div
         style={{
           display: "flex",
@@ -387,7 +442,12 @@ const SaaSLandingScene: React.FC = () => {
             marginBottom: 24,
           }}
           createTimeline={({ textRef, tl }) => {
-            tl.from(textRef.current, { opacity: 0, y: 15, duration: 0.5, delay: 0.67 });
+            tl.from(textRef.current, {
+              opacity: 0,
+              y: 15,
+              duration: 0.5,
+              delay: 0.67,
+            });
             return tl;
           }}
         >
@@ -469,7 +529,9 @@ const SaaSLandingScene: React.FC = () => {
                         marginBottom: 12,
                       }}
                     />
-                    <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>
+                    <div
+                      style={{ fontSize: 14, fontWeight: 600, color: "#111" }}
+                    >
                       Project {n}
                     </div>
                     <div style={{ fontSize: 12, color: "#6b7280" }}>
@@ -500,11 +562,11 @@ export const SaaSLanding: Story = {
 
 const ChatDemoScene: React.FC = () => {
   const frame = useCurrentFrame();
-  
+
   return (
     <AbsoluteFill>
       <AmbianceBackground preset="softLavender" />
-      
+
       <div
         style={{
           display: "flex",
@@ -599,7 +661,8 @@ const StatsScene: React.FC = () => {
           width: 600,
           height: 600,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
           top: -200,
           left: -200,
           filter: "blur(60px)",
@@ -611,7 +674,8 @@ const StatsScene: React.FC = () => {
           width: 500,
           height: 500,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
           bottom: -150,
           right: -100,
           filter: "blur(50px)",
@@ -676,14 +740,29 @@ const StatsScene: React.FC = () => {
         <div style={{ display: "flex", gap: 16 }}>
           {stats.map((stat, index) => {
             const cardDelay = stat.delay * fps;
-            const cardOpacity = interpolate(frame, [cardDelay, cardDelay + 15], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            const cardY = interpolate(frame, [cardDelay, cardDelay + 15], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+            const cardOpacity = interpolate(
+              frame,
+              [cardDelay, cardDelay + 15],
+              [0, 1],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+            );
+            const cardY = interpolate(
+              frame,
+              [cardDelay, cardDelay + 15],
+              [30, 0],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: Easing.out(Easing.cubic),
+              },
+            );
 
             return (
               <div
                 key={stat.label}
                 style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+                  background:
+                    "linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
                   borderRadius: 16,
                   padding: "24px 28px",
                   width: 140,
@@ -694,7 +773,9 @@ const StatsScene: React.FC = () => {
                   transform: `translateY(${cardY}px)`,
                 }}
               >
-                <div style={{ fontSize: 24, marginBottom: 12 }}>{stat.icon}</div>
+                <div style={{ fontSize: 24, marginBottom: 12 }}>
+                  {stat.icon}
+                </div>
                 <Counter
                   from={0}
                   to={stat.value}
@@ -759,7 +840,7 @@ const FeatureHighlightScene: React.FC = () => {
   return (
     <AbsoluteFill>
       <AmbianceBackground preset="softPink" />
-      
+
       <div
         style={{
           display: "flex",
@@ -802,11 +883,17 @@ const FeatureHighlightScene: React.FC = () => {
               lineHeight: 1.7,
             }}
             createTimeline={({ textRef, tl }) => {
-              tl.from(textRef.current, { opacity: 0, y: 15, duration: 0.5, delay: 0.67 });
+              tl.from(textRef.current, {
+                opacity: 0,
+                y: 15,
+                duration: 0.5,
+                delay: 0.67,
+              });
               return tl;
             }}
           >
-            Build complex layouts in seconds with our powerful visual editor. No code required.
+            Build complex layouts in seconds with our powerful visual editor. No
+            code required.
           </TextAnimation>
         </div>
 
@@ -841,9 +928,12 @@ const FeatureHighlightScene: React.FC = () => {
                       n === 2
                         ? "linear-gradient(135deg, #ec4899 0%, #f43f5e 100%)"
                         : "#f3f4f6",
-                    opacity: frame >= 25 + n * 5 
-                      ? (n === 2 && frame > 70 && frame < 120 ? 0.5 : 1) 
-                      : 0,
+                    opacity:
+                      frame >= 25 + n * 5
+                        ? n === 2 && frame > 70 && frame < 120
+                          ? 0.5
+                          : 1
+                        : 0,
                     transform: `translateY(${frame >= 25 + n * 5 ? 0 : 10}px)`,
                     transition: "opacity 0.2s, transform 0.2s",
                   }}
@@ -885,14 +975,33 @@ const TestimonialScene: React.FC = () => {
   const frame = useCurrentFrame();
 
   // Smooth animations
-  const bgScale = interpolate(frame, [0, 150], [1, 1.05], { extrapolateRight: "clamp" });
-  const quoteOpacity = interpolate(frame, [10, 30], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const quoteY = interpolate(frame, [10, 30], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  
-  const authorOpacity = interpolate(frame, [70, 90], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const authorY = interpolate(frame, [70, 90], [15, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const bgScale = interpolate(frame, [0, 150], [1, 1.05], {
+    extrapolateRight: "clamp",
+  });
+  const quoteOpacity = interpolate(frame, [10, 30], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const quoteY = interpolate(frame, [10, 30], [20, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
 
-  const starsOpacity = interpolate(frame, [90, 105], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const authorOpacity = interpolate(frame, [70, 90], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const authorY = interpolate(frame, [70, 90], [15, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
+
+  const starsOpacity = interpolate(frame, [90, 105], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <AbsoluteFill style={{ background: "#0f0f14", overflow: "hidden" }}>
@@ -901,11 +1010,12 @@ const TestimonialScene: React.FC = () => {
         style={{
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(ellipse 120% 80% at 50% 120%, #1a1a2e 0%, #0f0f14 60%)",
+          background:
+            "radial-gradient(ellipse 120% 80% at 50% 120%, #1a1a2e 0%, #0f0f14 60%)",
           transform: `scale(${bgScale})`,
         }}
       />
-      
+
       {/* Subtle light leak */}
       <div
         style={{
@@ -913,7 +1023,8 @@ const TestimonialScene: React.FC = () => {
           width: 800,
           height: 400,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(147, 51, 234, 0.08) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(147, 51, 234, 0.08) 0%, transparent 70%)",
           top: "10%",
           left: "50%",
           transform: "translateX(-50%)",
@@ -977,7 +1088,8 @@ const TestimonialScene: React.FC = () => {
               return tl;
             }}
           >
-            This isn't just a tool — it's become essential to how we build products.
+            This isn't just a tool — it's become essential to how we build
+            products.
           </TextAnimation>
         </div>
 
@@ -1008,7 +1120,8 @@ const TestimonialScene: React.FC = () => {
                   width: 14,
                   height: 14,
                   background: "#fbbf24",
-                  clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+                  clipPath:
+                    "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
                 }}
               />
             ))}
@@ -1071,7 +1184,7 @@ export const Testimonial: Story = {
 
 const PricingScene: React.FC = () => {
   const frame = useCurrentFrame();
-  
+
   return (
     <AbsoluteFill style={{ background: "#fafafa" }}>
       <div
@@ -1108,9 +1221,33 @@ const PricingScene: React.FC = () => {
 
         <div style={{ display: "flex", gap: 24 }}>
           {[
-            { name: "Starter", price: 0, features: ["5 projects", "Basic support", "1GB storage"], showAt: 20 },
-            { name: "Pro", price: 29, features: ["Unlimited projects", "Priority support", "100GB storage"], popular: true, showAt: 32 },
-            { name: "Enterprise", price: 99, features: ["Custom solutions", "Dedicated support", "Unlimited storage"], showAt: 44 },
+            {
+              name: "Starter",
+              price: 0,
+              features: ["5 projects", "Basic support", "1GB storage"],
+              showAt: 20,
+            },
+            {
+              name: "Pro",
+              price: 29,
+              features: [
+                "Unlimited projects",
+                "Priority support",
+                "100GB storage",
+              ],
+              popular: true,
+              showAt: 32,
+            },
+            {
+              name: "Enterprise",
+              price: 99,
+              features: [
+                "Custom solutions",
+                "Dedicated support",
+                "Unlimited storage",
+              ],
+              showAt: 44,
+            },
           ].map((plan) => (
             <div
               key={plan.name}
@@ -1148,7 +1285,9 @@ const PricingScene: React.FC = () => {
                 }}
               >
                 ${plan.price}
-                <span style={{ fontSize: 16, fontWeight: 400, opacity: 0.7 }}>/mo</span>
+                <span style={{ fontSize: 16, fontWeight: 400, opacity: 0.7 }}>
+                  /mo
+                </span>
               </div>
               {plan.features.map((feature) => (
                 <div
@@ -1162,7 +1301,9 @@ const PricingScene: React.FC = () => {
                     gap: 8,
                   }}
                 >
-                  <span style={{ color: plan.popular ? "#a5f3fc" : "#4ade80" }}>✓</span>
+                  <span style={{ color: plan.popular ? "#a5f3fc" : "#4ade80" }}>
+                    ✓
+                  </span>
                   {feature}
                 </div>
               ))}

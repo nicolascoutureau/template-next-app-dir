@@ -78,7 +78,8 @@ export const shadows: Record<ShadowName, string> = {
   "elevated-1": "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
   "elevated-2": "0 3px 6px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.12)",
   "elevated-3": "0 10px 20px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1)",
-  "elevated-4": "0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05)",
+  "elevated-4":
+    "0 15px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.05)",
   "elevated-5": "0 20px 40px rgba(0, 0, 0, 0.2)",
 
   // Soft diffused shadows - very blurry, modern look
@@ -98,25 +99,32 @@ export const shadows: Record<ShadowName, string> = {
     0 4px 4px rgba(0, 0, 0, 0.08),
     0 8px 8px rgba(0, 0, 0, 0.08),
     0 16px 16px rgba(0, 0, 0, 0.08)
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, " "),
   "layered-soft": `
     0 2px 4px rgba(0, 0, 0, 0.04),
     0 4px 8px rgba(0, 0, 0, 0.04),
     0 8px 16px rgba(0, 0, 0, 0.04),
     0 16px 32px rgba(0, 0, 0, 0.04),
     0 32px 64px rgba(0, 0, 0, 0.04)
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, " "),
   "layered-color": `
     0 2px 4px rgba(99, 102, 241, 0.1),
     0 4px 8px rgba(99, 102, 241, 0.1),
     0 8px 16px rgba(99, 102, 241, 0.1),
     0 16px 32px rgba(99, 102, 241, 0.05)
-  `.trim().replace(/\s+/g, ' '),
+  `
+    .trim()
+    .replace(/\s+/g, " "),
 
   // Glow effects - light emanating from element
   glow: "0 0 20px rgba(255, 255, 255, 0.3)",
   "glow-soft": "0 0 40px rgba(255, 255, 255, 0.2)",
-  "glow-intense": "0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.3)",
+  "glow-intense":
+    "0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.3)",
   neon: "0 0 10px currentColor, 0 0 20px currentColor, 0 0 40px currentColor",
 
   // Colored shadows - modern colored shadow effects
@@ -129,12 +137,14 @@ export const shadows: Record<ShadowName, string> = {
 
   // Dramatic shadows - bold, cinematic look
   dramatic: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-  cinematic: "0 30px 60px -15px rgba(0, 0, 0, 0.4), 0 10px 20px -10px rgba(0, 0, 0, 0.2)",
+  cinematic:
+    "0 30px 60px -15px rgba(0, 0, 0, 0.4), 0 10px 20px -10px rgba(0, 0, 0, 0.2)",
   noir: "0 20px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 0, 0, 0.1)",
 
   // Long shadows - extended directional shadows
   long: "8px 8px 0 rgba(0, 0, 0, 0.15), 16px 16px 0 rgba(0, 0, 0, 0.1), 24px 24px 0 rgba(0, 0, 0, 0.05)",
-  "long-soft": "4px 4px 8px rgba(0, 0, 0, 0.1), 8px 8px 16px rgba(0, 0, 0, 0.08), 16px 16px 32px rgba(0, 0, 0, 0.05)",
+  "long-soft":
+    "4px 4px 8px rgba(0, 0, 0, 0.1), 8px 8px 16px rgba(0, 0, 0, 0.08), 16px 16px 32px rgba(0, 0, 0, 0.05)",
 
   // Inner shadows - inset effects
   inner: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
@@ -146,7 +156,8 @@ export const shadows: Record<ShadowName, string> = {
   pressed: "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 2px rgba(0, 0, 0, 0.1)",
   card: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
   modal: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)",
-  dropdown: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+  dropdown:
+    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
   button: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
   text: "0 2px 4px rgba(0, 0, 0, 0.3)",
 };
@@ -173,11 +184,13 @@ export function createColorShadow(
   color: string,
   opacity: number = 0.4,
   blur: number = 40,
-  offsetY: number = 10
+  offsetY: number = 10,
 ): string {
   // Convert hex to RGB if needed
-  let r = 0, g = 0, b = 0;
-  
+  let r = 0,
+    g = 0,
+    b = 0;
+
   if (color.startsWith("#")) {
     const hex = color.slice(1);
     if (hex.length === 3) {
@@ -208,16 +221,18 @@ export function createColorShadow(
  */
 export function createLayeredShadow(
   layers: number = 5,
-  baseOpacity: number = 0.08
+  baseOpacity: number = 0.08,
 ): string {
   const shadowLayers: string[] = [];
-  
+
   for (let i = 0; i < layers; i++) {
     const size = Math.pow(2, i + 1);
     const opacity = baseOpacity * (1 - i * 0.1);
-    shadowLayers.push(`0 ${size}px ${size}px rgba(0, 0, 0, ${opacity.toFixed(3)})`);
+    shadowLayers.push(
+      `0 ${size}px ${size}px rgba(0, 0, 0, ${opacity.toFixed(3)})`,
+    );
   }
-  
+
   return shadowLayers.join(", ");
 }
 
@@ -231,11 +246,13 @@ export function createLayeredShadow(
 export function createGlow(
   color: string,
   opacity: number = 0.5,
-  blur: number = 30
+  blur: number = 30,
 ): string {
   // Reuse color parsing from createColorShadow
-  let r = 0, g = 0, b = 0;
-  
+  let r = 0,
+    g = 0,
+    b = 0;
+
   if (color.startsWith("#")) {
     const hex = color.slice(1);
     if (hex.length === 3) {
@@ -265,8 +282,10 @@ export function createGlow(
  * // Returns multi-layer neon glow
  */
 export function createNeonGlow(color: string): string {
-  let r = 0, g = 0, b = 0;
-  
+  let r = 0,
+    g = 0,
+    b = 0;
+
   if (color.startsWith("#")) {
     const hex = color.slice(1);
     if (hex.length === 3) {

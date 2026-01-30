@@ -1,5 +1,10 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, random, AbsoluteFill } from "remotion";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  random,
+  AbsoluteFill,
+} from "remotion";
 
 /**
  * Premium ambiance preset types.
@@ -61,7 +66,16 @@ export interface AmbianceBackgroundProps {
 /**
  * Premium color palettes with proper color theory.
  */
-const presets: Record<AmbiancePreset, { bg: string; primary: string; secondary: string; accent: string; mode: "dark" | "light" }> = {
+const presets: Record<
+  AmbiancePreset,
+  {
+    bg: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    mode: "dark" | "light";
+  }
+> = {
   midnight: {
     bg: "#030014",
     primary: "#1e1b4b",
@@ -209,7 +223,7 @@ export const AmbianceBackground: React.FC<AmbianceBackgroundProps> = ({
 
   const time = (frame / fps) * speed;
   const palette = presets[preset];
-  
+
   const colors = {
     bg: palette.bg,
     primary: primaryColor ?? palette.primary,
@@ -218,44 +232,47 @@ export const AmbianceBackground: React.FC<AmbianceBackgroundProps> = ({
   };
 
   // Smooth animation functions
-  const smoothSin = (t: number, phase: number = 0) => 
+  const smoothSin = (t: number, phase: number = 0) =>
     Math.sin(t + phase) * 0.5 + 0.5;
-  
-  const smoothCos = (t: number, phase: number = 0) => 
+
+  const smoothCos = (t: number, phase: number = 0) =>
     Math.cos(t + phase) * 0.5 + 0.5;
 
   // Animated gradient positions
-  const gradientPositions = useMemo(() => ({
-    // Primary blob - slow, large movement
-    primary: {
-      x: 20 + smoothSin(time * 0.5, 0) * 30,
-      y: 20 + smoothCos(time * 0.4, 1) * 30,
-      scale: 0.9 + smoothSin(time * 0.3, 2) * 0.2,
-    },
-    // Secondary blob - medium movement
-    secondary: {
-      x: 60 + smoothSin(time * 0.6, 3) * 25,
-      y: 50 + smoothCos(time * 0.5, 4) * 25,
-      scale: 0.85 + smoothCos(time * 0.4, 5) * 0.3,
-    },
-    // Accent blob - faster, smaller movement
-    accent: {
-      x: 75 + smoothSin(time * 0.8, 6) * 20,
-      y: 70 + smoothCos(time * 0.7, 7) * 20,
-      scale: 0.7 + smoothSin(time * 0.5, 8) * 0.3,
-    },
-    // Extra atmospheric blobs
-    extra1: {
-      x: 40 + smoothCos(time * 0.3, 9) * 35,
-      y: 80 + smoothSin(time * 0.35, 10) * 15,
-      scale: 0.6 + smoothCos(time * 0.25, 11) * 0.2,
-    },
-    extra2: {
-      x: 85 + smoothSin(time * 0.45, 12) * 15,
-      y: 25 + smoothCos(time * 0.4, 13) * 20,
-      scale: 0.5 + smoothSin(time * 0.35, 14) * 0.2,
-    },
-  }), [time]);
+  const gradientPositions = useMemo(
+    () => ({
+      // Primary blob - slow, large movement
+      primary: {
+        x: 20 + smoothSin(time * 0.5, 0) * 30,
+        y: 20 + smoothCos(time * 0.4, 1) * 30,
+        scale: 0.9 + smoothSin(time * 0.3, 2) * 0.2,
+      },
+      // Secondary blob - medium movement
+      secondary: {
+        x: 60 + smoothSin(time * 0.6, 3) * 25,
+        y: 50 + smoothCos(time * 0.5, 4) * 25,
+        scale: 0.85 + smoothCos(time * 0.4, 5) * 0.3,
+      },
+      // Accent blob - faster, smaller movement
+      accent: {
+        x: 75 + smoothSin(time * 0.8, 6) * 20,
+        y: 70 + smoothCos(time * 0.7, 7) * 20,
+        scale: 0.7 + smoothSin(time * 0.5, 8) * 0.3,
+      },
+      // Extra atmospheric blobs
+      extra1: {
+        x: 40 + smoothCos(time * 0.3, 9) * 35,
+        y: 80 + smoothSin(time * 0.35, 10) * 15,
+        scale: 0.6 + smoothCos(time * 0.25, 11) * 0.2,
+      },
+      extra2: {
+        x: 85 + smoothSin(time * 0.45, 12) * 15,
+        y: 25 + smoothCos(time * 0.4, 13) * 20,
+        scale: 0.5 + smoothSin(time * 0.35, 14) * 0.2,
+      },
+    }),
+    [time],
+  );
 
   // Light ray animation
   const rayAngle = time * 20;
@@ -395,7 +412,14 @@ export const AmbianceBackground: React.FC<AmbianceBackgroundProps> = ({
 
       {/* Content */}
       {children && (
-        <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            height: "100%",
+          }}
+        >
           {children}
         </div>
       )}
@@ -442,16 +466,13 @@ export const GradientOrbs: React.FC<GradientOrbsProps> = ({
       const y = 50 + Math.sin(time * 0.8 + baseAngle) * radius;
       const size = 40 + i * 10;
       const opacity = 0.6 - i * 0.1;
-      
+
       return { color, x, y, size, opacity };
     });
   }, [colors, count, time]);
 
   return (
-    <AbsoluteFill
-      className={className}
-      style={{ background, ...style }}
-    >
+    <AbsoluteFill className={className} style={{ background, ...style }}>
       {orbs.map((orb, i) => (
         <div
           key={i}
@@ -471,7 +492,14 @@ export const GradientOrbs: React.FC<GradientOrbsProps> = ({
       ))}
 
       {children && (
-        <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            height: "100%",
+          }}
+        >
           {children}
         </div>
       )}

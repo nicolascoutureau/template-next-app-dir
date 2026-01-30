@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { MotionPath, MotionPathWithTrail } from "../../remotion/base/components/paths";
+import {
+  MotionPath,
+  MotionPathWithTrail,
+} from "../../remotion/base/components/paths";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof MotionPath> = {
@@ -21,7 +24,10 @@ const meta: Meta<typeof MotionPath> = {
     rotateOffset: { control: { type: "range", min: -180, max: 180, step: 15 } },
     start: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     end: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
-    ease: { control: "select", options: ["smooth", "bouncy", "snappy", "gentle"] },
+    ease: {
+      control: "select",
+      options: ["smooth", "bouncy", "snappy", "gentle"],
+    },
   },
 };
 

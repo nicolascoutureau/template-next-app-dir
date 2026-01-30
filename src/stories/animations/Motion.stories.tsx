@@ -13,7 +13,10 @@ const meta: Meta<typeof Motion> = {
     ),
   ],
   argTypes: {
-    spring: { control: "select", options: ["smooth", "bouncy", "snappy", "gentle", "wobbly"] },
+    spring: {
+      control: "select",
+      options: ["smooth", "bouncy", "snappy", "gentle", "wobbly"],
+    },
     anticipation: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     followThrough: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     squashStretch: { control: { type: "range", min: 0, max: 1, step: 0.1 } },

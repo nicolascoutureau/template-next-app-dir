@@ -2,7 +2,34 @@ import React, { useMemo, type CSSProperties } from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { useSpring } from "../../hooks/useSpring";
 import { type SpringName, type SpringConfig } from "../../presets/springs";
-import { type AnimatableProperties } from "./Animate";
+
+/**
+ * Properties that can be animated by animation components.
+ */
+export interface AnimatableProperties {
+  /** Opacity (0-1) */
+  opacity?: number;
+  /** X translation in pixels */
+  x?: number;
+  /** Y translation in pixels */
+  y?: number;
+  /** Uniform scale (1 = 100%) */
+  scale?: number;
+  /** Horizontal scale */
+  scaleX?: number;
+  /** Vertical scale */
+  scaleY?: number;
+  /** Z-axis rotation in degrees */
+  rotate?: number;
+  /** X-axis rotation in degrees (3D) */
+  rotateX?: number;
+  /** Y-axis rotation in degrees (3D) */
+  rotateY?: number;
+  /** Z-axis rotation in degrees (3D) */
+  rotateZ?: number;
+  /** Blur amount in pixels */
+  blur?: number;
+}
 
 /**
  * Animation type for Motion component.
@@ -117,9 +144,13 @@ export const Motion: React.FC<MotionProps> = ({
     // Anticipation goes from 0 to -1 to 0
     const t = interpolate(
       frame,
-      [anticipationStart, (anticipationStart + anticipationEnd) / 2, anticipationEnd],
+      [
+        anticipationStart,
+        (anticipationStart + anticipationEnd) / 2,
+        anticipationEnd,
+      ],
       [0, 1, 0],
-      { easing: Easing.inOut(Easing.sin) }
+      { easing: Easing.inOut(Easing.sin) },
     );
 
     return t;
@@ -127,7 +158,9 @@ export const Motion: React.FC<MotionProps> = ({
 
   // Calculate animated values with principles applied
   const animatedStyle = useMemo((): CSSProperties => {
-    const getBaseValue = (prop: keyof AnimatableProperties): number | undefined => {
+    const getBaseValue = (
+      prop: keyof AnimatableProperties,
+    ): number | undefined => {
       const fromVal = from[prop];
       const toVal = to[prop];
 
@@ -135,12 +168,18 @@ export const Motion: React.FC<MotionProps> = ({
 
       const startVal =
         fromVal ??
-        (prop === "opacity" || prop === "scale" || prop === "scaleX" || prop === "scaleY"
+        (prop === "opacity" ||
+        prop === "scale" ||
+        prop === "scaleX" ||
+        prop === "scaleY"
           ? 1
           : 0);
       const endVal =
         toVal ??
-        (prop === "opacity" || prop === "scale" || prop === "scaleX" || prop === "scaleY"
+        (prop === "opacity" ||
+        prop === "scale" ||
+        prop === "scaleX" ||
+        prop === "scaleY"
           ? 1
           : 0);
 
@@ -190,7 +229,9 @@ export const Motion: React.FC<MotionProps> = ({
       const stretchAmount = squashStretch * velocity;
 
       // Determine primary axis of movement
-      const movingY = Math.abs((to.y ?? 0) - (from.y ?? 0)) > Math.abs((to.x ?? 0) - (from.x ?? 0));
+      const movingY =
+        Math.abs((to.y ?? 0) - (from.y ?? 0)) >
+        Math.abs((to.x ?? 0) - (from.x ?? 0));
 
       if (movingY) {
         // Stretch vertically, squash horizontally
@@ -251,7 +292,7 @@ export const Motion: React.FC<MotionProps> = ({
       parentDelay: delay + (secondaryMotion ? secondaryDelay : 0),
       parentProgress: mainProgress,
     }),
-    [delay, secondaryMotion, secondaryDelay, mainProgress]
+    [delay, secondaryMotion, secondaryDelay, mainProgress],
   );
 
   return (

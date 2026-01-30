@@ -30,7 +30,20 @@ const meta: Meta<typeof GlossyShape> = {
   argTypes: {
     shape: {
       control: "select",
-      options: ["circle", "square", "rounded", "pill", "blob1", "blob2", "blob3", "blob4", "organic", "hexagon", "diamond", "star"],
+      options: [
+        "circle",
+        "square",
+        "rounded",
+        "pill",
+        "blob1",
+        "blob2",
+        "blob3",
+        "blob4",
+        "organic",
+        "hexagon",
+        "diamond",
+        "star",
+      ],
     },
     glossStyle: {
       control: "select",
@@ -40,7 +53,9 @@ const meta: Meta<typeof GlossyShape> = {
     secondaryColor: { control: "color" },
     width: { control: { type: "range", min: 50, max: 400, step: 10 } },
     height: { control: { type: "range", min: 50, max: 400, step: 10 } },
-    highlightIntensity: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
+    highlightIntensity: {
+      control: { type: "range", min: 0, max: 1, step: 0.1 },
+    },
     shadowIntensity: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     animation: {
       control: "select",
@@ -94,7 +109,13 @@ export const NeonPill: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={180} backgroundColor="#0a0a0a">
-        <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <AbsoluteFill
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Story />
         </AbsoluteFill>
       </RemotionWrapper>
@@ -158,7 +179,9 @@ export const FrostedCard: Story = {
   render: (args) => (
     <GlossyShape {...args}>
       <div style={{ padding: 24, color: "#fff", textAlign: "center" }}>
-        <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Frosted Glass</div>
+        <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 8 }}>
+          Frosted Glass
+        </div>
         <div style={{ fontSize: 14, opacity: 0.8 }}>Beautiful blur effect</div>
       </div>
     </GlossyShape>
@@ -183,7 +206,13 @@ export const StarNeon: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={180} backgroundColor="#0a0a0a">
-        <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <AbsoluteFill
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Story />
         </AbsoluteFill>
       </RemotionWrapper>
@@ -223,7 +252,9 @@ export const PresetPill: Story = {
       width={280}
       height={70}
     >
-      <span style={{ color: "#fff", fontWeight: 600, fontSize: 18 }}>Subscribe</span>
+      <span style={{ color: "#fff", fontWeight: 600, fontSize: 18 }}>
+        Subscribe
+      </span>
     </GlossyPill>
   ),
 };
@@ -239,7 +270,9 @@ export const PresetCard: Story = {
       borderRadius={20}
     >
       <div style={{ padding: 24, color: "#fff" }}>
-        <div style={{ fontSize: 14, opacity: 0.7, marginBottom: 8 }}>PREMIUM</div>
+        <div style={{ fontSize: 14, opacity: 0.7, marginBottom: 8 }}>
+          PREMIUM
+        </div>
         <div style={{ fontSize: 28, fontWeight: 700 }}>$99/mo</div>
       </div>
     </GlossyCard>
@@ -265,7 +298,14 @@ export const NeonCollection: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={180} backgroundColor="#0a0a0a">
-        <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}>
+        <AbsoluteFill
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 40,
+          }}
+        >
           <Story />
         </AbsoluteFill>
       </RemotionWrapper>
@@ -273,10 +313,43 @@ export const NeonCollection: Story = {
   ],
   render: () => (
     <>
-      <GlossyShape shape="circle" glossStyle="neon" color="#00ff88" width={100} height={100} animation="glow" delay={0} />
-      <GlossyShape shape="rounded" glossStyle="neon" color="#ff0080" width={120} height={100} borderRadius={20} animation="glow" delay={0.2} />
-      <GlossyShape shape="hexagon" glossStyle="neon" color="#00d4ff" width={110} height={110} animation="glow" delay={0.4} />
-      <GlossyShape shape="diamond" glossStyle="neon" color="#ffd700" width={100} height={100} animation="glow" delay={0.6} />
+      <GlossyShape
+        shape="circle"
+        glossStyle="neon"
+        color="#00ff88"
+        width={100}
+        height={100}
+        animation="glow"
+        delay={0}
+      />
+      <GlossyShape
+        shape="rounded"
+        glossStyle="neon"
+        color="#ff0080"
+        width={120}
+        height={100}
+        borderRadius={20}
+        animation="glow"
+        delay={0.2}
+      />
+      <GlossyShape
+        shape="hexagon"
+        glossStyle="neon"
+        color="#00d4ff"
+        width={110}
+        height={110}
+        animation="glow"
+        delay={0.4}
+      />
+      <GlossyShape
+        shape="diamond"
+        glossStyle="neon"
+        color="#ffd700"
+        width={100}
+        height={100}
+        animation="glow"
+        delay={0.6}
+      />
     </>
   ),
 };
@@ -301,10 +374,43 @@ export const GlassCollection: Story = {
   ],
   render: () => (
     <>
-      <GlossyShape shape="circle" glossStyle="glass" color="#667eea" width={120} height={120} animation="float" delay={0} />
-      <GlossyShape shape="rounded" glossStyle="glass" color="#f093fb" width={140} height={100} borderRadius={24} animation="float" delay={0.15} />
-      <GlossyShape shape="blob1" glossStyle="glass" color="#4facfe" width={130} height={130} animation="float" delay={0.3} />
-      <GlossyShape shape="pill" glossStyle="glass" color="#43e97b" width={180} height={60} animation="float" delay={0.45} />
+      <GlossyShape
+        shape="circle"
+        glossStyle="glass"
+        color="#667eea"
+        width={120}
+        height={120}
+        animation="float"
+        delay={0}
+      />
+      <GlossyShape
+        shape="rounded"
+        glossStyle="glass"
+        color="#f093fb"
+        width={140}
+        height={100}
+        borderRadius={24}
+        animation="float"
+        delay={0.15}
+      />
+      <GlossyShape
+        shape="blob1"
+        glossStyle="glass"
+        color="#4facfe"
+        width={130}
+        height={130}
+        animation="float"
+        delay={0.3}
+      />
+      <GlossyShape
+        shape="pill"
+        glossStyle="glass"
+        color="#43e97b"
+        width={180}
+        height={60}
+        animation="float"
+        delay={0.45}
+      />
     </>
   ),
 };
@@ -335,7 +441,15 @@ export const BlobVariants: Story = {
     return (
       <>
         {blobs.map((blob, i) => (
-          <div key={blob} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <div
+            key={blob}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <GlossyShape
               shape={blob}
               glossStyle="soft"
@@ -372,13 +486,35 @@ export const StyleComparison: Story = {
     ),
   ],
   render: () => {
-    const styles = ["glass", "plastic", "metallic", "neon", "soft", "frosted"] as const;
-    const colors = ["#667eea", "#f093fb", "#c0c0c0", "#00ff88", "#ffecd2", "#ffffff"];
+    const styles = [
+      "glass",
+      "plastic",
+      "metallic",
+      "neon",
+      "soft",
+      "frosted",
+    ] as const;
+    const colors = [
+      "#667eea",
+      "#f093fb",
+      "#c0c0c0",
+      "#00ff88",
+      "#ffecd2",
+      "#ffffff",
+    ];
 
     return (
       <>
         {styles.map((glossStyle, i) => (
-          <div key={glossStyle} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <div
+            key={glossStyle}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
             <GlossyShape
               shape="rounded"
               glossStyle={glossStyle}
@@ -387,7 +523,15 @@ export const StyleComparison: Story = {
               height={80}
               borderRadius={16}
             />
-            <span style={{ color: "#888", fontSize: 12, textTransform: "capitalize" }}>{glossStyle}</span>
+            <span
+              style={{
+                color: "#888",
+                fontSize: 12,
+                textTransform: "capitalize",
+              }}
+            >
+              {glossStyle}
+            </span>
           </div>
         ))}
       </>
@@ -414,12 +558,27 @@ export const AnimationShowcase: Story = {
     ),
   ],
   render: () => {
-    const animations = ["none", "float", "pulse", "rotate", "breathe", "glow"] as const;
+    const animations = [
+      "none",
+      "float",
+      "pulse",
+      "rotate",
+      "breathe",
+      "glow",
+    ] as const;
 
     return (
       <>
         {animations.map((animation) => (
-          <div key={animation} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+          <div
+            key={animation}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
             <GlossyShape
               shape="circle"
               glossStyle={animation === "glow" ? "neon" : "glass"}
@@ -428,7 +587,15 @@ export const AnimationShowcase: Story = {
               height={80}
               animation={animation}
             />
-            <span style={{ color: "#888", fontSize: 12, textTransform: "capitalize" }}>{animation}</span>
+            <span
+              style={{
+                color: "#888",
+                fontSize: 12,
+                textTransform: "capitalize",
+              }}
+            >
+              {animation}
+            </span>
           </div>
         ))}
       </>

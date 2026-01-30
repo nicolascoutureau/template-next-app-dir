@@ -1,5 +1,10 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, AbsoluteFill } from "remotion";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  AbsoluteFill,
+} from "remotion";
 
 /**
  * Props for VignetteBlur component.
@@ -196,7 +201,12 @@ export const VignetteBlur: React.FC<VignetteBlurProps> = ({
 /**
  * Preset: Cinematic depth of field blur.
  */
-export const CinematicBlur: React.FC<Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "layers" | "tintColor" | "tintOpacity">> = (props) => (
+export const CinematicBlur: React.FC<
+  Omit<
+    VignetteBlurProps,
+    "blurAmount" | "clearRadius" | "layers" | "tintColor" | "tintOpacity"
+  >
+> = (props) => (
   <VignetteBlur
     {...props}
     blurAmount={25}
@@ -210,7 +220,9 @@ export const CinematicBlur: React.FC<Omit<VignetteBlurProps, "blurAmount" | "cle
 /**
  * Preset: Dreamy soft focus effect.
  */
-export const DreamyBlur: React.FC<Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "falloff" | "layers">> = (props) => (
+export const DreamyBlur: React.FC<
+  Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "falloff" | "layers">
+> = (props) => (
   <VignetteBlur
     {...props}
     blurAmount={35}
@@ -223,19 +235,26 @@ export const DreamyBlur: React.FC<Omit<VignetteBlurProps, "blurAmount" | "clearR
 /**
  * Preset: Subtle focus vignette.
  */
-export const SubtleVignette: React.FC<Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "layers">> = (props) => (
-  <VignetteBlur
-    {...props}
-    blurAmount={12}
-    clearRadius={0.45}
-    layers={4}
-  />
+export const SubtleVignette: React.FC<
+  Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "layers">
+> = (props) => (
+  <VignetteBlur {...props} blurAmount={12} clearRadius={0.45} layers={4} />
 );
 
 /**
  * Preset: Intense tunnel vision effect.
  */
-export const TunnelVision: React.FC<Omit<VignetteBlurProps, "blurAmount" | "clearRadius" | "falloff" | "layers" | "tintColor" | "tintOpacity">> = (props) => (
+export const TunnelVision: React.FC<
+  Omit<
+    VignetteBlurProps,
+    | "blurAmount"
+    | "clearRadius"
+    | "falloff"
+    | "layers"
+    | "tintColor"
+    | "tintOpacity"
+  >
+> = (props) => (
   <VignetteBlur
     {...props}
     blurAmount={40}

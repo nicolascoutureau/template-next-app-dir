@@ -41,7 +41,15 @@ const meta: Meta<typeof Tint> = {
     },
     mode: {
       control: "select",
-      options: ["overlay", "gradient", "duotone", "multiply", "screen", "colorBurn", "softLight"],
+      options: [
+        "overlay",
+        "gradient",
+        "duotone",
+        "multiply",
+        "screen",
+        "colorBurn",
+        "softLight",
+      ],
     },
     intensity: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     brightness: { control: { type: "range", min: 0.5, max: 1.5, step: 0.05 } },
@@ -89,7 +97,11 @@ export const Default: Story = {
   },
   render: (args) => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
       <Tint {...args}>
         <SampleImage />
@@ -108,25 +120,36 @@ export const CustomColor: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 30 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 30,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <Tint color="rgba(239, 68, 68, 0.4)">
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Red Tint</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Red Tint
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint color="rgba(59, 130, 246, 0.4)">
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Blue Tint</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Blue Tint
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint color="rgba(16, 185, 129, 0.4)">
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Green Tint</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Green Tint
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -146,11 +169,18 @@ export const WarmPreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <WarmTint>
@@ -172,11 +202,18 @@ export const CoolPreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <CoolTint>
@@ -198,17 +235,26 @@ export const CinemaPreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <CinemaTint>
           <SampleImage size={250} />
         </CinemaTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Cinema</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Cinema
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -224,17 +270,26 @@ export const SunsetPreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <SunsetTint>
           <SampleImage size={250} />
         </SunsetTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Sunset</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Sunset
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -250,11 +305,18 @@ export const NoirPreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <NoirTint>
@@ -276,17 +338,26 @@ export const VintagePreset: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 40 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 40,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={250} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <VintageTint>
           <SampleImage size={250} />
         </VintageTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>Vintage</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 14 }}>
+          Vintage
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -340,7 +411,9 @@ export const PresetGallery: Story = {
               ) : (
                 <SampleImage size={150} />
               )}
-              <div style={{ color: "white", marginTop: 8, fontSize: 12 }}>{name}</div>
+              <div style={{ color: "white", marginTop: 8, fontSize: 12 }}>
+                {name}
+              </div>
             </div>
           ))}
         </div>
@@ -384,7 +457,9 @@ export const BlendModes: Story = {
             <Tint color="rgba(255, 100, 50, 0.5)" mode={mode}>
               <SampleImage size={170} />
             </Tint>
-            <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>{name}</div>
+            <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+              {name}
+            </div>
           </div>
         ))}
       </AbsoluteFill>
@@ -406,7 +481,12 @@ export const GradientTint: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 30 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 30,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <Tint
@@ -417,7 +497,9 @@ export const GradientTint: Story = {
         >
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Blue → Pink (135°)</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Blue → Pink (135°)
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint
@@ -428,7 +510,9 @@ export const GradientTint: Story = {
         >
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Yellow → Red (180°)</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Yellow → Red (180°)
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint
@@ -439,7 +523,9 @@ export const GradientTint: Story = {
         >
           <SampleImage size={200} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Green → Cyan (90°)</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Green → Cyan (90°)
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -494,7 +580,11 @@ export const AnimatedTint: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
       <Tint
         preset="sunset"
@@ -537,9 +627,16 @@ export const WithRealImage: Story = {
         <img
           src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
           alt="Mountain landscape"
-          style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+          style={{
+            width: 280,
+            height: 180,
+            objectFit: "cover",
+            borderRadius: 12,
+          }}
         />
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Original
+        </div>
       </div>
 
       {/* Cinema */}
@@ -548,10 +645,17 @@ export const WithRealImage: Story = {
           <img
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
             alt="Mountain landscape"
-            style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+            style={{
+              width: 280,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: 12,
+            }}
           />
         </CinemaTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Cinema</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Cinema
+        </div>
       </div>
 
       {/* Sunset */}
@@ -560,10 +664,17 @@ export const WithRealImage: Story = {
           <img
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
             alt="Mountain landscape"
-            style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+            style={{
+              width: 280,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: 12,
+            }}
           />
         </SunsetTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Sunset</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Sunset
+        </div>
       </div>
 
       {/* Noir */}
@@ -572,7 +683,12 @@ export const WithRealImage: Story = {
           <img
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
             alt="Mountain landscape"
-            style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+            style={{
+              width: 280,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: 12,
+            }}
           />
         </NoirTint>
         <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Noir</div>
@@ -584,10 +700,17 @@ export const WithRealImage: Story = {
           <img
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
             alt="Mountain landscape"
-            style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+            style={{
+              width: 280,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: 12,
+            }}
           />
         </VintageTint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Vintage</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>
+          Vintage
+        </div>
       </div>
 
       {/* Cool */}
@@ -596,7 +719,12 @@ export const WithRealImage: Story = {
           <img
             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop"
             alt="Mountain landscape"
-            style={{ width: 280, height: 180, objectFit: "cover", borderRadius: 12 }}
+            style={{
+              width: 280,
+              height: 180,
+              objectFit: "cover",
+              borderRadius: 12,
+            }}
           />
         </CoolTint>
         <div style={{ color: "white", marginTop: 10, fontSize: 13 }}>Cool</div>
@@ -628,9 +756,16 @@ export const PortraitWithTints: Story = {
         <img
           src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=250&h=350&fit=crop"
           alt="Portrait"
-          style={{ width: 200, height: 280, objectFit: "cover", borderRadius: 16 }}
+          style={{
+            width: 200,
+            height: 280,
+            objectFit: "cover",
+            borderRadius: 16,
+          }}
         />
-        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>Original</div>
+        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>
+          Original
+        </div>
       </div>
 
       {/* Rose */}
@@ -639,7 +774,12 @@ export const PortraitWithTints: Story = {
           <img
             src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=250&h=350&fit=crop"
             alt="Portrait"
-            style={{ width: 200, height: 280, objectFit: "cover", borderRadius: 16 }}
+            style={{
+              width: 200,
+              height: 280,
+              objectFit: "cover",
+              borderRadius: 16,
+            }}
           />
         </RoseTint>
         <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>Rose</div>
@@ -651,10 +791,17 @@ export const PortraitWithTints: Story = {
           <img
             src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=250&h=350&fit=crop"
             alt="Portrait"
-            style={{ width: 200, height: 280, objectFit: "cover", borderRadius: 16 }}
+            style={{
+              width: 200,
+              height: 280,
+              objectFit: "cover",
+              borderRadius: 16,
+            }}
           />
         </GoldenTint>
-        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>Golden</div>
+        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>
+          Golden
+        </div>
       </div>
 
       {/* Moonlight */}
@@ -663,10 +810,17 @@ export const PortraitWithTints: Story = {
           <img
             src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=250&h=350&fit=crop"
             alt="Portrait"
-            style={{ width: 200, height: 280, objectFit: "cover", borderRadius: 16 }}
+            style={{
+              width: 200,
+              height: 280,
+              objectFit: "cover",
+              borderRadius: 16,
+            }}
           />
         </MoonlightTint>
-        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>Moonlight</div>
+        <div style={{ color: "white", marginTop: 12, fontSize: 13 }}>
+          Moonlight
+        </div>
       </div>
     </AbsoluteFill>
   ),
@@ -686,29 +840,42 @@ export const WithAdjustments: Story = {
   ],
   render: () => (
     <AbsoluteFill
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 30 }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 30,
+      }}
     >
       <div style={{ textAlign: "center" }}>
         <SampleImage size={180} />
-        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>Original</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>
+          Original
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint color="transparent" brightness={1.2} contrast={1.1}>
           <SampleImage size={180} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>Bright + Contrast</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>
+          Bright + Contrast
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint color="transparent" saturate={1.5}>
           <SampleImage size={180} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>Saturated</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>
+          Saturated
+        </div>
       </div>
       <div style={{ textAlign: "center" }}>
         <Tint color="transparent" saturate={0}>
           <SampleImage size={180} />
         </Tint>
-        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>Desaturated</div>
+        <div style={{ color: "white", marginTop: 10, fontSize: 12 }}>
+          Desaturated
+        </div>
       </div>
     </AbsoluteFill>
   ),

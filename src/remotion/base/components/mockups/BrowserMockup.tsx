@@ -47,26 +47,71 @@ export interface BrowserMockupProps {
 
 const TrafficLights = ({ theme }: { theme: BrowserTheme }) => (
   <div style={{ display: "flex", gap: 8 }}>
-    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#ff5f57" }} />
-    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#febc2e" }} />
-    <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#28c840" }} />
+    <div
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: "50%",
+        background: "#ff5f57",
+      }}
+    />
+    <div
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: "50%",
+        background: "#febc2e",
+      }}
+    />
+    <div
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: "50%",
+        background: "#28c840",
+      }}
+    />
   </div>
 );
 
 const ChevronLeft = ({ color }: { color: string }) => (
-  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
+  <svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+  >
     <path d="M15 18l-6-6 6-6" />
   </svg>
 );
 
 const ChevronRight = ({ color }: { color: string }) => (
-  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
+  <svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+  >
     <path d="M9 18l6-6-6-6" />
   </svg>
 );
 
 const RefreshIcon = ({ color }: { color: string }) => (
-  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+  >
     <path d="M23 4v6h-6M1 20v-6h6" />
     <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
   </svg>
@@ -79,13 +124,29 @@ const LockIcon = ({ color }: { color: string }) => (
 );
 
 const ShareIcon = ({ color }: { color: string }) => (
-  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
+  <svg
+    width={16}
+    height={16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+  >
     <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
   </svg>
 );
 
 const PlusIcon = ({ color }: { color: string }) => (
-  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round">
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+  >
     <path d="M12 5v14M5 12h14" />
   </svg>
 );
@@ -94,16 +155,19 @@ const PlusIcon = ({ color }: { color: string }) => (
 // Theme configurations
 // ============================================
 
-const themes: Record<BrowserTheme, {
-  bg: string;
-  toolbar: string;
-  text: string;
-  textMuted: string;
-  border: string;
-  urlBg: string;
-  tabBg: string;
-  tabActiveBg: string;
-}> = {
+const themes: Record<
+  BrowserTheme,
+  {
+    bg: string;
+    toolbar: string;
+    text: string;
+    textMuted: string;
+    border: string;
+    urlBg: string;
+    tabBg: string;
+    tabActiveBg: string;
+  }
+> = {
   light: {
     bg: "#ffffff",
     toolbar: "#f5f5f7",
@@ -154,7 +218,7 @@ const ChromeBrowser: React.FC<{
       <div style={{ padding: "0 8px", marginBottom: 8 }}>
         <TrafficLights theme={theme} />
       </div>
-      
+
       {/* Tab */}
       <div
         style={{
@@ -176,15 +240,26 @@ const ChromeBrowser: React.FC<{
             width: 16,
             height: 16,
             borderRadius: 4,
-            background: `linear-gradient(135deg, ${theme === 'dark' ? '#4a4a4c' : '#e0e0e0'} 0%, ${theme === 'dark' ? '#3a3a3c' : '#d0d0d0'} 100%)`,
+            background: `linear-gradient(135deg, ${theme === "dark" ? "#4a4a4c" : "#e0e0e0"} 0%, ${theme === "dark" ? "#3a3a3c" : "#d0d0d0"} 100%)`,
           }}
         />
-        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {tabTitle}
         </span>
-        <span style={{ color: colors.textMuted, fontSize: 14, cursor: "pointer" }}>×</span>
+        <span
+          style={{ color: colors.textMuted, fontSize: 14, cursor: "pointer" }}
+        >
+          ×
+        </span>
       </div>
-      
+
       {/* New tab button */}
       <div style={{ padding: "0 8px", marginBottom: 8, opacity: 0.6 }}>
         <PlusIcon color={colors.text} />
@@ -228,7 +303,9 @@ const ChromeBrowser: React.FC<{
           }}
         >
           <LockIcon color={colors.textMuted} />
-          <span style={{ color: colors.text }}>{url.replace(/^https?:\/\//, '')}</span>
+          <span style={{ color: colors.text }}>
+            {url.replace(/^https?:\/\//, "")}
+          </span>
         </div>
 
         {/* Actions */}
@@ -239,7 +316,9 @@ const ChromeBrowser: React.FC<{
     )}
 
     {/* Content */}
-    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>{children}</div>
+    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>
+      {children}
+    </div>
   </>
 );
 
@@ -272,7 +351,14 @@ const SafariBrowser: React.FC<{
 
       {/* Sidebar toggle (Safari style) */}
       <div style={{ width: 20, opacity: 0.5 }}>
-        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={colors.text} strokeWidth={2}>
+        <svg
+          width={18}
+          height={18}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={colors.text}
+          strokeWidth={2}
+        >
           <rect x={3} y={3} width={7} height={18} rx={1} />
           <rect x={14} y={3} width={7} height={18} rx={1} />
         </svg>
@@ -292,7 +378,7 @@ const SafariBrowser: React.FC<{
             maxWidth: 400,
             height: 30,
             margin: "0 auto",
-            background: theme === 'dark' ? colors.urlBg : '#e8e8ed',
+            background: theme === "dark" ? colors.urlBg : "#e8e8ed",
             borderRadius: 8,
             display: "flex",
             alignItems: "center",
@@ -304,7 +390,9 @@ const SafariBrowser: React.FC<{
           }}
         >
           <LockIcon color={colors.textMuted} />
-          <span style={{ color: colors.text }}>{url.replace(/^https?:\/\//, '').split('/')[0]}</span>
+          <span style={{ color: colors.text }}>
+            {url.replace(/^https?:\/\//, "").split("/")[0]}
+          </span>
         </div>
       )}
 
@@ -316,7 +404,9 @@ const SafariBrowser: React.FC<{
     </div>
 
     {/* Content */}
-    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>{children}</div>
+    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>
+      {children}
+    </div>
   </>
 );
 
@@ -331,15 +421,15 @@ const ArcBrowser: React.FC<{
   showAddressBar: boolean;
   colors: typeof themes.light;
 }> = ({ children, url, theme, showAddressBar, colors }) => {
-  const arcAccent = theme === 'dark' ? '#8b5cf6' : '#7c3aed';
-  
+  const arcAccent = theme === "dark" ? "#8b5cf6" : "#7c3aed";
+
   return (
     <div style={{ display: "flex", flex: 1 }}>
       {/* Sidebar */}
       <div
         style={{
           width: 68,
-          background: theme === 'dark' ? '#18181b' : '#fafafa',
+          background: theme === "dark" ? "#18181b" : "#fafafa",
           borderRight: `1px solid ${colors.border}`,
           display: "flex",
           flexDirection: "column",
@@ -350,13 +440,34 @@ const ArcBrowser: React.FC<{
       >
         {/* Traffic lights (vertical in Arc) */}
         <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840" }} />
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#ff5f57",
+            }}
+          />
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#febc2e",
+            }}
+          />
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#28c840",
+            }}
+          />
         </div>
 
         {/* Space tabs */}
-        {[arcAccent, '#3b82f6', '#22c55e'].map((color, i) => (
+        {[arcAccent, "#3b82f6", "#22c55e"].map((color, i) => (
           <div
             key={i}
             style={{
@@ -369,10 +480,10 @@ const ArcBrowser: React.FC<{
               justifyContent: "center",
               fontSize: 14,
               fontWeight: 600,
-              color: i === 0 ? '#fff' : colors.textMuted,
+              color: i === 0 ? "#fff" : colors.textMuted,
             }}
           >
-            {['W', 'D', 'P'][i]}
+            {["W", "D", "P"][i]}
           </div>
         ))}
 
@@ -431,7 +542,9 @@ const ArcBrowser: React.FC<{
               }}
             >
               <LockIcon color={colors.textMuted} />
-              <span style={{ color: colors.text }}>{url.replace(/^https?:\/\//, '')}</span>
+              <span style={{ color: colors.text }}>
+                {url.replace(/^https?:\/\//, "")}
+              </span>
             </div>
 
             {/* Actions */}
@@ -443,7 +556,9 @@ const ArcBrowser: React.FC<{
         )}
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>{children}</div>
+        <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -474,7 +589,9 @@ const MinimalBrowser: React.FC<{
     </div>
 
     {/* Content */}
-    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>{children}</div>
+    <div style={{ flex: 1, overflow: "hidden", background: colors.bg }}>
+      {children}
+    </div>
   </>
 );
 
@@ -527,7 +644,9 @@ export const BrowserMockup: React.FC<BrowserMockupProps> = ({
     overflow: "hidden",
     background: colors.bg,
     border: `1px solid ${colors.border}`,
-    boxShadow: shadow ? "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)" : undefined,
+    boxShadow: shadow
+      ? "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05)"
+      : undefined,
     display: "flex",
     flexDirection: "column",
     transform: scale !== 1 ? `scale(${scale})` : undefined,

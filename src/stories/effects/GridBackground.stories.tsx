@@ -38,7 +38,13 @@ export default meta;
 type Story = StoryObj<typeof GridBackground>;
 
 // Content overlay for demos
-const ContentOverlay = ({ title, dark = false }: { title?: string; dark?: boolean }) => (
+const ContentOverlay = ({
+  title,
+  dark = false,
+}: {
+  title?: string;
+  dark?: boolean;
+}) => (
   <AbsoluteFill
     style={{
       display: "flex",

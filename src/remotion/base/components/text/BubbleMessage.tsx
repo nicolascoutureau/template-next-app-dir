@@ -70,7 +70,10 @@ function getRemotionEasing(ease: EasingName | string): (t: number) => number {
 /**
  * Style presets for different bubble styles.
  */
-const stylePresets: Record<BubbleStyle, { borderRadius: string; padding: string }> = {
+const stylePresets: Record<
+  BubbleStyle,
+  { borderRadius: string; padding: string }
+> = {
   ios: { borderRadius: "18px", padding: "10px 14px" },
   android: { borderRadius: "20px 20px 20px 4px", padding: "12px 16px" },
   minimal: { borderRadius: "8px", padding: "8px 12px" },
@@ -81,15 +84,20 @@ const stylePresets: Record<BubbleStyle, { borderRadius: string; padding: string 
 /**
  * Glossy style configuration - shiny bubble with gradient highlight.
  */
-const glossyStyles: Record<BubbleAlign, { bg: string; highlight: string; text: string }> = {
+const glossyStyles: Record<
+  BubbleAlign,
+  { bg: string; highlight: string; text: string }
+> = {
   right: {
     bg: "linear-gradient(180deg, #3b9eff 0%, #007AFF 100%)",
-    highlight: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%)",
+    highlight:
+      "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%)",
     text: "#ffffff",
   },
   left: {
     bg: "linear-gradient(180deg, #f0f0f5 0%, #d8d8e0 100%)",
-    highlight: "linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%)",
+    highlight:
+      "linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 50%)",
     text: "#000000",
   },
 };
@@ -158,14 +166,20 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
   const duration = getDuration(durationProp);
   const delayFrames = Math.round(delay * fps);
   const typingFrames = Math.round(typingDuration * fps);
-  const messageDelayFrames = showTyping ? delayFrames + typingFrames : delayFrames;
+  const messageDelayFrames = showTyping
+    ? delayFrames + typingFrames
+    : delayFrames;
   const durationFrames = Math.round(duration * fps);
   const easing = getRemotionEasing(ease);
 
   // Colors - use glossy styles when glossy preset is selected
   const isGlossy = bubbleStyle === "glossy";
-  const bgColor = backgroundColor ?? (isGlossy ? glossyStyles[align].bg : defaultColors[align].bg);
-  const txtColor = textColor ?? (isGlossy ? glossyStyles[align].text : defaultColors[align].text);
+  const bgColor =
+    backgroundColor ??
+    (isGlossy ? glossyStyles[align].bg : defaultColors[align].bg);
+  const txtColor =
+    textColor ??
+    (isGlossy ? glossyStyles[align].text : defaultColors[align].text);
 
   // Style preset
   const preset = stylePresets[bubbleStyle];
@@ -211,7 +225,9 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
           opacity: typingProgress,
           position: "relative" as const,
           overflow: "hidden" as const,
-          boxShadow: isGlossy ? "0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)" : undefined,
+          boxShadow: isGlossy
+            ? "0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3)"
+            : undefined,
         }}
       >
         {[0, 1, 2].map((i) => {
@@ -238,8 +254,10 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
   const tailColor = useMemo(() => {
     if (!showTail || bubbleStyle !== "ios") return null;
     // For glossy, use solid color that matches the gradient bottom
-    return isGlossy 
-      ? (align === "right" ? "#007AFF" : "#d8d8e0")
+    return isGlossy
+      ? align === "right"
+        ? "#007AFF"
+        : "#d8d8e0"
       : (backgroundColor ?? defaultColors[align].bg);
   }, [showTail, bubbleStyle, align, backgroundColor, isGlossy]);
 
@@ -272,7 +290,8 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
     wordBreak: "break-word",
     // Glossy-specific styles
     ...(isGlossy && {
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+      boxShadow:
+        "0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
       overflow: "hidden" as const,
     }),
   };
@@ -335,7 +354,9 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
                     }}
                   />
                 )}
-                <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
+                <span style={{ position: "relative", zIndex: 1 }}>
+                  {children}
+                </span>
               </div>
               {/* Tail - rendered outside bubble to avoid overflow clipping */}
               {tailColor && align === "right" && (
@@ -349,10 +370,7 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
                     right: -8,
                   }}
                 >
-                  <path
-                    d="M0 16 C0 16 0 0 12 0 L12 16 Z"
-                    fill={tailColor}
-                  />
+                  <path d="M0 16 C0 16 0 0 12 0 L12 16 Z" fill={tailColor} />
                 </svg>
               )}
               {tailColor && align === "left" && (
@@ -366,10 +384,7 @@ export const BubbleMessage: React.FC<BubbleMessageProps> = ({
                     left: -8,
                   }}
                 >
-                  <path
-                    d="M12 16 C12 16 12 0 0 0 L0 16 Z"
-                    fill={tailColor}
-                  />
+                  <path d="M12 16 C12 16 12 0 0 0 L0 16 Z" fill={tailColor} />
                 </svg>
               )}
             </div>

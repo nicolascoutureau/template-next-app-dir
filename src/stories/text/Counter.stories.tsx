@@ -121,14 +121,24 @@ export const CompareTabular: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
-        <div style={{ color: "#888", fontSize: 14, marginBottom: 8 }}>With tabular-nums (fixed width):</div>
+        <div style={{ color: "#888", fontSize: 14, marginBottom: 8 }}>
+          With tabular-nums (fixed width):
+        </div>
         <div style={numberStyle}>
           <Counter from={0} to={11111} duration={2} tabularNums={true} />
         </div>
       </div>
       <div>
-        <div style={{ color: "#888", fontSize: 14, marginBottom: 8 }}>Without tabular-nums (proportional):</div>
-        <div style={{ ...numberStyle, fontVariantNumeric: "normal", fontFeatureSettings: "normal" }}>
+        <div style={{ color: "#888", fontSize: 14, marginBottom: 8 }}>
+          Without tabular-nums (proportional):
+        </div>
+        <div
+          style={{
+            ...numberStyle,
+            fontVariantNumeric: "normal",
+            fontFeatureSettings: "normal",
+          }}
+        >
           <Counter from={0} to={11111} duration={2} tabularNums={false} />
         </div>
       </div>

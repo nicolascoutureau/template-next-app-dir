@@ -132,9 +132,14 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
     // Fade in phase
     if (effectiveFrame < 0) return 0;
     if (effectiveFrame < durationFrames) {
-      const progress = interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
-        easing: Easing.out(Easing.cubic),
-      });
+      const progress = interpolate(
+        effectiveFrame,
+        [0, durationFrames],
+        [0, 1],
+        {
+          easing: Easing.out(Easing.cubic),
+        },
+      );
       return intensity * progress;
     }
 
@@ -144,13 +149,23 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
     // Pulsate phase
     const pulseDurationFrames = pulseDuration * fps;
     const pulseFrame = effectiveFrame - durationFrames;
-    const pulseProgress = (pulseFrame % pulseDurationFrames) / pulseDurationFrames;
+    const pulseProgress =
+      (pulseFrame % pulseDurationFrames) / pulseDurationFrames;
     const oscillation = Math.sin(pulseProgress * Math.PI * 2);
     const normalizedOscillation = (oscillation + 1) / 2;
     const scaledIntensity = pulseMin + normalizedOscillation * (1 - pulseMin);
 
     return intensity * scaledIntensity;
-  }, [frame, delayFrames, durationFrames, intensity, pulsateAfter, pulseDuration, pulseMin, fps]);
+  }, [
+    frame,
+    delayFrames,
+    durationFrames,
+    intensity,
+    pulsateAfter,
+    pulseDuration,
+    pulseMin,
+    fps,
+  ]);
 
   const glowStyle: CSSProperties = {
     filter:

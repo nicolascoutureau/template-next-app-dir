@@ -79,7 +79,11 @@ function getRemotionEasing(ease: EasingName | string): (t: number) => number {
 /**
  * Generate polygon points for regular polygon.
  */
-function generatePolygonPoints(sides: number, progress: number, rotation: number = 0): string {
+function generatePolygonPoints(
+  sides: number,
+  progress: number,
+  rotation: number = 0,
+): string {
   const points: string[] = [];
   const angleStep = (Math.PI * 2) / sides;
   const rotationRad = (rotation * Math.PI) / 180;
@@ -152,7 +156,8 @@ export const ClipReveal: React.FC<ClipRevealProps> = ({
     const effectiveFrame = frame - delayFrames;
 
     if (effectiveFrame <= 0) return direction === "contract" ? 1 : 0;
-    if (effectiveFrame >= durationFrames) return direction === "contract" ? 0 : 1;
+    if (effectiveFrame >= durationFrames)
+      return direction === "contract" ? 0 : 1;
 
     let p = interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
       easing,

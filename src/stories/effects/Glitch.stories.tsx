@@ -13,7 +13,10 @@ const meta: Meta<typeof Glitch> = {
     ),
   ],
   argTypes: {
-    type: { control: "select", options: ["rgbSplit", "scanlines", "blocks", "noise", "full"] },
+    type: {
+      control: "select",
+      options: ["rgbSplit", "scanlines", "blocks", "noise", "full"],
+    },
     intensity: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     animate: { control: "boolean" },
     speed: { control: { type: "range", min: 0.5, max: 5, step: 0.5 } },

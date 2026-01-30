@@ -263,9 +263,17 @@ export const Tint: React.FC<TintProps> = ({
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
         easing: Easing.inOut(Easing.cubic),
-      }
+      },
     );
-  }, [animate, frame, delayFrames, durationFrames, animateFrom, animateTo, intensity]);
+  }, [
+    animate,
+    frame,
+    delayFrames,
+    durationFrames,
+    animateFrom,
+    animateTo,
+    intensity,
+  ]);
 
   const effectiveIntensity = animate ? animatedIntensity : intensity;
 

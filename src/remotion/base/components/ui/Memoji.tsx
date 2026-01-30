@@ -186,25 +186,25 @@ export const Memoji: React.FC<MemojiProps> = ({
 };
 
 // Preset components for common use cases
-export const HappyMemoji: React.FC<Omit<MemojiProps, "expression">> = (props) => (
-  <Memoji expression="happy" {...props} />
-);
+export const HappyMemoji: React.FC<Omit<MemojiProps, "expression">> = (
+  props,
+) => <Memoji expression="happy" {...props} />;
 
-export const CoolMemoji: React.FC<Omit<MemojiProps, "expression">> = (props) => (
-  <Memoji expression="cool" {...props} />
-);
+export const CoolMemoji: React.FC<Omit<MemojiProps, "expression">> = (
+  props,
+) => <Memoji expression="cool" {...props} />;
 
-export const LoveMemoji: React.FC<Omit<MemojiProps, "expression">> = (props) => (
-  <Memoji expression="love" animation="pulse" {...props} />
-);
+export const LoveMemoji: React.FC<Omit<MemojiProps, "expression">> = (
+  props,
+) => <Memoji expression="love" animation="pulse" {...props} />;
 
-export const ThinkingMemoji: React.FC<Omit<MemojiProps, "expression">> = (props) => (
-  <Memoji expression="thinking" animation="nod" {...props} />
-);
+export const ThinkingMemoji: React.FC<Omit<MemojiProps, "expression">> = (
+  props,
+) => <Memoji expression="thinking" animation="nod" {...props} />;
 
-export const WaveMemoji: React.FC<Omit<MemojiProps, "expression">> = (props) => (
-  <Memoji expression="happy" animation="wave" {...props} />
-);
+export const WaveMemoji: React.FC<Omit<MemojiProps, "expression">> = (
+  props,
+) => <Memoji expression="happy" animation="wave" {...props} />;
 
 // Avatar group component
 export interface MemojiGroupProps {

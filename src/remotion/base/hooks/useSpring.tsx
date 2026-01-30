@@ -1,6 +1,14 @@
 import { useMemo } from "react";
-import { useCurrentFrame, useVideoConfig, spring as remotionSpring } from "remotion";
-import { getSpring, type SpringConfig, type SpringName } from "../presets/springs";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  spring as remotionSpring,
+} from "remotion";
+import {
+  getSpring,
+  type SpringConfig,
+  type SpringName,
+} from "../presets/springs";
 
 /**
  * Options for the useSpring hook.
@@ -56,7 +64,11 @@ export interface UseSpringReturn {
  * });
  */
 export function useSpring(options: UseSpringOptions = {}): UseSpringReturn {
-  const { spring: springOption = "smooth", delay = 0, from: startFrame } = options;
+  const {
+    spring: springOption = "smooth",
+    delay = 0,
+    from: startFrame,
+  } = options;
 
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();

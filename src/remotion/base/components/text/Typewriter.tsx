@@ -189,7 +189,10 @@ export const TypewriterLines: React.FC<TypewriterLinesProps> = ({
   const currentTime = frame / fps;
 
   return (
-    <div className={className} style={{ ...style, display: "flex", flexDirection: "column" }}>
+    <div
+      className={className}
+      style={{ ...style, display: "flex", flexDirection: "column" }}
+    >
       {lineTimings.map((line, index) => {
         // Calculate if this line should be visible
         const lineProgress = (currentTime - line.start) / line.duration;
@@ -201,7 +204,7 @@ export const TypewriterLines: React.FC<TypewriterLinesProps> = ({
 
         const charCount = Math.min(
           Math.floor(lineProgress * line.text.length),
-          line.text.length
+          line.text.length,
         );
         const isLastLine = index === lines.length - 1;
         const isLineComplete = charCount >= line.text.length;
@@ -216,7 +219,9 @@ export const TypewriterLines: React.FC<TypewriterLinesProps> = ({
           <div key={index} style={lineStyle}>
             {line.text.slice(0, charCount)}
             {showLineCursor && (
-              <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
+              <span style={{ opacity: cursorVisible ? 1 : 0 }}>
+                {cursorChar}
+              </span>
             )}
           </div>
         );

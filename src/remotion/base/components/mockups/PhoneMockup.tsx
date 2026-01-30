@@ -36,11 +36,44 @@ export interface PhoneMockupProps {
 /**
  * Device dimensions.
  */
-const deviceDimensions: Record<PhoneDevice, { width: number; height: number; borderRadius: number; notchWidth: number; notchHeight: number }> = {
-  "iphone-15": { width: 393, height: 852, borderRadius: 55, notchWidth: 126, notchHeight: 37 },
-  "iphone-14": { width: 390, height: 844, borderRadius: 47, notchWidth: 120, notchHeight: 35 },
-  "pixel-8": { width: 412, height: 915, borderRadius: 40, notchWidth: 80, notchHeight: 25 },
-  "generic": { width: 375, height: 812, borderRadius: 40, notchWidth: 100, notchHeight: 30 },
+const deviceDimensions: Record<
+  PhoneDevice,
+  {
+    width: number;
+    height: number;
+    borderRadius: number;
+    notchWidth: number;
+    notchHeight: number;
+  }
+> = {
+  "iphone-15": {
+    width: 393,
+    height: 852,
+    borderRadius: 55,
+    notchWidth: 126,
+    notchHeight: 37,
+  },
+  "iphone-14": {
+    width: 390,
+    height: 844,
+    borderRadius: 47,
+    notchWidth: 120,
+    notchHeight: 35,
+  },
+  "pixel-8": {
+    width: 412,
+    height: 915,
+    borderRadius: 40,
+    notchWidth: 80,
+    notchHeight: 25,
+  },
+  generic: {
+    width: 375,
+    height: 812,
+    borderRadius: 40,
+    notchWidth: 100,
+    notchHeight: 30,
+  },
 };
 
 /**

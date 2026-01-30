@@ -61,12 +61,51 @@ export interface ButtonProps {
 /**
  * Size configurations.
  */
-const sizes: Record<ButtonSize, { padding: string; fontSize: number; height: number; borderRadius: number; gap: number }> = {
-  xs: { padding: "6px 12px", fontSize: 12, height: 28, borderRadius: 6, gap: 4 },
-  sm: { padding: "8px 16px", fontSize: 13, height: 34, borderRadius: 8, gap: 6 },
-  md: { padding: "10px 20px", fontSize: 14, height: 40, borderRadius: 10, gap: 8 },
-  lg: { padding: "12px 28px", fontSize: 16, height: 48, borderRadius: 12, gap: 10 },
-  xl: { padding: "16px 36px", fontSize: 18, height: 56, borderRadius: 14, gap: 12 },
+const sizes: Record<
+  ButtonSize,
+  {
+    padding: string;
+    fontSize: number;
+    height: number;
+    borderRadius: number;
+    gap: number;
+  }
+> = {
+  xs: {
+    padding: "6px 12px",
+    fontSize: 12,
+    height: 28,
+    borderRadius: 6,
+    gap: 4,
+  },
+  sm: {
+    padding: "8px 16px",
+    fontSize: 13,
+    height: 34,
+    borderRadius: 8,
+    gap: 6,
+  },
+  md: {
+    padding: "10px 20px",
+    fontSize: 14,
+    height: 40,
+    borderRadius: 10,
+    gap: 8,
+  },
+  lg: {
+    padding: "12px 28px",
+    fontSize: 16,
+    height: 48,
+    borderRadius: 12,
+    gap: 10,
+  },
+  xl: {
+    padding: "16px 36px",
+    fontSize: 18,
+    height: 56,
+    borderRadius: 14,
+    gap: 12,
+  },
 };
 
 /**
@@ -104,7 +143,7 @@ function getVariantStyles(
   textColor: string,
   pressed: boolean,
   hover: boolean,
-  borderRadius: number
+  borderRadius: number,
 ): CSSProperties {
   const lighterColor = adjustColor(color, 20);
   const darkerColor = adjustColor(color, -20);
@@ -168,8 +207,8 @@ function getVariantStyles(
         boxShadow: pressed
           ? `0 0 5px ${color}, inset 0 0 10px ${color}40`
           : hover
-          ? `0 0 10px ${color}, 0 0 20px ${color}, 0 0 40px ${color}60, inset 0 0 20px ${color}20`
-          : `0 0 5px ${color}, 0 0 15px ${color}60`,
+            ? `0 0 10px ${color}, 0 0 20px ${color}, 0 0 40px ${color}60, inset 0 0 20px ${color}20`
+            : `0 0 5px ${color}, 0 0 15px ${color}60`,
         textShadow: `0 0 10px ${color}`,
       };
 
@@ -196,7 +235,11 @@ function getVariantStyles(
     case "outline":
       return {
         ...baseStyles,
-        background: pressed ? `${color}10` : hover ? `${color}08` : "transparent",
+        background: pressed
+          ? `${color}10`
+          : hover
+            ? `${color}08`
+            : "transparent",
         color: color,
         borderRadius,
         border: `2px solid ${color}`,
@@ -315,12 +358,11 @@ export const Button: React.FC<ButtonProps> = ({
   const delayFrames = Math.round(delay * fps);
   const animationProgress = useMemo(() => {
     if (!animate) return 1;
-    const progress = interpolate(
-      frame - delayFrames,
-      [0, fps * 0.4],
-      [0, 1],
-      { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.5)) }
-    );
+    const progress = interpolate(frame - delayFrames, [0, fps * 0.4], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.back(1.5)),
+    });
     return progress;
   }, [animate, frame, delayFrames, fps]);
 
@@ -345,7 +387,7 @@ export const Button: React.FC<ButtonProps> = ({
           animationProgress,
           [0, 0.6, 0.8, 1],
           [0.3, 1.1, 0.95, 1],
-          { extrapolateRight: "clamp" }
+          { extrapolateRight: "clamp" },
         );
         return {
           opacity: Math.min(animationProgress * 2, 1),
@@ -363,7 +405,7 @@ export const Button: React.FC<ButtonProps> = ({
     textColor,
     pressed,
     hover,
-    variant === "pill" ? 999 : sizeConfig.borderRadius
+    variant === "pill" ? 999 : sizeConfig.borderRadius,
   );
 
   return (
@@ -385,9 +427,15 @@ export const Button: React.FC<ButtonProps> = ({
         ...style,
       }}
     >
-      {icon && <span style={{ display: "flex", alignItems: "center" }}>{icon}</span>}
+      {icon && (
+        <span style={{ display: "flex", alignItems: "center" }}>{icon}</span>
+      )}
       <span>{children}</span>
-      {iconRight && <span style={{ display: "flex", alignItems: "center" }}>{iconRight}</span>}
+      {iconRight && (
+        <span style={{ display: "flex", alignItems: "center" }}>
+          {iconRight}
+        </span>
+      )}
     </div>
   );
 };
@@ -406,17 +454,17 @@ export const NeonButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
   <Button {...props} variant="neon" />
 );
 
-export const GradientButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
-  <Button {...props} variant="gradient" />
-);
+export const GradientButton: React.FC<Omit<ButtonProps, "variant">> = (
+  props,
+) => <Button {...props} variant="gradient" />;
 
 export const SoftButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
   <Button {...props} variant="soft" />
 );
 
-export const OutlineButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
-  <Button {...props} variant="outline" />
-);
+export const OutlineButton: React.FC<Omit<ButtonProps, "variant">> = (
+  props,
+) => <Button {...props} variant="outline" />;
 
 export const PillButton: React.FC<Omit<ButtonProps, "variant">> = (props) => (
   <Button {...props} variant="pill" />

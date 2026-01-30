@@ -86,7 +86,16 @@ export const Shimmer: React.FC<ShimmerProps> = ({
       overflow: "hidden",
       ...style,
     }),
-    [width, height, borderRadius, angle, baseColor, highlightColor, shimmerPosition, style]
+    [
+      width,
+      height,
+      borderRadius,
+      angle,
+      baseColor,
+      highlightColor,
+      shimmerPosition,
+      style,
+    ],
   );
 
   return (

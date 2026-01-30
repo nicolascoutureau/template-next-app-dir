@@ -2,8 +2,19 @@
  * Text components barrel export.
  */
 
-export { Typewriter, TypewriterLines, type TypewriterProps, type TypewriterLinesProps } from "./Typewriter";
-export { Counter, RollingCounter, type CounterProps, type RollingCounterProps, type CounterAnimation } from "./Counter";
+export {
+  Typewriter,
+  TypewriterLines,
+  type TypewriterProps,
+  type TypewriterLinesProps,
+} from "./Typewriter";
+export {
+  Counter,
+  RollingCounter,
+  type CounterProps,
+  type RollingCounterProps,
+  type CounterAnimation,
+} from "./Counter";
 export {
   BubbleMessage,
   ChatConversation,

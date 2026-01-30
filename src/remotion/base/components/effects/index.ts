@@ -2,9 +2,24 @@
  * Effects components barrel export.
  */
 
-export { Shimmer, ShimmerText, type ShimmerProps, type ShimmerTextProps } from "./Shimmer";
-export { Glow, AnimatedGlow, type GlowProps, type AnimatedGlowProps } from "./Glow";
-export { ClipReveal, type ClipRevealProps, type ClipShape, type ClipDirection } from "./ClipReveal";
+export {
+  Shimmer,
+  ShimmerText,
+  type ShimmerProps,
+  type ShimmerTextProps,
+} from "./Shimmer";
+export {
+  Glow,
+  AnimatedGlow,
+  type GlowProps,
+  type AnimatedGlowProps,
+} from "./Glow";
+export {
+  ClipReveal,
+  type ClipRevealProps,
+  type ClipShape,
+  type ClipDirection,
+} from "./ClipReveal";
 export {
   Particles,
   type ParticlesProps,

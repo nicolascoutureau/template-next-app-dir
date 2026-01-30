@@ -222,7 +222,14 @@ export function useStagger(config: StaggerConfig = {}): UseStaggerReturn {
  * Convenience function for one-off stagger needs.
  */
 export function createStagger(config: StaggerConfig): gsap.StaggerVars {
-  const { amount = 0.5, each, pattern = "start", ease = "power1.out", grid, axis = "both" } = config;
+  const {
+    amount = 0.5,
+    each,
+    pattern = "start",
+    ease = "power1.out",
+    grid,
+    axis = "both",
+  } = config;
 
   const gsapEase = getEasing(ease);
 

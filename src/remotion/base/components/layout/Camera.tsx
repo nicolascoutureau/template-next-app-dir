@@ -77,7 +77,10 @@ export interface CameraProps {
 /**
  * Parse position value to pixels.
  */
-function parsePosition(value: number | string | undefined, dimension: number): number {
+function parsePosition(
+  value: number | string | undefined,
+  dimension: number,
+): number {
   if (value === undefined) return 0;
   if (typeof value === "number") return value;
   if (value.endsWith("%")) {
@@ -95,7 +98,7 @@ function interpolateKeyframes(
   property: "x" | "y" | "scale" | "rotation",
   defaultValue: number,
   defaultEasing: (t: number) => number,
-  dimension: number
+  dimension: number,
 ): number {
   if (keyframes.length === 0) return defaultValue;
   if (keyframes.length === 1) {
@@ -163,11 +166,16 @@ function interpolateKeyframes(
 
   // Interpolate
   const easing = nextKf.easing || defaultEasing;
-  return interpolate(frame, [prevKf.frame, nextKf.frame], [prevParsed, nextParsed], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing,
-  });
+  return interpolate(
+    frame,
+    [prevKf.frame, nextKf.frame],
+    [prevParsed, nextParsed],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing,
+    },
+  );
 }
 
 /**
@@ -234,14 +242,38 @@ export const Camera: React.FC<CameraProps> = ({
     return {
       x: interpolateKeyframes(frame, keyframes, "x", 0, defaultEasing, width),
       y: interpolateKeyframes(frame, keyframes, "y", 0, defaultEasing, height),
-      scale: interpolateKeyframes(frame, keyframes, "scale", 1, defaultEasing, 1),
-      rotation: interpolateKeyframes(frame, keyframes, "rotation", 0, defaultEasing, 1),
+      scale: interpolateKeyframes(
+        frame,
+        keyframes,
+        "scale",
+        1,
+        defaultEasing,
+        1,
+      ),
+      rotation: interpolateKeyframes(
+        frame,
+        keyframes,
+        "rotation",
+        0,
+        defaultEasing,
+        1,
+      ),
     };
-  }, [frame, keyframes, staticX, staticY, staticScale, staticRotation, defaultEasing, width, height]);
+  }, [
+    frame,
+    keyframes,
+    staticX,
+    staticY,
+    staticScale,
+    staticRotation,
+    defaultEasing,
+    width,
+    height,
+  ]);
 
   const transform = useMemo(() => {
     const parts: string[] = [];
-    
+
     // Apply in order: translate, rotate, scale
     if (currentValues.x !== 0 || currentValues.y !== 0) {
       parts.push(`translate(${-currentValues.x}px, ${-currentValues.y}px)`);
@@ -407,7 +439,13 @@ export const PushIn: React.FC<PushInProps> = ({
     <Camera
       keyframes={[
         { frame: startFrame, x: 0, y: 0, scale: 1 },
-        { frame: startFrame + duration, x: targetX, y: targetY, scale: targetScale, easing },
+        {
+          frame: startFrame + duration,
+          x: targetX,
+          y: targetY,
+          scale: targetScale,
+          easing,
+        },
       ]}
       origin={origin}
       style={style}
@@ -495,13 +533,22 @@ export const Shake: React.FC<ShakeProps> = ({
   const offsetX = useMemo(() => {
     if (!isShaking) return 0;
     const t = (frame - startFrame) / speed;
-    return Math.sin(t * Math.PI * 2) * intensity * (1 - (frame - startFrame) / duration);
+    return (
+      Math.sin(t * Math.PI * 2) *
+      intensity *
+      (1 - (frame - startFrame) / duration)
+    );
   }, [frame, startFrame, isShaking, speed, intensity, duration]);
 
   const offsetY = useMemo(() => {
     if (!isShaking) return 0;
     const t = (frame - startFrame) / speed;
-    return Math.cos(t * Math.PI * 2.5) * intensity * 0.7 * (1 - (frame - startFrame) / duration);
+    return (
+      Math.cos(t * Math.PI * 2.5) *
+      intensity *
+      0.7 *
+      (1 - (frame - startFrame) / duration)
+    );
   }, [frame, startFrame, isShaking, speed, intensity, duration]);
 
   return (

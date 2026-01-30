@@ -121,7 +121,8 @@ export const Grid: React.FC<GridProps> = ({
     <div className={className} style={gridStyle}>
       {items.map((child, index) => {
         // Calculate item delay
-        const itemDelay = delay + (stagger > 0 ? getDelay(index, items.length) : 0);
+        const itemDelay =
+          delay + (stagger > 0 ? getDelay(index, items.length) : 0);
         const itemDelayFrames = Math.round(itemDelay * fps);
         const durationFrames = Math.round(duration * fps);
 
@@ -167,7 +168,8 @@ export const Grid: React.FC<GridProps> = ({
             style={{
               opacity,
               transform,
-              willChange: animation !== "none" ? "transform, opacity" : undefined,
+              willChange:
+                animation !== "none" ? "transform, opacity" : undefined,
             }}
           >
             {child}

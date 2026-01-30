@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { BubbleMessage, ChatConversation } from "../../remotion/base/components/text";
+import {
+  BubbleMessage,
+  ChatConversation,
+} from "../../remotion/base/components/text";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof BubbleMessage> = {
@@ -16,7 +19,10 @@ const meta: Meta<typeof BubbleMessage> = {
   ],
   argTypes: {
     align: { control: "select", options: ["left", "right"] },
-    bubbleStyle: { control: "select", options: ["ios", "android", "minimal", "rounded", "glossy"] },
+    bubbleStyle: {
+      control: "select",
+      options: ["ios", "android", "minimal", "rounded", "glossy"],
+    },
     backgroundColor: { control: "color" },
     textColor: { control: "color" },
     showTyping: { control: "boolean" },
@@ -36,9 +42,7 @@ export const SentMessage: Story = {
     delay: 0,
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      Hey! How are you doing?
-    </BubbleMessage>
+    <BubbleMessage {...args}>Hey! How are you doing?</BubbleMessage>
   ),
 };
 
@@ -49,9 +53,7 @@ export const ReceivedMessage: Story = {
     delay: 0,
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      I'm doing great, thanks for asking!
-    </BubbleMessage>
+    <BubbleMessage {...args}>I'm doing great, thanks for asking!</BubbleMessage>
   ),
 };
 
@@ -63,9 +65,7 @@ export const WithTypingIndicator: Story = {
     delay: 0,
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      Let me think about that...
-    </BubbleMessage>
+    <BubbleMessage {...args}>Let me think about that...</BubbleMessage>
   ),
 };
 
@@ -77,9 +77,7 @@ export const AndroidStyle: Story = {
     textColor: "#000000",
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      This is Android style!
-    </BubbleMessage>
+    <BubbleMessage {...args}>This is Android style!</BubbleMessage>
   ),
 };
 
@@ -91,9 +89,7 @@ export const WithSenderAndTimestamp: Story = {
     delay: 0,
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      Message with metadata
-    </BubbleMessage>
+    <BubbleMessage {...args}>Message with metadata</BubbleMessage>
   ),
 };
 
@@ -101,7 +97,15 @@ export const Conversation: Story = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={300} backgroundColor="#f5f5f5">
-        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <div style={{ width: 350 }}>
             <Story />
           </div>
@@ -137,9 +141,7 @@ export const CustomColors: Story = {
     textColor: "#ffffff",
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      Custom purple bubble!
-    </BubbleMessage>
+    <BubbleMessage {...args}>Custom purple bubble!</BubbleMessage>
   ),
 };
 
@@ -149,11 +151,7 @@ export const MinimalStyle: Story = {
     bubbleStyle: "minimal",
     backgroundColor: "#E5E7EB",
   },
-  render: (args) => (
-    <BubbleMessage {...args}>
-      Minimal and clean
-    </BubbleMessage>
-  ),
+  render: (args) => <BubbleMessage {...args}>Minimal and clean</BubbleMessage>,
 };
 
 export const GlossyStyle: Story = {
@@ -163,9 +161,7 @@ export const GlossyStyle: Story = {
     delay: 0,
   },
   render: (args) => (
-    <BubbleMessage {...args}>
-      This is a glossy bubble! ✨
-    </BubbleMessage>
+    <BubbleMessage {...args}>This is a glossy bubble! ✨</BubbleMessage>
   ),
 };
 
@@ -194,7 +190,13 @@ export const GlossyConversation: Story = {
       <BubbleMessage align="right" bubbleStyle="glossy" delay={0}>
         Hey! Check out this glossy effect
       </BubbleMessage>
-      <BubbleMessage align="left" bubbleStyle="glossy" delay={0.8} showTyping typingDuration={0.6}>
+      <BubbleMessage
+        align="left"
+        bubbleStyle="glossy"
+        delay={0.8}
+        showTyping
+        typingDuration={0.6}
+      >
         Wow, that looks shiny!
       </BubbleMessage>
       <BubbleMessage align="right" bubbleStyle="glossy" delay={2}>

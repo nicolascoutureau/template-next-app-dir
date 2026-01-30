@@ -16,8 +16,14 @@ const meta: Meta<typeof Grid> = {
     columns: { control: { type: "range", min: 2, max: 6, step: 1 } },
     gap: { control: { type: "range", min: 8, max: 32, step: 4 } },
     stagger: { control: { type: "range", min: 0, max: 0.2, step: 0.02 } },
-    animation: { control: "select", options: ["fadeIn", "scaleIn", "slideUp", "slideIn", "none"] },
-    staggerPattern: { control: "select", options: ["start", "end", "center", "edges", "random"] },
+    animation: {
+      control: "select",
+      options: ["fadeIn", "scaleIn", "slideUp", "slideIn", "none"],
+    },
+    staggerPattern: {
+      control: "select",
+      options: ["start", "end", "center", "edges", "random"],
+    },
   },
 };
 

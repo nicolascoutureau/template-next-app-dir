@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
-import { TextAnimation, TypewriterText } from "../../remotion/base/components/text";
+import {
+  TextAnimation,
+  TypewriterText,
+} from "../../remotion/base/components/text";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof TextAnimation> = {
@@ -76,7 +79,7 @@ export const CinematicTitle: Story = {
               stagger: 0.04,
               ease: "power4.out",
             },
-            0.3
+            0.3,
           );
           return tl;
         }}
@@ -99,7 +102,7 @@ export const CinematicTitle: Story = {
               duration: 0.8,
               ease: "power2.out",
             },
-            0.8
+            0.8,
           );
           return tl;
         }}
@@ -182,10 +185,25 @@ export const GradientMask: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          const colors = ["#667eea", "#7367d4", "#8060be", "#8c59a8", "#9952a2", "#a64b9c", "#b34496", "#c03d90", "#cd368a", "#da2f84", "#e7287e", "#f093fb"];
+          const colors = [
+            "#667eea",
+            "#7367d4",
+            "#8060be",
+            "#8c59a8",
+            "#9952a2",
+            "#a64b9c",
+            "#b34496",
+            "#c03d90",
+            "#cd368a",
+            "#da2f84",
+            "#e7287e",
+            "#f093fb",
+          ];
           split.chars.forEach((char: HTMLElement, i: number) => {
             char.style.display = "inline-block";
-            const colorIndex = Math.floor((i / split.chars.length) * colors.length);
+            const colorIndex = Math.floor(
+              (i / split.chars.length) * colors.length,
+            );
             char.style.color = colors[Math.min(colorIndex, colors.length - 1)];
           });
           tl.from(split.chars, {
@@ -240,7 +258,9 @@ export const ClipReveal: Story = {
             const text = word.innerHTML;
             word.innerHTML = `<span style="display:inline-block">${text}</span>`;
           });
-          const innerSpans = split.words.map((w: HTMLElement) => w.querySelector("span"));
+          const innerSpans = split.words.map((w: HTMLElement) =>
+            w.querySelector("span"),
+          );
           tl.from(innerSpans, {
             yPercent: 110,
             duration: 0.9,
@@ -293,7 +313,7 @@ export const StaggeredLines: Story = {
                 duration: 0.9,
                 ease: "power4.out",
               },
-              i * 0.15
+              i * 0.15,
             );
             return tl;
           }}
@@ -332,9 +352,10 @@ export const GlitchText: Story = {
           const split = new SplitText(textRef.current, { type: "chars" });
           split.chars.forEach((char: HTMLElement, i: number) => {
             char.style.display = "inline-block";
-            char.style.textShadow = i % 2 === 0 
-              ? "2px 0 #ff0040, -2px 0 #00ff90" 
-              : "-2px 0 #ff0040, 2px 0 #00ff90";
+            char.style.textShadow =
+              i % 2 === 0
+                ? "2px 0 #ff0040, -2px 0 #00ff90"
+                : "-2px 0 #ff0040, 2px 0 #00ff90";
           });
           tl.from(split.chars, {
             opacity: 0,
@@ -354,7 +375,7 @@ export const GlitchText: Story = {
               stagger: 0.01,
               ease: "power2.out",
             },
-            0.3
+            0.3,
           );
           return tl;
         }}
@@ -547,7 +568,7 @@ export const NumberCount: Story = {
               duration: 0.4,
               ease: "power3.out",
             },
-            0
+            0,
           );
           return tl;
         }}
@@ -571,7 +592,7 @@ export const NumberCount: Story = {
               duration: 0.5,
               ease: "power2.out",
             },
-            0.5
+            0.5,
           );
           return tl;
         }}
@@ -719,7 +740,7 @@ export const StackedReveal: Story = {
               duration: 0.8,
               ease: "power4.out",
             },
-            0.15
+            0.15,
           );
           return tl;
         }}
@@ -769,7 +790,7 @@ export const BlurFocus: Story = {
               stagger: 0.3,
               ease: "power2.out",
             },
-            0.2
+            0.2,
           );
           return tl;
         }}
@@ -865,7 +886,7 @@ export const SlideLeftBlurReveal: Story = {
           tl.fromTo(
             textRef.current,
             { x: 100 },
-            { x: -100, duration: 4, ease: "none" }
+            { x: -100, duration: 4, ease: "none" },
           );
           // Words reveal with blur, staggered
           tl.from(
@@ -878,12 +899,13 @@ export const SlideLeftBlurReveal: Story = {
               stagger: 0.15,
               ease: "power3.out",
             },
-            0
+            0,
           );
           return tl;
         }}
       >
-        Creating beautiful motion design with smooth animations and professional transitions
+        Creating beautiful motion design with smooth animations and professional
+        transitions
       </TextAnimation>
     </AbsoluteFill>
   ),
@@ -923,7 +945,7 @@ export const CinematicTextCrawl: Story = {
           tl.fromTo(
             textRef.current,
             { x: 800 },
-            { x: -1200, duration: 7, ease: "none" }
+            { x: -1200, duration: 7, ease: "none" },
           );
           // Each word fades in and gets sharp as it enters
           tl.from(
@@ -936,7 +958,7 @@ export const CinematicTextCrawl: Story = {
               stagger: 0.2,
               ease: "power2.out",
             },
-            0
+            0,
           );
           return tl;
         }}
@@ -993,7 +1015,7 @@ export const FocusReveal: Story = {
               stagger: 0.12,
               ease: "power2.out",
             },
-            0
+            0,
           );
           // After revealing, words go slightly out of focus as new ones appear
           split.words.forEach((word: HTMLElement, i: number) => {
@@ -1005,13 +1027,14 @@ export const FocusReveal: Story = {
                 duration: 0.4,
                 ease: "power2.in",
               },
-              0.5 + i * 0.12
+              0.5 + i * 0.12,
             );
           });
           return tl;
         }}
       >
-        Every great story begins with a single word that captures the imagination
+        Every great story begins with a single word that captures the
+        imagination
       </TextAnimation>
     </AbsoluteFill>
   ),
@@ -1135,7 +1158,7 @@ export const SunsetGradient: Story = {
               duration: 0.6,
               ease: "power2.out",
             },
-            0.6
+            0.6,
           );
           return tl;
         }}
@@ -1206,7 +1229,8 @@ export const NeonVerticalGradient: Story = {
       <VerticalGradientText
         gradient="linear-gradient(180deg, #00ff87 0%, #30f7a3 33%, #60efff 66%, #a78bfa 100%)"
         style={{
-          filter: "drop-shadow(0 0 20px rgba(0, 255, 135, 0.5)) drop-shadow(0 0 40px rgba(96, 239, 255, 0.3))",
+          filter:
+            "drop-shadow(0 0 20px rgba(0, 255, 135, 0.5)) drop-shadow(0 0 40px rgba(96, 239, 255, 0.3))",
         }}
       >
         <TextAnimation
@@ -1284,7 +1308,7 @@ export const SilverGradient: Story = {
                 duration: 0.8,
                 ease: "power4.out",
               },
-              0.2
+              0.2,
             );
             return tl;
           }}
@@ -1398,7 +1422,7 @@ export const AuroraGradient: Story = {
               duration: 0.8,
               ease: "power2.out",
             },
-            0.8
+            0.8,
           );
           return tl;
         }}
@@ -1548,7 +1572,7 @@ export const GoldGradient: Story = {
               duration: 0.5,
               ease: "power2.out",
             },
-            0.6
+            0.6,
           );
           return tl;
         }}
@@ -1594,9 +1618,12 @@ export const HighlightedWord: Story = {
             word.style.display = "inline-block";
           });
           // Find and style the highlighted word
-          const highlightWord = split.words.find((w: HTMLElement) => w.textContent === "beautiful");
+          const highlightWord = split.words.find(
+            (w: HTMLElement) => w.textContent === "beautiful",
+          );
           if (highlightWord) {
-            highlightWord.style.background = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+            highlightWord.style.background =
+              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
             highlightWord.style.padding = "4px 16px";
             highlightWord.style.borderRadius = "8px";
             highlightWord.style.marginLeft = "8px";
@@ -1647,8 +1674,11 @@ export const GradientHighlight: Story = {
           const highlightWords = ["innovation", "creativity"];
           split.words.forEach((word: HTMLElement) => {
             word.style.display = "inline-block";
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
-              word.style.background = "linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)";
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
+              word.style.background =
+                "linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)";
               word.style.WebkitBackgroundClip = "text";
               word.style.WebkitTextFillColor = "transparent";
               word.style.fontWeight = "700";
@@ -1700,7 +1730,9 @@ export const UnderlineHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["design", "motion"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.color = "#fff";
               // Create underline element
@@ -1710,7 +1742,8 @@ export const UnderlineHighlight: Story = {
               underline.style.left = "0";
               underline.style.width = "100%";
               underline.style.height = "3px";
-              underline.style.background = "linear-gradient(90deg, #f093fb 0%, #f5576c 100%)";
+              underline.style.background =
+                "linear-gradient(90deg, #f093fb 0%, #f5576c 100%)";
               underline.style.borderRadius = "2px";
               underline.style.transformOrigin = "left";
               underline.style.transform = "scaleX(0)";
@@ -1735,7 +1768,7 @@ export const UnderlineHighlight: Story = {
               stagger: 0.15,
               ease: "power2.out",
             },
-            0.6
+            0.6,
           );
           return tl;
         }}
@@ -1775,7 +1808,9 @@ export const BoxHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["faster", "smarter", "better"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.color = "#fff";
               word.style.background = "#4f46e5";
               word.style.padding = "2px 10px";
@@ -1800,7 +1835,7 @@ export const BoxHighlight: Story = {
               stagger: 0.1,
               ease: "back.out(1.7)",
             },
-            0.3
+            0.3,
           );
           return tl;
         }}
@@ -1841,7 +1876,8 @@ export const GlowHighlight: Story = {
             word.style.display = "inline-block";
             if (word.textContent?.toLowerCase() === highlightWord) {
               word.style.color = "#00ff88";
-              word.style.textShadow = "0 0 20px #00ff88, 0 0 40px #00ff8866, 0 0 60px #00ff8833";
+              word.style.textShadow =
+                "0 0 20px #00ff88, 0 0 40px #00ff8866, 0 0 60px #00ff8833";
               word.className = "glow-word";
             }
           });
@@ -1856,13 +1892,14 @@ export const GlowHighlight: Story = {
           tl.to(
             ".glow-word",
             {
-              textShadow: "0 0 30px #00ff88, 0 0 60px #00ff88aa, 0 0 90px #00ff8866",
+              textShadow:
+                "0 0 30px #00ff88, 0 0 60px #00ff88aa, 0 0 90px #00ff8866",
               duration: 0.5,
               yoyo: true,
               repeat: 2,
               ease: "power1.inOut",
             },
-            0.8
+            0.8,
           );
           return tl;
         }}
@@ -1960,7 +1997,9 @@ export const MarkerHighlight: Story = {
           const highlightWords = ["important", "remember"];
           split.words.forEach((word: HTMLElement) => {
             word.style.position = "relative";
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               // Create marker highlight behind text
               const marker = document.createElement("span");
               marker.style.position = "absolute";
@@ -1992,7 +2031,7 @@ export const MarkerHighlight: Story = {
               stagger: 0.2,
               ease: "power2.out",
             },
-            0.5
+            0.5,
           );
           return tl;
         }}
@@ -2052,7 +2091,7 @@ export const ScaleHighlight: Story = {
               duration: 0.4,
               ease: "back.out(2)",
             },
-            0.6
+            0.6,
           );
           return tl;
         }}
@@ -2139,7 +2178,7 @@ export const CircleHighlight: Story = {
               duration: 0.6,
               ease: "power2.inOut",
             },
-            0.6
+            0.6,
           );
           return tl;
         }}
@@ -2183,9 +2222,12 @@ export const NeonGlowHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["neon", "glow"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.color = "#0ff";
-              word.style.textShadow = "0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff";
+              word.style.textShadow =
+                "0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff";
               word.className = "neon-word";
             }
           });
@@ -2204,7 +2246,7 @@ export const NeonGlowHighlight: Story = {
               stagger: 0.15,
               ease: "power2.out",
             },
-            0.5
+            0.5,
           );
           return tl;
         }}
@@ -2293,13 +2335,19 @@ export const BrushStrokeHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["creative", "brush"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.zIndex = "1";
               // Create brush stroke SVG
-              const brush = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+              const brush = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "svg",
+              );
               brush.setAttribute("viewBox", "0 0 120 40");
-              brush.style.cssText = "position: absolute; top: 50%; left: -8%; width: 116%; height: 120%; transform: translateY(-50%); z-index: -1; opacity: 0;";
+              brush.style.cssText =
+                "position: absolute; top: 50%; left: -8%; width: 116%; height: 120%; transform: translateY(-50%); z-index: -1; opacity: 0;";
               brush.setAttribute("class", "brush-stroke");
               brush.innerHTML = `<path d="M5 20 Q30 8, 60 22 T115 18" stroke="#fef08a" stroke-width="18" fill="none" stroke-linecap="round"/>`;
               word.appendChild(brush);
@@ -2320,7 +2368,7 @@ export const BrushStrokeHighlight: Story = {
               stagger: 0.2,
               ease: "power2.out",
             },
-            0.5
+            0.5,
           );
           return tl;
         }}
@@ -2360,16 +2408,20 @@ export const DoubleUnderlineHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["double", "emphasis"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.color = "#fff";
               // First underline
               const line1 = document.createElement("span");
-              line1.style.cssText = "position: absolute; bottom: 2px; left: 0; width: 100%; height: 2px; background: #6366f1; transform-origin: left; transform: scaleX(0);";
+              line1.style.cssText =
+                "position: absolute; bottom: 2px; left: 0; width: 100%; height: 2px; background: #6366f1; transform-origin: left; transform: scaleX(0);";
               line1.className = "underline-1";
               // Second underline
               const line2 = document.createElement("span");
-              line2.style.cssText = "position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #ec4899; transform-origin: left; transform: scaleX(0);";
+              line2.style.cssText =
+                "position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px; background: #ec4899; transform-origin: left; transform: scaleX(0);";
               line2.className = "underline-2";
               word.appendChild(line1);
               word.appendChild(line2);
@@ -2382,8 +2434,16 @@ export const DoubleUnderlineHighlight: Story = {
             stagger: 0.08,
             ease: "power3.out",
           });
-          tl.to(".underline-1", { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" }, 0.5);
-          tl.to(".underline-2", { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" }, 0.6);
+          tl.to(
+            ".underline-1",
+            { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" },
+            0.5,
+          );
+          tl.to(
+            ".underline-2",
+            { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" },
+            0.6,
+          );
           return tl;
         }}
       >
@@ -2427,9 +2487,12 @@ export const GradientBoxHighlight: Story = {
           ];
           let gradientIndex = 0;
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.color = "#fff";
-              word.style.background = gradients[gradientIndex % gradients.length];
+              word.style.background =
+                gradients[gradientIndex % gradients.length];
               word.style.padding = "4px 12px";
               word.style.borderRadius = "8px";
               word.className = "gradient-box";
@@ -2451,7 +2514,7 @@ export const GradientBoxHighlight: Story = {
               stagger: 0.12,
               ease: "back.out(1.7)",
             },
-            0.4
+            0.4,
           );
           return tl;
         }}
@@ -2497,7 +2560,8 @@ export const StrikethroughReveal: Story = {
               word.style.position = "relative";
               word.style.color = "#999";
               const strike = document.createElement("span");
-              strike.style.cssText = "position: absolute; top: 50%; left: -4px; right: -4px; height: 3px; background: #ef4444; transform-origin: left; transform: scaleX(0);";
+              strike.style.cssText =
+                "position: absolute; top: 50%; left: -4px; right: -4px; height: 3px; background: #ef4444; transform-origin: left; transform: scaleX(0);";
               strike.className = "strike-line";
               word.appendChild(strike);
             }
@@ -2513,7 +2577,11 @@ export const StrikethroughReveal: Story = {
             stagger: 0.1,
             ease: "power3.out",
           });
-          tl.to(".strike-line", { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" }, 0.6);
+          tl.to(
+            ".strike-line",
+            { scaleX: 1, duration: 0.3, stagger: 0.15, ease: "power2.out" },
+            0.6,
+          );
           return tl;
         }}
       >
@@ -2557,17 +2625,21 @@ export const GlitchHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["glitch", "system"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.className = "glitch-word";
               // Create RGB shift layers
               const red = document.createElement("span");
               red.textContent = word.textContent;
-              red.style.cssText = "position: absolute; top: 0; left: 0; color: #ff0040; clip-path: inset(0 0 70% 0); transform: translateX(-3px); opacity: 0;";
+              red.style.cssText =
+                "position: absolute; top: 0; left: 0; color: #ff0040; clip-path: inset(0 0 70% 0); transform: translateX(-3px); opacity: 0;";
               red.className = "glitch-red";
               const cyan = document.createElement("span");
               cyan.textContent = word.textContent;
-              cyan.style.cssText = "position: absolute; top: 0; left: 0; color: #00ffff; clip-path: inset(70% 0 0 0); transform: translateX(3px); opacity: 0;";
+              cyan.style.cssText =
+                "position: absolute; top: 0; left: 0; color: #00ffff; clip-path: inset(70% 0 0 0); transform: translateX(3px); opacity: 0;";
               cyan.className = "glitch-cyan";
               word.appendChild(red);
               word.appendChild(cyan);
@@ -2582,11 +2654,31 @@ export const GlitchHighlight: Story = {
             ease: "power4.out",
           });
           // Glitch animation
-          tl.to(".glitch-red, .glitch-cyan", { opacity: 1, duration: 0.05 }, 0.8);
-          tl.to(".glitch-red", { x: -4, duration: 0.05, yoyo: true, repeat: 5 }, 0.8);
-          tl.to(".glitch-cyan", { x: 4, duration: 0.05, yoyo: true, repeat: 5 }, 0.8);
-          tl.to(".glitch-word", { x: 2, duration: 0.03, yoyo: true, repeat: 8 }, 0.8);
-          tl.to(".glitch-red, .glitch-cyan", { opacity: 0, duration: 0.1 }, 1.2);
+          tl.to(
+            ".glitch-red, .glitch-cyan",
+            { opacity: 1, duration: 0.05 },
+            0.8,
+          );
+          tl.to(
+            ".glitch-red",
+            { x: -4, duration: 0.05, yoyo: true, repeat: 5 },
+            0.8,
+          );
+          tl.to(
+            ".glitch-cyan",
+            { x: 4, duration: 0.05, yoyo: true, repeat: 5 },
+            0.8,
+          );
+          tl.to(
+            ".glitch-word",
+            { x: 2, duration: 0.03, yoyo: true, repeat: 8 },
+            0.8,
+          );
+          tl.to(
+            ".glitch-red, .glitch-cyan",
+            { opacity: 0, duration: 0.1 },
+            1.2,
+          );
           return tl;
         }}
       >
@@ -2625,16 +2717,20 @@ export const ScanLineReveal: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["scanning", "complete"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.overflow = "hidden";
               // Scan line
               const scanLine = document.createElement("span");
-              scanLine.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, #00ff88, #00ff88, transparent); transform: translateY(-100%); box-shadow: 0 0 20px #00ff88;";
+              scanLine.style.cssText =
+                "position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, transparent, #00ff88, #00ff88, transparent); transform: translateY(-100%); box-shadow: 0 0 20px #00ff88;";
               scanLine.className = "scan-line";
               // Glow overlay
               const glow = document.createElement("span");
-              glow.style.cssText = "position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,255,136,0.3) 0%, transparent 50%); opacity: 0;";
+              glow.style.cssText =
+                "position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,255,136,0.3) 0%, transparent 50%); opacity: 0;";
               glow.className = "scan-glow";
               word.appendChild(scanLine);
               word.appendChild(glow);
@@ -2649,9 +2745,17 @@ export const ScanLineReveal: Story = {
             stagger: 0.1,
             ease: "power3.out",
           });
-          tl.to(".scan-line", { y: "2500%", duration: 0.6, stagger: 0.3, ease: "power2.inOut" }, 0.6);
+          tl.to(
+            ".scan-line",
+            { y: "2500%", duration: 0.6, stagger: 0.3, ease: "power2.inOut" },
+            0.6,
+          );
           tl.to(".scan-glow", { opacity: 1, duration: 0.2, stagger: 0.3 }, 0.8);
-          tl.to(".scan-word", { color: "#00ff88", duration: 0.2, stagger: 0.3 }, 0.9);
+          tl.to(
+            ".scan-word",
+            { color: "#00ff88", duration: 0.2, stagger: 0.3 },
+            0.9,
+          );
           tl.to(".scan-glow", { opacity: 0, duration: 0.3 }, 1.4);
           return tl;
         }}
@@ -2691,18 +2795,22 @@ export const LiquidFillHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["liquid", "flow"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.display = "inline-block";
               word.style.overflow = "hidden";
               // Liquid fill layer
               const fill = document.createElement("span");
               fill.textContent = word.textContent;
-              fill.style.cssText = "position: absolute; top: 0; left: 0; color: #06b6d4; clip-path: inset(100% 0 0 0);";
+              fill.style.cssText =
+                "position: absolute; top: 0; left: 0; color: #06b6d4; clip-path: inset(100% 0 0 0);";
               fill.className = "liquid-fill";
               // Wave effect at top
               const wave = document.createElement("span");
-              wave.style.cssText = "position: absolute; bottom: 100%; left: -10%; width: 120%; height: 8px; background: #06b6d4; border-radius: 50%; filter: blur(2px); opacity: 0;";
+              wave.style.cssText =
+                "position: absolute; bottom: 100%; left: -10%; width: 120%; height: 8px; background: #06b6d4; border-radius: 50%; filter: blur(2px); opacity: 0;";
               wave.className = "liquid-wave";
               word.appendChild(fill);
               word.appendChild(wave);
@@ -2716,8 +2824,21 @@ export const LiquidFillHighlight: Story = {
             ease: "power3.out",
           });
           tl.to(".liquid-wave", { opacity: 1, duration: 0.1 }, 0.6);
-          tl.to(".liquid-fill", { clipPath: "inset(0% 0 0 0)", duration: 0.8, stagger: 0.2, ease: "power2.out" }, 0.6);
-          tl.to(".liquid-wave", { bottom: "-10%", duration: 0.8, stagger: 0.2, ease: "power2.out" }, 0.6);
+          tl.to(
+            ".liquid-fill",
+            {
+              clipPath: "inset(0% 0 0 0)",
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "power2.out",
+            },
+            0.6,
+          );
+          tl.to(
+            ".liquid-wave",
+            { bottom: "-10%", duration: 0.8, stagger: 0.2, ease: "power2.out" },
+            0.6,
+          );
           tl.to(".liquid-wave", { opacity: 0, duration: 0.2 }, 1.2);
           return tl;
         }}
@@ -2758,8 +2879,11 @@ export const ChromeHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["chrome", "metallic"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
-              word.style.background = "linear-gradient(180deg, #f5f5f5 0%, #a8a8a8 25%, #f5f5f5 50%, #8a8a8a 75%, #d4d4d4 100%)";
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
+              word.style.background =
+                "linear-gradient(180deg, #f5f5f5 0%, #a8a8a8 25%, #f5f5f5 50%, #8a8a8a 75%, #d4d4d4 100%)";
               word.style.backgroundClip = "text";
               word.style.webkitBackgroundClip = "text";
               word.style.webkitTextFillColor = "transparent";
@@ -2767,7 +2891,8 @@ export const ChromeHighlight: Story = {
               word.className = "chrome-word";
               // Add shine overlay
               const shine = document.createElement("span");
-              shine.style.cssText = "position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-20deg);";
+              shine.style.cssText =
+                "position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-20deg);";
               shine.className = "chrome-shine";
               word.style.position = "relative";
               word.style.overflow = "hidden";
@@ -2782,7 +2907,11 @@ export const ChromeHighlight: Story = {
             stagger: 0.1,
             ease: "power3.out",
           });
-          tl.to(".chrome-shine", { left: "150%", duration: 0.6, stagger: 0.2, ease: "power2.inOut" }, 0.8);
+          tl.to(
+            ".chrome-shine",
+            { left: "150%", duration: 0.6, stagger: 0.2, ease: "power2.inOut" },
+            0.8,
+          );
           return tl;
         }}
       >
@@ -2820,11 +2949,13 @@ export const MorphHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["transform", "evolve"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.className = "morph-word";
               // Get chars within this word
               const wordChars = Array.from(word.querySelectorAll("div")).filter(
-                (el) => el.textContent && el.textContent.length === 1
+                (el) => el.textContent && el.textContent.length === 1,
               );
               wordChars.forEach((char) => {
                 (char as HTMLElement).style.display = "inline-block";
@@ -2839,20 +2970,28 @@ export const MorphHighlight: Story = {
             stagger: 0.03,
             ease: "power3.out",
           });
-          tl.to(".morph-char", {
-            scale: 1.3,
-            color: "#6366f1",
-            fontWeight: 800,
-            duration: 0.3,
-            stagger: 0.05,
-            ease: "power2.out",
-          }, 0.7);
-          tl.to(".morph-char", {
-            scale: 1,
-            duration: 0.3,
-            stagger: 0.05,
-            ease: "elastic.out(1, 0.5)",
-          }, 1);
+          tl.to(
+            ".morph-char",
+            {
+              scale: 1.3,
+              color: "#6366f1",
+              fontWeight: 800,
+              duration: 0.3,
+              stagger: 0.05,
+              ease: "power2.out",
+            },
+            0.7,
+          );
+          tl.to(
+            ".morph-char",
+            {
+              scale: 1,
+              duration: 0.3,
+              stagger: 0.05,
+              ease: "elastic.out(1, 0.5)",
+            },
+            1,
+          );
           return tl;
         }}
       >
@@ -2894,13 +3033,16 @@ export const PerspectiveFlipHighlight: Story = {
           split.words.forEach((word: HTMLElement) => {
             word.style.display = "inline-block";
             word.style.transformStyle = "preserve-3d";
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.className = "flip-word";
               word.style.color = "#fff";
               // Create back face
               const backFace = document.createElement("span");
               backFace.textContent = word.textContent;
-              backFace.style.cssText = "position: absolute; top: 0; left: 0; color: #f472b6; transform: rotateY(180deg); backface-visibility: hidden;";
+              backFace.style.cssText =
+                "position: absolute; top: 0; left: 0; color: #f472b6; transform: rotateY(180deg); backface-visibility: hidden;";
               word.style.position = "relative";
               word.style.backfaceVisibility = "hidden";
               word.appendChild(backFace);
@@ -2914,18 +3056,26 @@ export const PerspectiveFlipHighlight: Story = {
             stagger: 0.08,
             ease: "power3.out",
           });
-          tl.to(".flip-word", {
-            rotationY: 180,
-            duration: 0.5,
-            stagger: 0.15,
-            ease: "power2.inOut",
-          }, 0.8);
-          tl.to(".flip-word", {
-            rotationY: 360,
-            duration: 0.5,
-            stagger: 0.15,
-            ease: "power2.inOut",
-          }, 1.5);
+          tl.to(
+            ".flip-word",
+            {
+              rotationY: 180,
+              duration: 0.5,
+              stagger: 0.15,
+              ease: "power2.inOut",
+            },
+            0.8,
+          );
+          tl.to(
+            ".flip-word",
+            {
+              rotationY: 360,
+              duration: 0.5,
+              stagger: 0.15,
+              ease: "power2.inOut",
+            },
+            1.5,
+          );
           return tl;
         }}
       >
@@ -2964,13 +3114,16 @@ export const ShatterHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["break", "rules"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.className = "shatter-word";
               const chars = Array.from(word.querySelectorAll("div"));
               chars.forEach((char, i) => {
                 (char as HTMLElement).style.display = "inline-block";
-                (char as HTMLElement).className = `shatter-char shatter-char-${i % 2}`;
+                (char as HTMLElement).className =
+                  `shatter-char shatter-char-${i % 2}`;
               });
             }
           });
@@ -2982,29 +3135,41 @@ export const ShatterHighlight: Story = {
             ease: "power4.out",
           });
           // Shatter effect
-          tl.to(".shatter-char-0", {
-            y: -20,
-            x: () => Math.random() * 10 - 5,
-            rotation: () => Math.random() * 20 - 10,
-            duration: 0.3,
-            ease: "power2.out",
-          }, 0.8);
-          tl.to(".shatter-char-1", {
-            y: 20,
-            x: () => Math.random() * 10 - 5,
-            rotation: () => Math.random() * 20 - 10,
-            duration: 0.3,
-            ease: "power2.out",
-          }, 0.8);
+          tl.to(
+            ".shatter-char-0",
+            {
+              y: -20,
+              x: () => Math.random() * 10 - 5,
+              rotation: () => Math.random() * 20 - 10,
+              duration: 0.3,
+              ease: "power2.out",
+            },
+            0.8,
+          );
+          tl.to(
+            ".shatter-char-1",
+            {
+              y: 20,
+              x: () => Math.random() * 10 - 5,
+              rotation: () => Math.random() * 20 - 10,
+              duration: 0.3,
+              ease: "power2.out",
+            },
+            0.8,
+          );
           // Reform
-          tl.to(".shatter-char-0, .shatter-char-1", {
-            y: 0,
-            x: 0,
-            rotation: 0,
-            color: "#ef4444",
-            duration: 0.4,
-            ease: "elastic.out(1, 0.5)",
-          }, 1.2);
+          tl.to(
+            ".shatter-char-0, .shatter-char-1",
+            {
+              y: 0,
+              x: 0,
+              rotation: 0,
+              color: "#ef4444",
+              duration: 0.4,
+              ease: "elastic.out(1, 0.5)",
+            },
+            1.2,
+          );
           return tl;
         }}
       >
@@ -3042,14 +3207,17 @@ export const ElectricHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["electric", "power"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.color = "#fff";
               word.className = "electric-word";
               // Electric glow
               const glow = document.createElement("span");
               glow.textContent = word.textContent;
-              glow.style.cssText = "position: absolute; top: 0; left: 0; color: #a855f7; filter: blur(8px); opacity: 0;";
+              glow.style.cssText =
+                "position: absolute; top: 0; left: 0; color: #a855f7; filter: blur(8px); opacity: 0;";
               glow.className = "electric-glow";
               // Spark lines
               for (let i = 0; i < 4; i++) {
@@ -3073,12 +3241,21 @@ export const ElectricHighlight: Story = {
           tl.to(".electric-glow", { opacity: 0.8, duration: 0.1 }, 0.7);
           tl.to(".electric-glow", { opacity: 0, duration: 0.1 }, 0.8);
           tl.to(".electric-glow", { opacity: 1, duration: 0.1 }, 0.9);
-          tl.to(".electric-spark", { opacity: 1, scale: 2, duration: 0.2 }, 0.9);
+          tl.to(
+            ".electric-spark",
+            { opacity: 1, scale: 2, duration: 0.2 },
+            0.9,
+          );
           tl.to(".electric-spark", { opacity: 0, duration: 0.3 }, 1.1);
-          tl.to(".electric-word", { 
-            textShadow: "0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 40px #a855f7",
-            duration: 0.3,
-          }, 0.9);
+          tl.to(
+            ".electric-word",
+            {
+              textShadow:
+                "0 0 10px #a855f7, 0 0 20px #a855f7, 0 0 40px #a855f7",
+              duration: 0.3,
+            },
+            0.9,
+          );
           return tl;
         }}
       >
@@ -3116,9 +3293,12 @@ export const HolographicHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["holographic", "future"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
-              word.style.background = "linear-gradient(90deg, #ff0080, #ff8c00, #40e0d0, #ff0080)";
+              word.style.background =
+                "linear-gradient(90deg, #ff0080, #ff8c00, #40e0d0, #ff0080)";
               word.style.backgroundSize = "300% 100%";
               word.style.backgroundClip = "text";
               word.style.webkitBackgroundClip = "text";
@@ -3127,7 +3307,8 @@ export const HolographicHighlight: Story = {
               // Reflection
               const reflection = document.createElement("span");
               reflection.textContent = word.textContent;
-              reflection.style.cssText = "position: absolute; top: 100%; left: 0; transform: scaleY(-1); opacity: 0.3; filter: blur(2px); background: inherit; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; mask-image: linear-gradient(transparent 30%, black);";
+              reflection.style.cssText =
+                "position: absolute; top: 100%; left: 0; transform: scaleY(-1); opacity: 0.3; filter: blur(2px); background: inherit; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; mask-image: linear-gradient(transparent 30%, black);";
               word.appendChild(reflection);
             }
           });
@@ -3138,12 +3319,16 @@ export const HolographicHighlight: Story = {
             stagger: 0.1,
             ease: "power3.out",
           });
-          tl.to(".holo-word", {
-            backgroundPosition: "-300% 0",
-            duration: 2,
-            ease: "none",
-            stagger: 0.2,
-          }, 0.6);
+          tl.to(
+            ".holo-word",
+            {
+              backgroundPosition: "-300% 0",
+              duration: 2,
+              ease: "none",
+              stagger: 0.2,
+            },
+            0.6,
+          );
           return tl;
         }}
       >
@@ -3182,17 +3367,21 @@ export const CinematicWipeHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["cinematic", "reveal"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.display = "inline-block";
               // Gold fill layer
               const fill = document.createElement("span");
               fill.textContent = word.textContent;
-              fill.style.cssText = "position: absolute; top: 0; left: 0; right: 0; bottom: 0; color: #fbbf24; clip-path: inset(0 100% 0 0);";
+              fill.style.cssText =
+                "position: absolute; top: 0; left: 0; right: 0; bottom: 0; color: #fbbf24; clip-path: inset(0 100% 0 0);";
               fill.className = "wipe-fill";
               // Wipe line that travels across
               const wipeLine = document.createElement("span");
-              wipeLine.style.cssText = "position: absolute; top: -10%; left: 0; width: 3px; height: 120%; background: linear-gradient(180deg, transparent 0%, #fbbf24 20%, #fbbf24 80%, transparent 100%); box-shadow: 0 0 15px #fbbf24, 0 0 30px #fbbf24; opacity: 0;";
+              wipeLine.style.cssText =
+                "position: absolute; top: -10%; left: 0; width: 3px; height: 120%; background: linear-gradient(180deg, transparent 0%, #fbbf24 20%, #fbbf24 80%, transparent 100%); box-shadow: 0 0 15px #fbbf24, 0 0 30px #fbbf24; opacity: 0;";
               wipeLine.className = "wipe-line";
               word.appendChild(fill);
               word.appendChild(wipeLine);
@@ -3207,8 +3396,26 @@ export const CinematicWipeHighlight: Story = {
           });
           // Wipe animation - line travels from left to right
           tl.to(".wipe-line", { opacity: 1, duration: 0.1 }, 0.7);
-          tl.to(".wipe-line", { left: "100%", duration: 0.6, stagger: 0.25, ease: "power2.inOut" }, 0.7);
-          tl.to(".wipe-fill", { clipPath: "inset(0 0% 0 0)", duration: 0.6, stagger: 0.25, ease: "power2.inOut" }, 0.7);
+          tl.to(
+            ".wipe-line",
+            {
+              left: "100%",
+              duration: 0.6,
+              stagger: 0.25,
+              ease: "power2.inOut",
+            },
+            0.7,
+          );
+          tl.to(
+            ".wipe-fill",
+            {
+              clipPath: "inset(0 0% 0 0)",
+              duration: 0.6,
+              stagger: 0.25,
+              ease: "power2.inOut",
+            },
+            0.7,
+          );
           tl.to(".wipe-line", { opacity: 0, duration: 0.15 }, 1.4);
           return tl;
         }}
@@ -3247,7 +3454,9 @@ export const ParticleTrailHighlight: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["magic", "sparkle"];
           split.words.forEach((word: HTMLElement) => {
-            if (highlightWords.includes(word.textContent?.toLowerCase() || "")) {
+            if (
+              highlightWords.includes(word.textContent?.toLowerCase() || "")
+            ) {
               word.style.position = "relative";
               word.style.color = "#f8fafc";
               word.className = "particle-word";
@@ -3255,7 +3464,7 @@ export const ParticleTrailHighlight: Story = {
               for (let i = 0; i < 12; i++) {
                 const particle = document.createElement("span");
                 const size = Math.random() * 4 + 2;
-                particle.style.cssText = `position: absolute; width: ${size}px; height: ${size}px; background: ${['#fbbf24', '#f472b6', '#60a5fa', '#34d399'][i % 4]}; border-radius: 50%; top: ${Math.random() * 100}%; left: ${Math.random() * 100}%; opacity: 0; pointer-events: none;`;
+                particle.style.cssText = `position: absolute; width: ${size}px; height: ${size}px; background: ${["#fbbf24", "#f472b6", "#60a5fa", "#34d399"][i % 4]}; border-radius: 50%; top: ${Math.random() * 100}%; left: ${Math.random() * 100}%; opacity: 0; pointer-events: none;`;
                 particle.className = "magic-particle";
                 word.appendChild(particle);
               }
@@ -3268,26 +3477,38 @@ export const ParticleTrailHighlight: Story = {
             stagger: 0.1,
             ease: "power3.out",
           });
-          tl.to(".magic-particle", {
-            opacity: 1,
-            scale: 1.5,
-            y: () => (Math.random() - 0.5) * 60,
-            x: () => (Math.random() - 0.5) * 40,
-            duration: 0.4,
-            stagger: 0.03,
-            ease: "power2.out",
-          }, 0.6);
-          tl.to(".magic-particle", {
-            opacity: 0,
-            scale: 0,
-            duration: 0.3,
-            stagger: 0.02,
-            ease: "power2.in",
-          }, 1);
-          tl.to(".particle-word", {
-            textShadow: "0 0 20px rgba(251, 191, 36, 0.5)",
-            duration: 0.3,
-          }, 0.8);
+          tl.to(
+            ".magic-particle",
+            {
+              opacity: 1,
+              scale: 1.5,
+              y: () => (Math.random() - 0.5) * 60,
+              x: () => (Math.random() - 0.5) * 40,
+              duration: 0.4,
+              stagger: 0.03,
+              ease: "power2.out",
+            },
+            0.6,
+          );
+          tl.to(
+            ".magic-particle",
+            {
+              opacity: 0,
+              scale: 0,
+              duration: 0.3,
+              stagger: 0.02,
+              ease: "power2.in",
+            },
+            1,
+          );
+          tl.to(
+            ".particle-word",
+            {
+              textShadow: "0 0 20px rgba(251, 191, 36, 0.5)",
+              duration: 0.3,
+            },
+            0.8,
+          );
           return tl;
         }}
       >
@@ -3397,7 +3618,7 @@ export const EmojiWave: Story = {
               },
               ease: "power1.inOut",
             },
-            1
+            1,
           );
           return tl;
         }}
@@ -3463,7 +3684,7 @@ export const EmojiReaction: Story = {
               stagger: 0.15,
               ease: "back.out(1.5)",
             },
-            0.4
+            0.4,
           );
           return tl;
         }}
@@ -3576,7 +3797,7 @@ export const EmojiBounce: Story = {
               duration: 0.5,
               ease: "back.out(2)",
             },
-            0.8
+            0.8,
           );
           return tl;
         }}
@@ -3610,13 +3831,24 @@ export const EmojiGradientText: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          const colors = ["#667eea", "#7367d4", "#8060be", "#9952a2", "#b34496", "#cd368a", "#f093fb"];
+          const colors = [
+            "#667eea",
+            "#7367d4",
+            "#8060be",
+            "#9952a2",
+            "#b34496",
+            "#cd368a",
+            "#f093fb",
+          ];
           split.chars.forEach((char: HTMLElement, i: number) => {
             char.style.display = "inline-block";
             // Emojis stay as-is, text gets gradient colors
             if (!/\p{Emoji}/u.test(char.textContent || "")) {
-              const colorIndex = Math.floor((i / split.chars.length) * colors.length);
-              char.style.color = colors[Math.min(colorIndex, colors.length - 1)];
+              const colorIndex = Math.floor(
+                (i / split.chars.length) * colors.length,
+              );
+              char.style.color =
+                colors[Math.min(colorIndex, colors.length - 1)];
             }
           });
           tl.from(split.chars, {
@@ -3680,7 +3912,7 @@ export const EmojiList: Story = {
                 duration: 0.5,
                 ease: "power3.out",
               },
-              index * 0.2
+              index * 0.2,
             );
             return tl;
           }}
@@ -3743,7 +3975,7 @@ export const EmojiSparkle: Story = {
               repeat: 2,
               ease: "power1.inOut",
             },
-            1
+            1,
           );
           return tl;
         }}

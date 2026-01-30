@@ -1,4 +1,9 @@
-import React, { useMemo, useId, type CSSProperties, type ReactNode } from "react";
+import React, {
+  useMemo,
+  useId,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { useCurrentFrame, useVideoConfig, random } from "remotion";
 
 /**
@@ -88,12 +93,16 @@ export const Glitch: React.FC<GlitchProps> = ({
 
   const time = frame / fps;
   const animatedIntensity = animate
-    ? intensity * (0.5 + random(`${seed}-${Math.floor(time * speed * 10)}`) * 0.5)
+    ? intensity *
+      (0.5 + random(`${seed}-${Math.floor(time * speed * 10)}`) * 0.5)
     : intensity;
 
   // Check for flicker
-  const isFlickering = animate && random(`${seed}-flicker-${frame}`) < flickerRate;
-  const flickerIntensity = isFlickering ? animatedIntensity * 2 : animatedIntensity;
+  const isFlickering =
+    animate && random(`${seed}-flicker-${frame}`) < flickerRate;
+  const flickerIntensity = isFlickering
+    ? animatedIntensity * 2
+    : animatedIntensity;
 
   // RGB Split effect
   const rgbSplitStyle = useMemo((): CSSProperties => {
@@ -136,7 +145,11 @@ export const Glitch: React.FC<GlitchProps> = ({
             patternUnits="userSpaceOnUse"
             y={animOffset}
           >
-            <rect width="100%" height="1" fill={`rgba(0,0,0,${scanlineOpacity})`} />
+            <rect
+              width="100%"
+              height="1"
+              fill={`rgba(0,0,0,${scanlineOpacity})`}
+            />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill={`url(#scanlines-${filterId})`} />
@@ -154,10 +167,16 @@ export const Glitch: React.FC<GlitchProps> = ({
     const clipPaths: string[] = [];
 
     for (let i = 0; i < slices; i++) {
-      const sliceRandom = random(`${seed}-slice-${i}-${Math.floor(time * speed * 5)}`);
+      const sliceRandom = random(
+        `${seed}-slice-${i}-${Math.floor(time * speed * 5)}`,
+      );
       if (sliceRandom < 0.3) {
         // This slice is displaced
-        const sliceDisplacement = (random(`${seed}-disp-${i}-${frame}`) - 0.5) * displacement * 2 * flickerIntensity;
+        const sliceDisplacement =
+          (random(`${seed}-disp-${i}-${frame}`) - 0.5) *
+          displacement *
+          2 *
+          flickerIntensity;
         clipPaths.push(`
           rect(${i * sliceHeight}% 0, ${(i + 1) * sliceHeight}% 100%)
         `);
@@ -165,7 +184,17 @@ export const Glitch: React.FC<GlitchProps> = ({
     }
 
     return {};
-  }, [type, slices, displacement, animate, time, speed, flickerIntensity, seed, frame]);
+  }, [
+    type,
+    slices,
+    displacement,
+    animate,
+    time,
+    speed,
+    flickerIntensity,
+    seed,
+    frame,
+  ]);
 
   // RGB split layers
   const rgbLayers = useMemo(() => {
@@ -259,7 +288,9 @@ export const Glitch: React.FC<GlitchProps> = ({
           <filter id={`noise-${filterId}`}>
             <feTurbulence
               type="fractalNoise"
-              baseFrequency={animate ? 0.8 + random(`${seed}-noise-${frame}`) * 0.2 : 0.9}
+              baseFrequency={
+                animate ? 0.8 + random(`${seed}-noise-${frame}`) * 0.2 : 0.9
+              }
               numOctaves={3}
               seed={animate ? frame : 0}
               result="noise"
@@ -273,7 +304,12 @@ export const Glitch: React.FC<GlitchProps> = ({
             <feBlend in="SourceGraphic" in2="monoNoise" mode="overlay" />
           </filter>
         </defs>
-        <rect width="100%" height="100%" filter={`url(#noise-${filterId})`} fill="transparent" />
+        <rect
+          width="100%"
+          height="100%"
+          filter={`url(#noise-${filterId})`}
+          fill="transparent"
+        />
       </svg>
     );
   }, [type, noise, flickerIntensity, animate, seed, frame, filterId]);

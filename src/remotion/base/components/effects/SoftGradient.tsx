@@ -76,7 +76,7 @@ export const SoftGradient: React.FC<SoftGradientProps> = ({
     return Array.from({ length: numBlobs }, (_, index) => {
       const colorIndex = index % colors.length;
       const color = colors[colorIndex];
-      
+
       const baseAngle = (index / numBlobs) * Math.PI * 2;
       const animatedAngle = baseAngle + time * speed;
 
@@ -125,7 +125,14 @@ export const SoftGradient: React.FC<SoftGradientProps> = ({
 
       {/* Content */}
       {children && (
-        <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            height: "100%",
+          }}
+        >
           {children}
         </div>
       )}

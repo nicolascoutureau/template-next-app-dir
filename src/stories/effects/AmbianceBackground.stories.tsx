@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
-import { AmbianceBackground, GradientOrbs } from "../../remotion/base/components/effects";
+import {
+  AmbianceBackground,
+  GradientOrbs,
+} from "../../remotion/base/components/effects";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof AmbianceBackground> = {
@@ -16,13 +19,33 @@ const meta: Meta<typeof AmbianceBackground> = {
   argTypes: {
     preset: {
       control: "select",
-      options: ["midnight", "aurora", "sunset", "ocean", "lavender", "ember", "forest", "cosmic", "minimal", "warm", "cool", "softPink", "softLavender", "softCloud", "softPeach", "softMint", "softSky"],
+      options: [
+        "midnight",
+        "aurora",
+        "sunset",
+        "ocean",
+        "lavender",
+        "ember",
+        "forest",
+        "cosmic",
+        "minimal",
+        "warm",
+        "cool",
+        "softPink",
+        "softLavender",
+        "softCloud",
+        "softPeach",
+        "softMint",
+        "softSky",
+      ],
     },
     speed: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
     grain: { control: "boolean" },
     grainOpacity: { control: { type: "range", min: 0, max: 0.1, step: 0.01 } },
     vignette: { control: "boolean" },
-    vignetteIntensity: { control: { type: "range", min: 0, max: 1, step: 0.1 } },
+    vignetteIntensity: {
+      control: { type: "range", min: 0, max: 1, step: 0.1 },
+    },
     rays: { control: "boolean" },
     brightness: { control: { type: "range", min: 0.5, max: 1.5, step: 0.1 } },
   },
@@ -235,7 +258,12 @@ export const WithLightRays: Story = {
 };
 
 export const HeavyVignette: Story = {
-  args: { preset: "midnight", speed: 0.25, vignette: true, vignetteIntensity: 0.7 },
+  args: {
+    preset: "midnight",
+    speed: 0.25,
+    vignette: true,
+    vignetteIntensity: 0.7,
+  },
   render: (args) => (
     <AmbianceBackground {...args}>
       <Content title="Vignette" />
@@ -318,7 +346,14 @@ export const PresetGallery: Story = {
     ),
   ],
   render: () => {
-    const darkPresets = ["midnight", "aurora", "sunset", "ocean", "lavender", "cosmic"] as const;
+    const darkPresets = [
+      "midnight",
+      "aurora",
+      "sunset",
+      "ocean",
+      "lavender",
+      "cosmic",
+    ] as const;
 
     return (
       <div
@@ -334,8 +369,20 @@ export const PresetGallery: Story = {
         }}
       >
         {darkPresets.map((preset) => (
-          <div key={preset} style={{ position: "relative", borderRadius: 8, overflow: "hidden" }}>
-            <AmbianceBackground preset={preset} speed={0.3} vignette={false} grain={false}>
+          <div
+            key={preset}
+            style={{
+              position: "relative",
+              borderRadius: 8,
+              overflow: "hidden",
+            }}
+          >
+            <AmbianceBackground
+              preset={preset}
+              speed={0.3}
+              vignette={false}
+              grain={false}
+            >
               <AbsoluteFill
                 style={{
                   display: "flex",
@@ -371,7 +418,14 @@ export const SoftPresetGallery: Story = {
     ),
   ],
   render: () => {
-    const softPresets = ["softPink", "softLavender", "softCloud", "softPeach", "softMint", "softSky"] as const;
+    const softPresets = [
+      "softPink",
+      "softLavender",
+      "softCloud",
+      "softPeach",
+      "softMint",
+      "softSky",
+    ] as const;
 
     return (
       <div
@@ -387,8 +441,21 @@ export const SoftPresetGallery: Story = {
         }}
       >
         {softPresets.map((preset) => (
-          <div key={preset} style={{ position: "relative", borderRadius: 12, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-            <AmbianceBackground preset={preset} speed={0.25} vignette={false} grain={false}>
+          <div
+            key={preset}
+            style={{
+              position: "relative",
+              borderRadius: 12,
+              overflow: "hidden",
+              boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+            }}
+          >
+            <AmbianceBackground
+              preset={preset}
+              speed={0.25}
+              vignette={false}
+              grain={false}
+            >
               <AbsoluteFill
                 style={{
                   display: "flex",

@@ -58,57 +58,57 @@ export const gradientPositions = {
 export const gradientPalettes = {
   // Aurora borealis - vibrant greens and purples
   aurora: {
-    topLeft: "#22d3ee",    // cyan
-    topRight: "#a855f7",   // purple
+    topLeft: "#22d3ee", // cyan
+    topRight: "#a855f7", // purple
     bottomLeft: "#10b981", // emerald
     bottomRight: "#6366f1", // indigo
   },
   // Warm sunset - elegant oranges and pinks
   sunset: {
-    topLeft: "#fb923c",    // orange
-    topRight: "#f472b6",   // pink
+    topLeft: "#fb923c", // orange
+    topRight: "#f472b6", // pink
     bottomLeft: "#fbbf24", // amber
     bottomRight: "#f87171", // red
   },
   // Deep ocean - rich blues and teals
   ocean: {
-    topLeft: "#06b6d4",    // cyan
-    topRight: "#3b82f6",   // blue
+    topLeft: "#06b6d4", // cyan
+    topRight: "#3b82f6", // blue
     bottomLeft: "#0891b2", // dark cyan
     bottomRight: "#1d4ed8", // dark blue
   },
   // Natural forest - greens and earth tones
   forest: {
-    topLeft: "#4ade80",    // green
-    topRight: "#86efac",   // light green
+    topLeft: "#4ade80", // green
+    topRight: "#86efac", // light green
     bottomLeft: "#22c55e", // emerald
     bottomRight: "#a3e635", // lime
   },
   // Fire/amber - warm reds and oranges
   fire: {
-    topLeft: "#f97316",    // orange
-    topRight: "#ef4444",   // red
+    topLeft: "#f97316", // orange
+    topRight: "#ef4444", // red
     bottomLeft: "#fbbf24", // amber
     bottomRight: "#dc2626", // dark red
   },
   // Candy - playful pinks and purples
   candy: {
-    topLeft: "#f472b6",    // pink
-    topRight: "#c084fc",   // purple
+    topLeft: "#f472b6", // pink
+    topRight: "#c084fc", // purple
     bottomLeft: "#fb7185", // rose
     bottomRight: "#a78bfa", // violet
   },
   // Deep midnight - dark moody gradient
   midnight: {
-    topLeft: "#3b82f6",    // blue
-    topRight: "#8b5cf6",   // violet
+    topLeft: "#3b82f6", // blue
+    topRight: "#8b5cf6", // violet
     bottomLeft: "#1e3a8a", // dark blue
     bottomRight: "#4c1d95", // dark purple
   },
   // Light pastel - soft and airy
   pastel: {
-    topLeft: "#fdf4ff",    // very light pink
-    topRight: "#f0f9ff",   // very light blue
+    topLeft: "#fdf4ff", // very light pink
+    topRight: "#f0f9ff", // very light blue
     bottomLeft: "#fefce8", // very light yellow
     bottomRight: "#f5f3ff", // very light purple
   },
@@ -246,7 +246,8 @@ export const FourColorGradient: React.FC<FourColorGradientProps> = ({
   const topLeft = topLeftProp || paletteColors?.topLeft || "#667eea";
   const topRight = topRightProp || paletteColors?.topRight || "#764ba2";
   const bottomLeft = bottomLeftProp || paletteColors?.bottomLeft || "#f093fb";
-  const bottomRight = bottomRightProp || paletteColors?.bottomRight || "#f5576c";
+  const bottomRight =
+    bottomRightProp || paletteColors?.bottomRight || "#f5576c";
 
   // Get positions
   const defaultPositions = gradientPositions.corners;
@@ -320,10 +321,22 @@ export const FourColorGradient: React.FC<FourColorGradientProps> = ({
         const offsetY = Math.cos(t * Math.PI * 2) * 15;
 
         return {
-          topLeft: { x: positions.topLeft.x + offsetX, y: positions.topLeft.y + offsetY },
-          topRight: { x: positions.topRight.x - offsetX, y: positions.topRight.y + offsetY },
-          bottomLeft: { x: positions.bottomLeft.x + offsetX, y: positions.bottomLeft.y - offsetY },
-          bottomRight: { x: positions.bottomRight.x - offsetX, y: positions.bottomRight.y - offsetY },
+          topLeft: {
+            x: positions.topLeft.x + offsetX,
+            y: positions.topLeft.y + offsetY,
+          },
+          topRight: {
+            x: positions.topRight.x - offsetX,
+            y: positions.topRight.y + offsetY,
+          },
+          bottomLeft: {
+            x: positions.bottomLeft.x + offsetX,
+            y: positions.bottomLeft.y - offsetY,
+          },
+          bottomRight: {
+            x: positions.bottomRight.x - offsetX,
+            y: positions.bottomRight.y - offsetY,
+          },
         };
       }
 
@@ -333,10 +346,22 @@ export const FourColorGradient: React.FC<FourColorGradientProps> = ({
         const wave2 = Math.sin(t * Math.PI * 2 + Math.PI / 2) * 10;
 
         return {
-          topLeft: { x: positions.topLeft.x + wave1, y: positions.topLeft.y + wave2 },
-          topRight: { x: positions.topRight.x + wave2, y: positions.topRight.y - wave1 },
-          bottomLeft: { x: positions.bottomLeft.x - wave2, y: positions.bottomLeft.y + wave1 },
-          bottomRight: { x: positions.bottomRight.x - wave1, y: positions.bottomRight.y - wave2 },
+          topLeft: {
+            x: positions.topLeft.x + wave1,
+            y: positions.topLeft.y + wave2,
+          },
+          topRight: {
+            x: positions.topRight.x + wave2,
+            y: positions.topRight.y - wave1,
+          },
+          bottomLeft: {
+            x: positions.bottomLeft.x - wave2,
+            y: positions.bottomLeft.y + wave1,
+          },
+          bottomRight: {
+            x: positions.bottomRight.x - wave1,
+            y: positions.bottomRight.y - wave2,
+          },
         };
       }
 
@@ -347,7 +372,12 @@ export const FourColorGradient: React.FC<FourColorGradientProps> = ({
 
   // Generate the gradient using radial gradients
   const gradientStyle = useMemo(() => {
-    const { topLeft: tlPos, topRight: trPos, bottomLeft: blPos, bottomRight: brPos } = animatedPositions;
+    const {
+      topLeft: tlPos,
+      topRight: trPos,
+      bottomLeft: blPos,
+      bottomRight: brPos,
+    } = animatedPositions;
 
     // Create 4 radial gradients, one for each color
     const gradients = [

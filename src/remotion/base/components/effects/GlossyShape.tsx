@@ -4,11 +4,11 @@ import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 /**
  * Shape types for glossy shapes.
  */
-export type GlossyShapeType = 
-  | "circle" 
-  | "square" 
-  | "rounded" 
-  | "pill" 
+export type GlossyShapeType =
+  | "circle"
+  | "square"
+  | "rounded"
+  | "pill"
   | "blob1"
   | "blob2"
   | "blob3"
@@ -21,11 +21,11 @@ export type GlossyShapeType =
 /**
  * Glossy style presets.
  */
-export type GlossyStyle = 
-  | "glass" 
-  | "plastic" 
-  | "metallic" 
-  | "neon" 
+export type GlossyStyle =
+  | "glass"
+  | "plastic"
+  | "metallic"
+  | "neon"
   | "soft"
   | "frosted";
 
@@ -74,15 +74,20 @@ export interface GlossyShapeProps {
  */
 const blobPaths = {
   // Smooth rounded blob
-  blob1: "M50,5 C70,5 90,25 90,50 C90,75 70,95 45,95 C20,95 0,75 0,50 C0,25 20,5 45,5 C47,5 50,5 50,5",
+  blob1:
+    "M50,5 C70,5 90,25 90,50 C90,75 70,95 45,95 C20,95 0,75 0,50 C0,25 20,5 45,5 C47,5 50,5 50,5",
   // Wider horizontal blob
-  blob2: "M45,10 C70,5 95,25 95,50 C95,75 75,95 50,95 C25,95 5,80 5,55 C5,30 20,10 45,10",
+  blob2:
+    "M45,10 C70,5 95,25 95,50 C95,75 75,95 50,95 C25,95 5,80 5,55 C5,30 20,10 45,10",
   // Asymmetric organic blob
-  blob3: "M55,8 C80,8 95,30 92,55 C89,80 65,95 40,92 C15,89 0,65 5,40 C10,15 35,8 55,8",
+  blob3:
+    "M55,8 C80,8 95,30 92,55 C89,80 65,95 40,92 C15,89 0,65 5,40 C10,15 35,8 55,8",
   // Rounded square-ish blob
-  blob4: "M50,5 C75,5 95,20 95,45 C95,70 80,95 55,95 C30,95 5,75 5,50 C5,25 25,5 50,5",
+  blob4:
+    "M50,5 C75,5 95,20 95,45 C95,70 80,95 55,95 C30,95 5,75 5,50 C5,25 25,5 50,5",
   // Amoeba-like organic shape
-  organic: "M48,8 C75,3 98,25 95,52 C92,79 68,98 42,95 C16,92 -2,70 2,45 C6,20 25,10 48,8",
+  organic:
+    "M48,8 C75,3 98,25 95,52 C92,79 68,98 42,95 C16,92 -2,70 2,45 C6,20 25,10 48,8",
 };
 
 /**
@@ -127,14 +132,21 @@ function isBlobShape(shape: GlossyShapeType): boolean {
 /**
  * Get border radius for shape.
  */
-function getShapeBorderRadius(shape: GlossyShapeType, width: number, height: number, customRadius?: number): string {
+function getShapeBorderRadius(
+  shape: GlossyShapeType,
+  width: number,
+  height: number,
+  customRadius?: number,
+): string {
   switch (shape) {
     case "circle":
       return "50%";
     case "square":
       return customRadius ? `${customRadius}px` : "0";
     case "rounded":
-      return customRadius ? `${customRadius}px` : `${Math.min(width, height) * 0.2}px`;
+      return customRadius
+        ? `${customRadius}px`
+        : `${Math.min(width, height) * 0.2}px`;
     case "pill":
       return `${Math.min(width, height) / 2}px`;
     case "blob1":
@@ -157,7 +169,7 @@ function getGlossyStyles(
   color: string,
   secondaryColor: string,
   highlightIntensity: number,
-  shadowIntensity: number
+  shadowIntensity: number,
 ): CSSProperties {
   switch (glossStyle) {
     case "glass":
@@ -336,13 +348,18 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
 
   // Get shape styles
   const clipPath = getShapePath(shape);
-  const shapeBorderRadius = getShapeBorderRadius(shape, width, height, borderRadius);
+  const shapeBorderRadius = getShapeBorderRadius(
+    shape,
+    width,
+    height,
+    borderRadius,
+  );
   const glossyStyles = getGlossyStyles(
     glossStyle,
     color,
     effectiveSecondaryColor,
     highlightIntensity,
-    shadowIntensity
+    shadowIntensity,
   );
 
   // Check if this is a blob shape
@@ -358,7 +375,9 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
         right: 0,
         height: "50%",
         background: `linear-gradient(180deg, rgba(255,255,255,${0.4 * highlightIntensity}) 0%, rgba(255,255,255,0) 100%)`,
-        borderRadius: isBlob ? "50%" : `${shapeBorderRadius} ${shapeBorderRadius} 50% 50% / ${shapeBorderRadius} ${shapeBorderRadius} 20% 20%`,
+        borderRadius: isBlob
+          ? "50%"
+          : `${shapeBorderRadius} ${shapeBorderRadius} 50% 50% / ${shapeBorderRadius} ${shapeBorderRadius} 20% 20%`,
         pointerEvents: "none",
       }
     : {};
@@ -366,7 +385,7 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
   // For blob shapes, render with SVG clip path
   if (isBlob && blobPath) {
     const svgId = `blob-${shape}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return (
       <div
         className={className}
@@ -391,28 +410,44 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
               <path d={blobPath} />
             </clipPath>
             {/* Gradient for fill */}
-            <linearGradient id={`${svgId}-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient
+              id={`${svgId}-gradient`}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor={color} />
               <stop offset="100%" stopColor={effectiveSecondaryColor} />
             </linearGradient>
             {/* Highlight gradient */}
-            <linearGradient id={`${svgId}-highlight`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={`rgba(255,255,255,${0.5 * highlightIntensity})`} />
+            <linearGradient
+              id={`${svgId}-highlight`}
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
+              <stop
+                offset="0%"
+                stopColor={`rgba(255,255,255,${0.5 * highlightIntensity})`}
+              />
               <stop offset="50%" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
           </defs>
-          
+
           {/* Main blob shape - using path directly with fill for smooth edges */}
           <path
             d={blobPath}
             fill={glossStyle === "neon" ? color : `url(#${svgId}-gradient)`}
             style={{
-              filter: glossStyle === "neon" 
-                ? `drop-shadow(0 0 ${20 * shadowIntensity}px ${color}) drop-shadow(0 0 ${40 * shadowIntensity}px ${color})`
-                : `drop-shadow(0 ${8 * shadowIntensity}px ${20 * shadowIntensity}px rgba(0,0,0,0.2))`,
+              filter:
+                glossStyle === "neon"
+                  ? `drop-shadow(0 0 ${20 * shadowIntensity}px ${color}) drop-shadow(0 0 ${40 * shadowIntensity}px ${color})`
+                  : `drop-shadow(0 ${8 * shadowIntensity}px ${20 * shadowIntensity}px rgba(0,0,0,0.2))`,
             }}
           />
-          
+
           {/* Highlight overlay clipped to blob shape */}
           {highlight && glossStyle !== "neon" && (
             <g clipPath={`url(#${svgId})`}>
@@ -426,7 +461,7 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
             </g>
           )}
         </svg>
-        
+
         {/* Content positioned in center */}
         {children && (
           <div
@@ -484,7 +519,7 @@ export const GlossyShape: React.FC<GlossyShapeProps> = ({
 function adjustColor(hex: string, percent: number): string {
   // Remove # if present
   hex = hex.replace("#", "");
-  
+
   // Parse RGB
   let r = parseInt(hex.substring(0, 2), 16);
   let g = parseInt(hex.substring(2, 4), 16);
@@ -502,20 +537,26 @@ function adjustColor(hex: string, percent: number): string {
 /**
  * Pre-built glossy shape presets.
  */
-export const GlossyCircle: React.FC<Omit<GlossyShapeProps, "shape">> = (props) => (
-  <GlossyShape {...props} shape="circle" />
+export const GlossyCircle: React.FC<Omit<GlossyShapeProps, "shape">> = (
+  props,
+) => <GlossyShape {...props} shape="circle" />;
+
+export const GlossyPill: React.FC<Omit<GlossyShapeProps, "shape">> = (
+  props,
+) => <GlossyShape {...props} shape="pill" />;
+
+export const GlossyCard: React.FC<Omit<GlossyShapeProps, "shape">> = (
+  props,
+) => (
+  <GlossyShape
+    {...props}
+    shape="rounded"
+    borderRadius={props.borderRadius ?? 24}
+  />
 );
 
-export const GlossyPill: React.FC<Omit<GlossyShapeProps, "shape">> = (props) => (
-  <GlossyShape {...props} shape="pill" />
-);
-
-export const GlossyCard: React.FC<Omit<GlossyShapeProps, "shape">> = (props) => (
-  <GlossyShape {...props} shape="rounded" borderRadius={props.borderRadius ?? 24} />
-);
-
-export const GlossyBlob: React.FC<Omit<GlossyShapeProps, "shape">> = (props) => (
-  <GlossyShape {...props} shape="blob1" />
-);
+export const GlossyBlob: React.FC<Omit<GlossyShapeProps, "shape">> = (
+  props,
+) => <GlossyShape {...props} shape="blob1" />;
 
 export default GlossyShape;

@@ -23,7 +23,10 @@ const meta: Meta<typeof SearchBar> = {
     ),
   ],
   argTypes: {
-    variant: { control: "select", options: ["default", "pill", "minimal", "glass"] },
+    variant: {
+      control: "select",
+      options: ["default", "pill", "minimal", "glass"],
+    },
     width: { control: { type: "range", min: 200, max: 500, step: 20 } },
     height: { control: { type: "range", min: 36, max: 56, step: 4 } },
     showIcon: { control: "boolean" },
@@ -133,7 +136,14 @@ export const CustomIcon: Story = {
     variant: "pill",
     width: 320,
     icon: (
-      <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <svg
+        width={18}
+        height={18}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
         <polyline points="14 2 14 8 20 8" />
       </svg>
@@ -195,9 +205,24 @@ export const MultipleSearchBars: Story = {
   ],
   render: () => (
     <>
-      <SearchBar placeholder="Default style" variant="default" width={320} delay={0} />
-      <SearchBar placeholder="Pill style" variant="pill" width={320} delay={0.15} />
-      <SearchBar placeholder="Minimal style" variant="minimal" width={320} delay={0.3} />
+      <SearchBar
+        placeholder="Default style"
+        variant="default"
+        width={320}
+        delay={0}
+      />
+      <SearchBar
+        placeholder="Pill style"
+        variant="pill"
+        width={320}
+        delay={0.15}
+      />
+      <SearchBar
+        placeholder="Minimal style"
+        variant="minimal"
+        width={320}
+        delay={0.3}
+      />
     </>
   ),
 };

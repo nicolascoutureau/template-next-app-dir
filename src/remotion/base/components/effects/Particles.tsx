@@ -4,7 +4,12 @@ import { useCurrentFrame, useVideoConfig, random } from "remotion";
 /**
  * Particle behavior types.
  */
-export type ParticleBehavior = "float" | "confetti" | "snow" | "sparkle" | "rise";
+export type ParticleBehavior =
+  | "float"
+  | "confetti"
+  | "snow"
+  | "sparkle"
+  | "rise";
 
 /**
  * Particle shape types.
@@ -61,7 +66,7 @@ function generateParticle(
   seed: string,
   size: [number, number],
   colors: string[],
-  opacity: [number, number]
+  opacity: [number, number],
 ) {
   const particleSeed = `${seed}-${index}`;
 
@@ -70,7 +75,9 @@ function generateParticle(
     y: random(particleSeed + "-y") * 100,
     size: size[0] + random(particleSeed + "-size") * (size[1] - size[0]),
     color: colors[Math.floor(random(particleSeed + "-color") * colors.length)],
-    opacity: opacity[0] + random(particleSeed + "-opacity") * (opacity[1] - opacity[0]),
+    opacity:
+      opacity[0] +
+      random(particleSeed + "-opacity") * (opacity[1] - opacity[0]),
     delay: random(particleSeed + "-delay"),
     speedMod: 0.5 + random(particleSeed + "-speed") * 1,
     angle: random(particleSeed + "-angle") * 360,
@@ -132,7 +139,7 @@ export const Particles: React.FC<ParticlesProps> = ({
   // Generate particles
   const particles = useMemo(() => {
     return Array.from({ length: count }, (_, i) =>
-      generateParticle(i, seed, size, colors, opacity)
+      generateParticle(i, seed, size, colors, opacity),
     );
   }, [count, seed, size, colors, opacity]);
 
@@ -145,7 +152,8 @@ export const Particles: React.FC<ParticlesProps> = ({
       let scale = 1;
       let rotation = 0;
 
-      const particleTime = time * speed * particle.speedMod + particle.delay * 10;
+      const particleTime =
+        time * speed * particle.speedMod + particle.delay * 10;
 
       switch (behavior) {
         case "float": {
@@ -167,10 +175,16 @@ export const Particles: React.FC<ParticlesProps> = ({
           const vy = Math.sin(angleRad) * burstSpeed;
 
           x = origin[0] * 100 + vx * burstTime * 0.3;
-          y = origin[1] * 100 + vy * burstTime * 0.3 + gravity * burstTime * burstTime * 50;
+          y =
+            origin[1] * 100 +
+            vy * burstTime * 0.3 +
+            gravity * burstTime * burstTime * 50;
 
           rotation = burstTime * 360 * particle.speedMod;
-          currentOpacity = Math.max(0, particle.opacity * (1 - burstTime * 0.3));
+          currentOpacity = Math.max(
+            0,
+            particle.opacity * (1 - burstTime * 0.3),
+          );
           break;
         }
 
@@ -178,15 +192,20 @@ export const Particles: React.FC<ParticlesProps> = ({
           // Falling with wind drift
           const fallSpeed = 10 * particle.speedMod;
           y = ((particle.y + particleTime * fallSpeed) % 120) - 10;
-          x = particle.x + Math.sin(particleTime + index) * 5 + wind * particleTime * 20;
-          x = ((x % 120) + 120) % 120 - 10;
+          x =
+            particle.x +
+            Math.sin(particleTime + index) * 5 +
+            wind * particleTime * 20;
+          x = (((x % 120) + 120) % 120) - 10;
           rotation = Math.sin(particleTime) * 30;
           break;
         }
 
         case "sparkle": {
           // Stationary with twinkling
-          const twinkleCycle = Math.sin(particleTime * twinkleSpeed * Math.PI * 2 + index * 1.5);
+          const twinkleCycle = Math.sin(
+            particleTime * twinkleSpeed * Math.PI * 2 + index * 1.5,
+          );
           currentOpacity = particle.opacity * ((twinkleCycle + 1) / 2);
           scale = 0.5 + ((twinkleCycle + 1) / 2) * 0.5;
           break;
@@ -209,7 +228,8 @@ export const Particles: React.FC<ParticlesProps> = ({
       if (shape === "square") {
         borderRadius = "0";
       } else if (shape === "star") {
-        clipPath = "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
+        clipPath =
+          "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)";
       }
 
       return {
@@ -226,7 +246,19 @@ export const Particles: React.FC<ParticlesProps> = ({
         pointerEvents: "none" as const,
       };
     });
-  }, [particles, behavior, time, speed, origin, spread, gravity, wind, twinkleSpeed, wobble, shape]);
+  }, [
+    particles,
+    behavior,
+    time,
+    speed,
+    origin,
+    spread,
+    gravity,
+    wind,
+    twinkleSpeed,
+    wobble,
+    shape,
+  ]);
 
   return (
     <div

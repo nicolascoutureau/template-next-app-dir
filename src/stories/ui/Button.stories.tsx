@@ -18,7 +18,18 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     variant: {
       control: "select",
-      options: ["glossy", "glass", "neon", "gradient", "soft", "outline", "solid", "pill", "rounded", "sharp"],
+      options: [
+        "glossy",
+        "glass",
+        "neon",
+        "gradient",
+        "soft",
+        "outline",
+        "solid",
+        "pill",
+        "rounded",
+        "sharp",
+      ],
     },
     size: {
       control: "select",
@@ -42,7 +53,13 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 // Centered wrapper
-const CenteredWrapper = ({ children, dark = true }: { children: React.ReactNode; dark?: boolean }) => (
+const CenteredWrapper = ({
+  children,
+  dark = true,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+}) => (
   <AbsoluteFill
     style={{
       display: "flex",
@@ -58,44 +75,76 @@ const CenteredWrapper = ({ children, dark = true }: { children: React.ReactNode;
 // === INDIVIDUAL VARIANTS ===
 
 export const Glossy: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <GlossyButton color="#3b82f6" size="lg">Glossy Button</GlossyButton>
+      <GlossyButton color="#3b82f6" size="lg">
+        Glossy Button
+      </GlossyButton>
     </CenteredWrapper>
   ),
 };
 
 export const Glass: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ position: "relative" }}>
         {/* Background for glass effect */}
-        <div style={{
-          position: "absolute",
-          inset: -100,
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          filter: "blur(40px)",
-          opacity: 0.6,
-        }} />
-        <GlassButton size="lg" textColor="#fff">Glass Button</GlassButton>
+        <div
+          style={{
+            position: "absolute",
+            inset: -100,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            filter: "blur(40px)",
+            opacity: 0.6,
+          }}
+        />
+        <GlassButton size="lg" textColor="#fff">
+          Glass Button
+        </GlassButton>
       </div>
     </CenteredWrapper>
   ),
 };
 
 export const Neon: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <NeonButton color="#00ff88" size="lg">Neon Button</NeonButton>
+      <NeonButton color="#00ff88" size="lg">
+        Neon Button
+      </NeonButton>
     </CenteredWrapper>
   ),
 };
 
 export const Gradient: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg">
@@ -106,37 +155,69 @@ export const Gradient: Story = {
 };
 
 export const Soft: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper dark={false}>
-      <SoftButton color="#3b82f6" size="lg">Soft Button</SoftButton>
+      <SoftButton color="#3b82f6" size="lg">
+        Soft Button
+      </SoftButton>
     </CenteredWrapper>
   ),
 };
 
 export const Outline: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <OutlineButton color="#f472b6" size="lg">Outline Button</OutlineButton>
+      <OutlineButton color="#f472b6" size="lg">
+        Outline Button
+      </OutlineButton>
     </CenteredWrapper>
   ),
 };
 
 export const Pill: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <PillButton color="#10b981" size="lg">Pill Button</PillButton>
+      <PillButton color="#10b981" size="lg">
+        Pill Button
+      </PillButton>
     </CenteredWrapper>
   ),
 };
 
 export const Sharp: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <Button variant="sharp" color="#f59e0b" size="lg">Sharp Button</Button>
+      <Button variant="sharp" color="#f59e0b" size="lg">
+        Sharp Button
+      </Button>
     </CenteredWrapper>
   ),
 };
@@ -144,38 +225,69 @@ export const Sharp: Story = {
 // === STATES ===
 
 export const PressedState: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 20 }}>
-        <GlossyButton color="#3b82f6" size="lg">Normal</GlossyButton>
-        <GlossyButton color="#3b82f6" size="lg" pressed>Pressed</GlossyButton>
+        <GlossyButton color="#3b82f6" size="lg">
+          Normal
+        </GlossyButton>
+        <GlossyButton color="#3b82f6" size="lg" pressed>
+          Pressed
+        </GlossyButton>
       </div>
     </CenteredWrapper>
   ),
 };
 
 export const HoverState: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 20 }}>
-        <NeonButton color="#00ff88" size="lg">Normal</NeonButton>
-        <NeonButton color="#00ff88" size="lg" hover>Hover</NeonButton>
+        <NeonButton color="#00ff88" size="lg">
+          Normal
+        </NeonButton>
+        <NeonButton color="#00ff88" size="lg" hover>
+          Hover
+        </NeonButton>
       </div>
     </CenteredWrapper>
   ),
 };
 
 export const DisabledState: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 20 }}>
         <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg">
           Enabled
         </GradientButton>
-        <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg" disabled>
+        <GradientButton
+          color="#667eea"
+          secondaryColor="#764ba2"
+          size="lg"
+          disabled
+        >
           Disabled
         </GradientButton>
       </div>
@@ -186,15 +298,31 @@ export const DisabledState: Story = {
 // === SIZES ===
 
 export const AllSizes: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        <GlossyButton color="#3b82f6" size="xs">XS</GlossyButton>
-        <GlossyButton color="#3b82f6" size="sm">Small</GlossyButton>
-        <GlossyButton color="#3b82f6" size="md">Medium</GlossyButton>
-        <GlossyButton color="#3b82f6" size="lg">Large</GlossyButton>
-        <GlossyButton color="#3b82f6" size="xl">Extra Large</GlossyButton>
+        <GlossyButton color="#3b82f6" size="xs">
+          XS
+        </GlossyButton>
+        <GlossyButton color="#3b82f6" size="sm">
+          Small
+        </GlossyButton>
+        <GlossyButton color="#3b82f6" size="md">
+          Medium
+        </GlossyButton>
+        <GlossyButton color="#3b82f6" size="lg">
+          Large
+        </GlossyButton>
+        <GlossyButton color="#3b82f6" size="xl">
+          Extra Large
+        </GlossyButton>
       </div>
     </CenteredWrapper>
   ),
@@ -203,10 +331,24 @@ export const AllSizes: Story = {
 // === COLORS ===
 
 export const ColorPalette: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", maxWidth: 500 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 12,
+          justifyContent: "center",
+          maxWidth: 500,
+        }}
+      >
         <GlossyButton color="#ef4444">Red</GlossyButton>
         <GlossyButton color="#f97316">Orange</GlossyButton>
         <GlossyButton color="#eab308">Yellow</GlossyButton>
@@ -222,7 +364,13 @@ export const ColorPalette: Story = {
 };
 
 export const NeonColors: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 20 }}>
@@ -238,15 +386,31 @@ export const NeonColors: Story = {
 // === GRADIENTS ===
 
 export const GradientStyles: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg">Purple Magic</GradientButton>
-        <GradientButton color="#f093fb" secondaryColor="#f5576c" size="lg">Pink Sunset</GradientButton>
-        <GradientButton color="#4facfe" secondaryColor="#00f2fe" size="lg">Ocean Blue</GradientButton>
-        <GradientButton color="#43e97b" secondaryColor="#38f9d7" size="lg">Fresh Mint</GradientButton>
-        <GradientButton color="#fa709a" secondaryColor="#fee140" size="lg">Warm Glow</GradientButton>
+        <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg">
+          Purple Magic
+        </GradientButton>
+        <GradientButton color="#f093fb" secondaryColor="#f5576c" size="lg">
+          Pink Sunset
+        </GradientButton>
+        <GradientButton color="#4facfe" secondaryColor="#00f2fe" size="lg">
+          Ocean Blue
+        </GradientButton>
+        <GradientButton color="#43e97b" secondaryColor="#38f9d7" size="lg">
+          Fresh Mint
+        </GradientButton>
+        <GradientButton color="#fa709a" secondaryColor="#fee140" size="lg">
+          Warm Glow
+        </GradientButton>
       </div>
     </CenteredWrapper>
   ),
@@ -261,26 +425,51 @@ const PlayIcon = () => (
 );
 
 const ArrowIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <path d="M5 12h14M12 5l7 7-7 7" />
   </svg>
 );
 
 const DownloadIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
   </svg>
 );
 
 export const WithIcons: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 16 }}>
         <GlossyButton color="#3b82f6" size="lg" icon={<PlayIcon />}>
           Play
         </GlossyButton>
-        <GradientButton color="#667eea" secondaryColor="#764ba2" size="lg" iconRight={<ArrowIcon />}>
+        <GradientButton
+          color="#667eea"
+          secondaryColor="#764ba2"
+          size="lg"
+          iconRight={<ArrowIcon />}
+        >
           Get Started
         </GradientButton>
         <OutlineButton color="#10b981" size="lg" icon={<DownloadIcon />}>
@@ -294,20 +483,50 @@ export const WithIcons: Story = {
 // === ANIMATIONS ===
 
 export const AnimatedButtons: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", gap: 20 }}>
-        <GlossyButton color="#ef4444" size="lg" animate animationType="fadeIn" delay={0}>
+        <GlossyButton
+          color="#ef4444"
+          size="lg"
+          animate
+          animationType="fadeIn"
+          delay={0}
+        >
           Fade In
         </GlossyButton>
-        <GlossyButton color="#f97316" size="lg" animate animationType="scaleIn" delay={0.2}>
+        <GlossyButton
+          color="#f97316"
+          size="lg"
+          animate
+          animationType="scaleIn"
+          delay={0.2}
+        >
           Scale In
         </GlossyButton>
-        <GlossyButton color="#22c55e" size="lg" animate animationType="slideUp" delay={0.4}>
+        <GlossyButton
+          color="#22c55e"
+          size="lg"
+          animate
+          animationType="slideUp"
+          delay={0.4}
+        >
           Slide Up
         </GlossyButton>
-        <GlossyButton color="#3b82f6" size="lg" animate animationType="bounce" delay={0.6}>
+        <GlossyButton
+          color="#3b82f6"
+          size="lg"
+          animate
+          animationType="bounce"
+          delay={0.6}
+        >
           Bounce
         </GlossyButton>
       </div>
@@ -318,13 +537,24 @@ export const AnimatedButtons: Story = {
 // === ALL VARIANTS GALLERY ===
 
 export const VariantGallery: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={90}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={90}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => {
     const variants = [
       { variant: "glossy" as const, color: "#3b82f6", label: "Glossy" },
       { variant: "glass" as const, color: "#fff", label: "Glass" },
       { variant: "neon" as const, color: "#00ff88", label: "Neon" },
-      { variant: "gradient" as const, color: "#667eea", secondaryColor: "#764ba2", label: "Gradient" },
+      {
+        variant: "gradient" as const,
+        color: "#667eea",
+        secondaryColor: "#764ba2",
+        label: "Gradient",
+      },
       { variant: "soft" as const, color: "#8b5cf6", label: "Soft" },
       { variant: "outline" as const, color: "#f472b6", label: "Outline" },
       { variant: "solid" as const, color: "#14b8a6", label: "Solid" },
@@ -335,19 +565,27 @@ export const VariantGallery: Story = {
 
     return (
       <CenteredWrapper>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: 16,
-          padding: 40,
-        }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, 1fr)",
+            gap: 16,
+            padding: 40,
+          }}
+        >
           {variants.map((v) => (
             <Button
               key={v.variant}
               variant={v.variant}
               color={v.color}
               secondaryColor={v.secondaryColor}
-              textColor={v.variant === "soft" || v.variant === "outline" || v.variant === "neon" ? v.color : "#fff"}
+              textColor={
+                v.variant === "soft" ||
+                v.variant === "outline" ||
+                v.variant === "neon"
+                  ? v.color
+                  : "#fff"
+              }
             >
               {v.label}
             </Button>
@@ -361,7 +599,13 @@ export const VariantGallery: Story = {
 // === BUTTON GROUP ===
 
 export const ButtonGroup: Story = {
-  decorators: [(Story) => <RemotionWrapper durationInFrames={120}><Story /></RemotionWrapper>],
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <CenteredWrapper>
       <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
@@ -377,16 +621,28 @@ export const ButtonGroup: Story = {
 
         {/* Social buttons */}
         <div style={{ display: "flex", gap: 12 }}>
-          <GlossyButton color="#1DA1F2" size="md">Twitter</GlossyButton>
-          <GlossyButton color="#4267B2" size="md">Facebook</GlossyButton>
-          <GlossyButton color="#333333" size="md">GitHub</GlossyButton>
+          <GlossyButton color="#1DA1F2" size="md">
+            Twitter
+          </GlossyButton>
+          <GlossyButton color="#4267B2" size="md">
+            Facebook
+          </GlossyButton>
+          <GlossyButton color="#333333" size="md">
+            GitHub
+          </GlossyButton>
         </div>
 
         {/* Action buttons */}
         <div style={{ display: "flex", gap: 12 }}>
-          <SoftButton color="#22c55e" size="md">Approve</SoftButton>
-          <SoftButton color="#ef4444" size="md">Reject</SoftButton>
-          <SoftButton color="#6b7280" size="md">Skip</SoftButton>
+          <SoftButton color="#22c55e" size="md">
+            Approve
+          </SoftButton>
+          <SoftButton color="#ef4444" size="md">
+            Reject
+          </SoftButton>
+          <SoftButton color="#6b7280" size="md">
+            Skip
+          </SoftButton>
         </div>
       </div>
     </CenteredWrapper>

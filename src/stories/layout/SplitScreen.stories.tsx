@@ -15,7 +15,10 @@ const meta: Meta<typeof SplitScreen> = {
     ),
   ],
   argTypes: {
-    layout: { control: "select", options: ["horizontal", "vertical", "diagonal"] },
+    layout: {
+      control: "select",
+      options: ["horizontal", "vertical", "diagonal"],
+    },
     ratio: { control: { type: "range", min: 0.2, max: 0.8, step: 0.1 } },
     gap: { control: { type: "range", min: 0, max: 20, step: 2 } },
     animated: { control: "boolean" },

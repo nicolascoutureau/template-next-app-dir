@@ -1,4 +1,10 @@
-import React, { useMemo, useRef, useEffect, useState, type CSSProperties } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useEffect,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { getEasing, type EasingName } from "../../presets/easings";
 import { getDuration, type DurationName } from "../../presets/durations";
@@ -141,7 +147,8 @@ export const TrimPath: React.FC<TrimPathProps> = ({
 
   // Calculate stroke-dasharray and stroke-dashoffset
   const strokeStyles = useMemo(() => {
-    if (pathLength === 0) return { strokeDasharray: "0", strokeDashoffset: "0" };
+    if (pathLength === 0)
+      return { strokeDasharray: "0", strokeDashoffset: "0" };
 
     // Animate from start to end
     const animatedStart = start;
@@ -259,16 +266,19 @@ export const DrawPath: React.FC<DrawPathProps> = ({
     if (pathRef.current && pathLength > 0) {
       const point = pathRef.current.getPointAtLength(progress * pathLength);
       const nextPoint = pathRef.current.getPointAtLength(
-        Math.min(progress * pathLength + 1, pathLength)
+        Math.min(progress * pathLength + 1, pathLength),
       );
-      const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
+      const angle =
+        Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) *
+        (180 / Math.PI);
       setHeadPosition({ x: point.x, y: point.y, angle });
     }
   }, [progress, pathLength]);
 
   // Stroke styles
   const strokeStyles = useMemo(() => {
-    if (pathLength === 0) return { strokeDasharray: "0", strokeDashoffset: "0" };
+    if (pathLength === 0)
+      return { strokeDasharray: "0", strokeDashoffset: "0" };
 
     const start = trail > 0 ? Math.max(0, progress - trail) : 0;
     const visibleLength = (progress - start) * pathLength;
@@ -319,7 +329,9 @@ export const DrawPath: React.FC<DrawPathProps> = ({
 
       {/* Head element */}
       {head && progress > 0 && progress < 1 && (
-        <g transform={`translate(${headPosition.x}, ${headPosition.y}) rotate(${headPosition.angle})`}>
+        <g
+          transform={`translate(${headPosition.x}, ${headPosition.y}) rotate(${headPosition.angle})`}
+        >
           {head}
         </g>
       )}

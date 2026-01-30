@@ -1,4 +1,9 @@
-import React, { useMemo, useRef, type CSSProperties, type ReactNode } from "react";
+import React, {
+  useMemo,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { getEasing, type EasingName } from "../../presets/easings";
 import { getDuration, type DurationName } from "../../presets/durations";
@@ -62,7 +67,7 @@ function getPointOnPath(
   offsetX: number,
   offsetY: number,
   vbWidth: number,
-  vbHeight: number
+  vbHeight: number,
 ): { xPercent: number; yPercent: number; angle: number } {
   if (!pathElement || vbWidth === 0 || vbHeight === 0) {
     return { xPercent: 50, yPercent: 50, angle: 0 };
@@ -83,7 +88,9 @@ function getPointOnPath(
     const nextLength = Math.min(length + delta, pathLength);
     const prevPoint = pathElement.getPointAtLength(prevLength);
     const nextPoint = pathElement.getPointAtLength(nextLength);
-    angle = Math.atan2(nextPoint.y - prevPoint.y, nextPoint.x - prevPoint.x) * (180 / Math.PI);
+    angle =
+      Math.atan2(nextPoint.y - prevPoint.y, nextPoint.x - prevPoint.x) *
+      (180 / Math.PI);
   }
 
   // Convert to percentage of viewBox
@@ -171,7 +178,7 @@ export const MotionPath: React.FC<MotionPathProps> = ({
     offset.x ?? 0,
     offset.y ?? 0,
     vbWidth,
-    vbHeight
+    vbHeight,
   );
 
   return (
@@ -195,7 +202,7 @@ export const MotionPath: React.FC<MotionPathProps> = ({
       >
         {/* Hidden path for calculations */}
         <path ref={pathRef} d={path} fill="none" stroke="transparent" />
-        
+
         {/* Moving element positioned in SVG coordinate space */}
         <foreignObject
           x={vbX}
@@ -308,7 +315,7 @@ export const MotionPathWithTrail: React.FC<MotionPathWithTrailProps> = ({
     offset.x ?? 0,
     offset.y ?? 0,
     vbWidth,
-    vbHeight
+    vbHeight,
   );
 
   // Get path length for trail animation

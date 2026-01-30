@@ -159,11 +159,16 @@ export const CircleLayout: React.FC<CircleLayoutProps> = ({
           if (effectiveFrame <= 0) {
             progress = 0;
           } else if (effectiveFrame < durationFrames) {
-            progress = interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
-              easing,
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-            });
+            progress = interpolate(
+              effectiveFrame,
+              [0, durationFrames],
+              [0, 1],
+              {
+                easing,
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              },
+            );
           }
         }
 
@@ -208,7 +213,8 @@ export const CircleLayout: React.FC<CircleLayoutProps> = ({
 /**
  * Props for ArcLayout - items along an arc.
  */
-export interface ArcLayoutProps extends Omit<CircleLayoutProps, "startAngle" | "endAngle"> {
+export interface ArcLayoutProps
+  extends Omit<CircleLayoutProps, "startAngle" | "endAngle"> {
   /** Arc angle in degrees (e.g., 90 for quarter circle) */
   arcAngle?: number;
   /** Center angle of the arc */
@@ -236,7 +242,9 @@ export const ArcLayout: React.FC<ArcLayoutProps> = ({
   const startAngle = centerAngle - arcAngle / 2;
   const endAngle = centerAngle + arcAngle / 2;
 
-  return <CircleLayout {...props} startAngle={startAngle} endAngle={endAngle} />;
+  return (
+    <CircleLayout {...props} startAngle={startAngle} endAngle={endAngle} />
+  );
 };
 
 export default CircleLayout;

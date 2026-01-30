@@ -117,7 +117,8 @@ export const RemotionWrapper: React.FC<RemotionWrapperProps> = ({
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {durationInFrames} frames @ {fps}fps ({(durationInFrames / fps).toFixed(1)}s)
+        {durationInFrames} frames @ {fps}fps (
+        {(durationInFrames / fps).toFixed(1)}s)
       </div>
     </div>
   );

@@ -620,13 +620,13 @@ const FollowTypewriterScene: React.FC = () => {
   const secondsPerChar = 0.06;
   const totalChars = text.length;
   const typingDurationFrames = totalChars * secondsPerChar * fps;
-  
+
   // Approximate character width in pixels (monospace font at 32px)
   const charWidth = 19;
 
   // Text starts at center of screen
   const textStartX = width / 2 - 100;
-  
+
   // Smooth continuous camera movement - linear interpolation for perfect tracking
   const cameraX = interpolate(
     frame,
@@ -635,7 +635,7 @@ const FollowTypewriterScene: React.FC = () => {
     {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-    }
+    },
   );
 
   const gridSize = 40;
@@ -915,7 +915,8 @@ const HeroSceneWithCamera: React.FC = () => {
     >
       <AbsoluteFill
         style={{
-          background: "linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%)",
+          background:
+            "linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%)",
         }}
       >
         {/* Decorative elements */}
@@ -925,7 +926,8 @@ const HeroSceneWithCamera: React.FC = () => {
             width: 500,
             height: 500,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)",
             top: -100,
             right: -100,
             filter: "blur(60px)",
@@ -937,7 +939,8 @@ const HeroSceneWithCamera: React.FC = () => {
             width: 400,
             height: 400,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)",
             bottom: -50,
             left: -50,
             filter: "blur(50px)",
@@ -1007,7 +1010,12 @@ const HeroSceneWithCamera: React.FC = () => {
               lineHeight: 1.6,
             }}
             createTimeline={({ textRef, tl }) => {
-              tl.from(textRef.current, { opacity: 0, y: 20, duration: 0.5, delay: 0.8 });
+              tl.from(textRef.current, {
+                opacity: 0,
+                y: 20,
+                duration: 0.5,
+                delay: 0.8,
+              });
               return tl;
             }}
           >
@@ -1024,7 +1032,10 @@ const HeroSceneWithCamera: React.FC = () => {
               color: "white",
               fontWeight: 600,
               fontSize: 16,
-              opacity: interpolate(frame, [50, 65], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+              opacity: interpolate(frame, [50, 65], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
               transform: `translateY(${interpolate(frame, [50, 65], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
             }}
           >
@@ -1065,10 +1076,11 @@ const LandingKenBurnsScene: React.FC = () => {
           style={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
+            background:
+              "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
           }}
         />
-        
+
         {/* Decorative shapes */}
         <div
           style={{
@@ -1138,18 +1150,27 @@ const LandingKenBurnsScene: React.FC = () => {
                 marginBottom: 32,
               }}
               createTimeline={({ textRef, tl }) => {
-                tl.from(textRef.current, { opacity: 0, y: 20, duration: 0.5, delay: 0.8 });
+                tl.from(textRef.current, {
+                  opacity: 0,
+                  y: 20,
+                  duration: 0.5,
+                  delay: 0.8,
+                });
                 return tl;
               }}
             >
-              The all-in-one platform for modern teams. Collaborate, build, and deploy with confidence.
+              The all-in-one platform for modern teams. Collaborate, build, and
+              deploy with confidence.
             </TextAnimation>
 
             <div
               style={{
                 display: "flex",
                 gap: 16,
-                opacity: interpolate(frame, [50, 70], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+                opacity: interpolate(frame, [50, 70], [0, 1], {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                }),
                 transform: `translateY(${interpolate(frame, [50, 70], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
               }}
             >
@@ -1206,7 +1227,12 @@ const FeatureCardsScene: React.FC = () => {
   const frame = useCurrentFrame();
 
   const features = [
-    { icon: "⚡", title: "Lightning Fast", desc: "Built for speed", color: "#fbbf24" },
+    {
+      icon: "⚡",
+      title: "Lightning Fast",
+      desc: "Built for speed",
+      color: "#fbbf24",
+    },
     { icon: "🔒", title: "Secure", desc: "Enterprise-grade", color: "#10b981" },
     { icon: "🎨", title: "Beautiful", desc: "Pixel perfect", color: "#ec4899" },
   ];
@@ -1229,7 +1255,8 @@ const FeatureCardsScene: React.FC = () => {
             width: 400,
             height: 400,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
             top: -100,
             left: "20%",
             filter: "blur(60px)",
@@ -1272,9 +1299,19 @@ const FeatureCardsScene: React.FC = () => {
           <div style={{ display: "flex", gap: 24 }}>
             {features.map((feature, i) => {
               const delay = 25 + i * 15;
-              const opacity = interpolate(frame, [delay, delay + 20], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-              const y = interpolate(frame, [delay, delay + 20], [30, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-              const scale = interpolate(frame, [delay, delay + 20], [0.9, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+              const opacity = interpolate(frame, [delay, delay + 20], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              });
+              const y = interpolate(frame, [delay, delay + 20], [30, 0], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: Easing.out(Easing.cubic),
+              });
+              const scale = interpolate(frame, [delay, delay + 20], [0.9, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              });
 
               return (
                 <div
@@ -1290,8 +1327,17 @@ const FeatureCardsScene: React.FC = () => {
                     transform: `translateY(${y}px) scale(${scale})`,
                   }}
                 >
-                  <div style={{ fontSize: 40, marginBottom: 16 }}>{feature.icon}</div>
-                  <div style={{ fontSize: 18, fontWeight: 600, color: "white", marginBottom: 8 }}>
+                  <div style={{ fontSize: 40, marginBottom: 16 }}>
+                    {feature.icon}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 600,
+                      color: "white",
+                      marginBottom: 8,
+                    }}
+                  >
                     {feature.title}
                   </div>
                   <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)" }}>
@@ -1322,7 +1368,10 @@ export const FeatureCardsWithCamera: Story = {
 const QuoteRevealScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const quoteOpacity = interpolate(frame, [20, 50], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const quoteOpacity = interpolate(frame, [20, 50], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <Camera
@@ -1346,7 +1395,8 @@ const QuoteRevealScene: React.FC = () => {
             width: 600,
             height: 300,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, transparent 70%)",
             top: "30%",
             left: "50%",
             transform: "translateX(-50%)",
@@ -1407,7 +1457,10 @@ const QuoteRevealScene: React.FC = () => {
               fontSize: 14,
               color: "rgba(255,255,255,0.5)",
               fontWeight: 500,
-              opacity: interpolate(frame, [80, 100], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+              opacity: interpolate(frame, [80, 100], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
             }}
           >
             — Steve Jobs
@@ -1433,9 +1486,19 @@ export const QuoteWithDramaticZoom: Story = {
 const LogoRevealScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const logoScale = interpolate(frame, [30, 60], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.back(1.5)) });
-  const logoOpacity = interpolate(frame, [30, 50], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const taglineOpacity = interpolate(frame, [70, 90], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const logoScale = interpolate(frame, [30, 60], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.back(1.5)),
+  });
+  const logoOpacity = interpolate(frame, [30, 50], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+  const taglineOpacity = interpolate(frame, [70, 90], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <Camera
@@ -1453,7 +1516,8 @@ const LogoRevealScene: React.FC = () => {
           style={{
             position: "absolute",
             inset: 0,
-            background: "radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 70%)",
+            background:
+              "radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000 70%)",
           }}
         />
 
@@ -1472,7 +1536,8 @@ const LogoRevealScene: React.FC = () => {
               width: 120,
               height: 120,
               borderRadius: 30,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
+              background:
+                "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1589,10 +1654,38 @@ const AppInterfaceScene: React.FC = () => {
                 gap: 8,
               }}
             >
-              <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#ef4444" }} />
-              <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#fbbf24" }} />
-              <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#22c55e" }} />
-              <div style={{ flex: 1, textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 13 }}>
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background: "#ef4444",
+                }}
+              />
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background: "#fbbf24",
+                }}
+              />
+              <div
+                style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  background: "#22c55e",
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: 13,
+                }}
+              >
                 Dashboard — Analytics
               </div>
             </div>
@@ -1608,26 +1701,34 @@ const AppInterfaceScene: React.FC = () => {
                   padding: 16,
                 }}
               >
-                {["Overview", "Analytics", "Reports", "Settings"].map((item, i) => {
-                  const itemOpacity = interpolate(frame, [20 + i * 10, 30 + i * 10], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-                  return (
-                    <div
-                      key={item}
-                      style={{
-                        padding: "10px 12px",
-                        borderRadius: 8,
-                        marginBottom: 4,
-                        background: i === 1 ? "rgba(99, 102, 241, 0.2)" : "transparent",
-                        color: i === 1 ? "#818cf8" : "rgba(255,255,255,0.6)",
-                        fontSize: 13,
-                        fontWeight: i === 1 ? 600 : 400,
-                        opacity: itemOpacity,
-                      }}
-                    >
-                      {item}
-                    </div>
-                  );
-                })}
+                {["Overview", "Analytics", "Reports", "Settings"].map(
+                  (item, i) => {
+                    const itemOpacity = interpolate(
+                      frame,
+                      [20 + i * 10, 30 + i * 10],
+                      [0, 1],
+                      { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+                    );
+                    return (
+                      <div
+                        key={item}
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 8,
+                          marginBottom: 4,
+                          background:
+                            i === 1 ? "rgba(99, 102, 241, 0.2)" : "transparent",
+                          color: i === 1 ? "#818cf8" : "rgba(255,255,255,0.6)",
+                          fontSize: 13,
+                          fontWeight: i === 1 ? 600 : 400,
+                          opacity: itemOpacity,
+                        }}
+                      >
+                        {item}
+                      </div>
+                    );
+                  },
+                )}
               </div>
 
               {/* Main content */}
@@ -1638,24 +1739,44 @@ const AppInterfaceScene: React.FC = () => {
                     fontWeight: 600,
                     color: "white",
                     marginBottom: 20,
-                    opacity: interpolate(frame, [40, 55], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+                    opacity: interpolate(frame, [40, 55], [0, 1], {
+                      extrapolateLeft: "clamp",
+                      extrapolateRight: "clamp",
+                    }),
                   }}
                 >
                   Performance Overview
                 </div>
 
                 {/* Chart bars */}
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 200 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-end",
+                    gap: 12,
+                    height: 200,
+                  }}
+                >
                   {[60, 80, 45, 90, 70, 85, 55, 95].map((h, i) => {
                     const barDelay = 50 + i * 5;
-                    const barHeight = interpolate(frame, [barDelay, barDelay + 20], [0, h], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+                    const barHeight = interpolate(
+                      frame,
+                      [barDelay, barDelay + 20],
+                      [0, h],
+                      {
+                        extrapolateLeft: "clamp",
+                        extrapolateRight: "clamp",
+                        easing: Easing.out(Easing.cubic),
+                      },
+                    );
                     return (
                       <div
                         key={i}
                         style={{
                           flex: 1,
                           height: `${barHeight}%`,
-                          background: "linear-gradient(180deg, #6366f1 0%, #4f46e5 100%)",
+                          background:
+                            "linear-gradient(180deg, #6366f1 0%, #4f46e5 100%)",
                           borderRadius: 6,
                         }}
                       />
@@ -1698,7 +1819,8 @@ const AnnouncementScene: React.FC = () => {
     >
       <AbsoluteFill
         style={{
-          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
+          background:
+            "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)",
         }}
       >
         {/* Pattern overlay */}
@@ -1731,7 +1853,10 @@ const AnnouncementScene: React.FC = () => {
               fontSize: 13,
               fontWeight: 600,
               marginBottom: 24,
-              opacity: interpolate(frame, [40, 55], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+              opacity: interpolate(frame, [40, 55], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
             }}
           >
             🎉 NEW RELEASE
@@ -1769,7 +1894,12 @@ const AnnouncementScene: React.FC = () => {
               lineHeight: 1.5,
             }}
             createTimeline={({ textRef, tl }) => {
-              tl.from(textRef.current, { opacity: 0, y: 20, duration: 0.5, delay: 1.2 });
+              tl.from(textRef.current, {
+                opacity: 0,
+                y: 20,
+                duration: 0.5,
+                delay: 1.2,
+              });
               return tl;
             }}
           >
@@ -1786,7 +1916,10 @@ const AnnouncementScene: React.FC = () => {
               color: "#6366f1",
               fontWeight: 700,
               fontSize: 16,
-              opacity: interpolate(frame, [80, 95], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }),
+              opacity: interpolate(frame, [80, 95], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              }),
               transform: `translateY(${interpolate(frame, [80, 95], [20, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}px)`,
             }}
           >
