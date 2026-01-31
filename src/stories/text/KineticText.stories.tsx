@@ -8,7 +8,14 @@ const meta: Meta<typeof KineticText> = {
   decorators: [
     (Story) => (
       <RemotionWrapper durationInFrames={300}>
-        <div style={{ width: "100%", height: "100%", backgroundColor: "#111", color: "#fff" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#111",
+            color: "#fff",
+          }}
+        >
           <Story />
         </div>
       </RemotionWrapper>

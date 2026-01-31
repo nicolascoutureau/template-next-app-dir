@@ -1,1 +1,20 @@
-export { WordStream, type WordStreamProps, type PushDirection } from "./WordStream";
+export {
+  type KineticStreamProps,
+  type PushDirection,
+  SlideStream,
+  SwipeStream,
+  DynamicSizeStream,
+  StompStream,
+  SlotMachineStream,
+  OutlineStream,
+  ElasticStream,
+  BlockStream,
+  ChromaticStream,
+  FlipTextStream,
+  ZoomTextStream,
+  BlurTextStream,
+  SlicedStream,
+  TurbulenceStream,
+  NeonStream,
+  PushStream,
+} from "./KineticStream";

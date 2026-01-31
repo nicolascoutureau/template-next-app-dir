@@ -45,8 +45,8 @@ export interface RemotionWrapperProps {
  */
 export const RemotionWrapper: React.FC<RemotionWrapperProps> = ({
   children,
-  width = 800,
-  height = 450,
+  width = 1280,
+  height = 720,
   durationInFrames = 150,
   fps = 30,
   autoPlay = true,

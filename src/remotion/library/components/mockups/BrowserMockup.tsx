@@ -53,6 +53,7 @@ const TrafficLights = ({ theme }: { theme: BrowserTheme }) => (
         height: 12,
         borderRadius: "50%",
         background: "#ff5f57",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
       }}
     />
     <div
@@ -61,6 +62,7 @@ const TrafficLights = ({ theme }: { theme: BrowserTheme }) => (
         height: 12,
         borderRadius: "50%",
         background: "#febc2e",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
       }}
     />
     <div
@@ -69,6 +71,7 @@ const TrafficLights = ({ theme }: { theme: BrowserTheme }) => (
         height: 12,
         borderRadius: "50%",
         background: "#28c840",
+        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.12)",
       }}
     />
   </div>
@@ -83,6 +86,7 @@ const ChevronLeft = ({ color }: { color: string }) => (
     stroke={color}
     strokeWidth={2}
     strokeLinecap="round"
+    strokeLinejoin="round"
   >
     <path d="M15 18l-6-6 6-6" />
   </svg>
@@ -97,6 +101,7 @@ const ChevronRight = ({ color }: { color: string }) => (
     stroke={color}
     strokeWidth={2}
     strokeLinecap="round"
+    strokeLinejoin="round"
   >
     <path d="M9 18l6-6-6-6" />
   </svg>
@@ -111,6 +116,7 @@ const RefreshIcon = ({ color }: { color: string }) => (
     stroke={color}
     strokeWidth={2}
     strokeLinecap="round"
+    strokeLinejoin="round"
   >
     <path d="M23 4v6h-6M1 20v-6h6" />
     <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
@@ -132,6 +138,7 @@ const ShareIcon = ({ color }: { color: string }) => (
     stroke={color}
     strokeWidth={2}
     strokeLinecap="round"
+    strokeLinejoin="round"
   >
     <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
   </svg>
@@ -146,8 +153,40 @@ const PlusIcon = ({ color }: { color: string }) => (
     stroke={color}
     strokeWidth={2}
     strokeLinecap="round"
+    strokeLinejoin="round"
   >
     <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const SidebarIcon = ({ color }: { color: string }) => (
+  <svg
+    width={18}
+    height={18}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x={4} y={4} width={16} height={16} rx={2} />
+    <path d="M9 4v16" />
+  </svg>
+);
+
+const StarIcon = ({ color }: { color: string }) => (
+  <svg
+    width={14}
+    height={14}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
 );
 
@@ -166,27 +205,30 @@ const themes: Record<
     urlBg: string;
     tabBg: string;
     tabActiveBg: string;
+    inputBorder?: string;
   }
 > = {
   light: {
     bg: "#ffffff",
-    toolbar: "#f5f5f7",
-    text: "#1d1d1f",
-    textMuted: "#86868b",
-    border: "#d2d2d7",
+    toolbar: "#f3f4f6", // Zinc-100
+    text: "#1f2937", // Zinc-800
+    textMuted: "#6b7280", // Zinc-500
+    border: "#e5e7eb", // Zinc-200
     urlBg: "#ffffff",
-    tabBg: "#e8e8ed",
+    tabBg: "#e5e7eb",
     tabActiveBg: "#ffffff",
+    inputBorder: "#e5e7eb",
   },
   dark: {
-    bg: "#1c1c1e",
-    toolbar: "#2c2c2e",
-    text: "#f5f5f7",
-    textMuted: "#86868b",
-    border: "#3a3a3c",
-    urlBg: "#1c1c1e",
-    tabBg: "#3a3a3c",
-    tabActiveBg: "#48484a",
+    bg: "#18181b", // Zinc-900
+    toolbar: "#27272a", // Zinc-800
+    text: "#f4f4f5", // Zinc-100
+    textMuted: "#a1a1aa", // Zinc-400
+    border: "#3f3f46", // Zinc-700
+    urlBg: "#18181b",
+    tabBg: "#3f3f46",
+    tabActiveBg: "#52525b",
+    inputBorder: "#3f3f46",
   },
 };
 
@@ -206,16 +248,16 @@ const ChromeBrowser: React.FC<{
     {/* Tab bar */}
     <div
       style={{
-        height: 38,
+        height: 42,
         background: colors.toolbar,
         display: "flex",
         alignItems: "flex-end",
         padding: "0 8px",
-        gap: 0,
+        gap: 6,
       }}
     >
       {/* Traffic lights */}
-      <div style={{ padding: "0 8px", marginBottom: 8 }}>
+      <div style={{ padding: "0 12px 10px 8px" }}>
         <TrafficLights theme={theme} />
       </div>
 
@@ -223,23 +265,26 @@ const ChromeBrowser: React.FC<{
       <div
         style={{
           height: 34,
-          minWidth: 180,
+          minWidth: 160,
           maxWidth: 240,
           background: colors.tabActiveBg,
-          borderRadius: "8px 8px 0 0",
+          borderRadius: "10px 10px 0 0",
           display: "flex",
           alignItems: "center",
           padding: "0 12px",
           gap: 8,
           fontSize: 12,
           color: colors.text,
+          position: "relative",
+          marginBottom: -1,
+          boxShadow: theme === "light" ? "0 0 1px rgba(0,0,0,0.1)" : "none",
         }}
       >
         <div
           style={{
-            width: 16,
-            height: 16,
-            borderRadius: 4,
+            width: 14,
+            height: 14,
+            borderRadius: 3,
             background: `linear-gradient(135deg, ${theme === "dark" ? "#4a4a4c" : "#e0e0e0"} 0%, ${theme === "dark" ? "#3a3a3c" : "#d0d0d0"} 100%)`,
           }}
         />
@@ -254,14 +299,24 @@ const ChromeBrowser: React.FC<{
           {tabTitle}
         </span>
         <span
-          style={{ color: colors.textMuted, fontSize: 14, cursor: "pointer" }}
+          style={{
+            color: colors.textMuted,
+            fontSize: 14,
+            cursor: "pointer",
+            width: 16,
+            height: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+          }}
         >
           ×
         </span>
       </div>
 
       {/* New tab button */}
-      <div style={{ padding: "0 8px", marginBottom: 8, opacity: 0.6 }}>
+      <div style={{ padding: "0 4px 8px 4px", opacity: 0.6 }}>
         <PlusIcon color={colors.text} />
       </div>
     </div>
@@ -270,17 +325,17 @@ const ChromeBrowser: React.FC<{
     {showAddressBar && (
       <div
         style={{
-          height: 40,
+          height: 44,
           background: colors.tabActiveBg,
           display: "flex",
           alignItems: "center",
           padding: "0 12px",
-          gap: 8,
+          gap: 12,
           borderBottom: `1px solid ${colors.border}`,
         }}
       >
         {/* Navigation */}
-        <div style={{ display: "flex", gap: 4, opacity: 0.5 }}>
+        <div style={{ display: "flex", gap: 6, opacity: 0.6 }}>
           <ChevronLeft color={colors.text} />
           <ChevronRight color={colors.text} />
           <RefreshIcon color={colors.text} />
@@ -290,27 +345,51 @@ const ChromeBrowser: React.FC<{
         <div
           style={{
             flex: 1,
-            height: 28,
-            background: colors.urlBg,
-            border: `1px solid ${colors.border}`,
-            borderRadius: 14,
+            height: 30,
+            background: colors.toolbar,
+            borderRadius: 99,
             display: "flex",
             alignItems: "center",
-            padding: "0 12px",
+            padding: "0 14px",
             gap: 8,
             fontSize: 13,
             color: colors.textMuted,
+            border: theme === "light" ? "none" : `1px solid ${colors.border}`,
           }}
         >
           <LockIcon color={colors.textMuted} />
-          <span style={{ color: colors.text }}>
-            {url.replace(/^https?:\/\//, "")}
-          </span>
+          <div
+            style={{
+              flex: 1,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            <span style={{ color: colors.text }}>
+              {url.replace(/^https?:\/\//, "").split("/")[0]}
+            </span>
+            <span style={{ opacity: 0.6 }}>
+              {url.replace(/^https?:\/\//, "").includes("/")
+                ? "/" + url.replace(/^https?:\/\//, "").split("/").slice(1).join("/")
+                : ""}
+            </span>
+          </div>
+          <div style={{ opacity: 0.6 }}>
+            <StarIcon color={colors.textMuted} />
+          </div>
         </div>
 
         {/* Actions */}
-        <div style={{ opacity: 0.5 }}>
-          <ShareIcon color={colors.text} />
+        <div style={{ display: "flex", gap: 12, opacity: 0.6, paddingRight: 4 }}>
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              background: `linear-gradient(135deg, ${theme === "dark" ? "#6366f1" : "#818cf8"}, ${theme === "dark" ? "#a855f7" : "#c084fc"})`,
+            }}
+          />
         </div>
       </div>
     )}
@@ -341,7 +420,7 @@ const SafariBrowser: React.FC<{
         background: colors.toolbar,
         display: "flex",
         alignItems: "center",
-        padding: "0 16px",
+        padding: "0 18px",
         gap: 16,
         borderBottom: `1px solid ${colors.border}`,
       }}
@@ -349,23 +428,13 @@ const SafariBrowser: React.FC<{
       {/* Traffic lights */}
       <TrafficLights theme={theme} />
 
-      {/* Sidebar toggle (Safari style) */}
-      <div style={{ width: 20, opacity: 0.5 }}>
-        <svg
-          width={18}
-          height={18}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={colors.text}
-          strokeWidth={2}
-        >
-          <rect x={3} y={3} width={7} height={18} rx={1} />
-          <rect x={14} y={3} width={7} height={18} rx={1} />
-        </svg>
+      {/* Sidebar toggle */}
+      <div style={{ opacity: 0.5, display: "flex" }}>
+        <SidebarIcon color={colors.text} />
       </div>
 
       {/* Navigation */}
-      <div style={{ display: "flex", gap: 12, opacity: 0.4 }}>
+      <div style={{ display: "flex", gap: 14, opacity: 0.5 }}>
         <ChevronLeft color={colors.text} />
         <ChevronRight color={colors.text} />
       </div>
@@ -375,10 +444,10 @@ const SafariBrowser: React.FC<{
         <div
           style={{
             flex: 1,
-            maxWidth: 400,
-            height: 30,
+            maxWidth: 420,
+            height: 32,
             margin: "0 auto",
-            background: theme === "dark" ? colors.urlBg : "#e8e8ed",
+            background: theme === "dark" ? "#1c1c1e" : "#e5e7eb",
             borderRadius: 8,
             display: "flex",
             alignItems: "center",
@@ -387,10 +456,14 @@ const SafariBrowser: React.FC<{
             gap: 6,
             fontSize: 13,
             color: colors.textMuted,
+            boxShadow:
+              theme === "light"
+                ? "0 1px 2px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(0,0,0,0.05)"
+                : "none",
           }}
         >
           <LockIcon color={colors.textMuted} />
-          <span style={{ color: colors.text }}>
+          <span style={{ color: colors.text, fontWeight: 500 }}>
             {url.replace(/^https?:\/\//, "").split("/")[0]}
           </span>
         </div>
@@ -400,6 +473,18 @@ const SafariBrowser: React.FC<{
       <div style={{ display: "flex", gap: 16, opacity: 0.5 }}>
         <ShareIcon color={colors.text} />
         <PlusIcon color={colors.text} />
+        <div style={{ width: 16 }}>
+          <svg
+            width={16}
+            height={16}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={colors.text}
+            strokeWidth={2}
+          >
+            <path d="M4 4h5v5H4zM15 4h5v5h-5zM4 15h5v5H4zM15 15h5v5h-5z" />
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -428,62 +513,82 @@ const ArcBrowser: React.FC<{
       {/* Sidebar */}
       <div
         style={{
-          width: 68,
-          background: theme === "dark" ? "#18181b" : "#fafafa",
+          width: 72,
+          background: theme === "dark" ? "#18181b" : "#f8f9fa",
           borderRight: `1px solid ${colors.border}`,
           display: "flex",
           flexDirection: "column",
-          padding: "12px 0",
-          gap: 8,
+          padding: "16px 0",
+          gap: 12,
           alignItems: "center",
         }}
       >
         {/* Traffic lights (vertical in Arc) */}
-        <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
           <div
             style={{
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               borderRadius: "50%",
               background: "#ff5f57",
             }}
           />
           <div
             style={{
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               borderRadius: "50%",
               background: "#febc2e",
             }}
           />
           <div
             style={{
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               borderRadius: "50%",
               background: "#28c840",
             }}
           />
         </div>
 
+        {/* URL Bar for Arc (Sidebar top) */}
+        <div
+           style={{
+             width: 56,
+             height: 36,
+             borderRadius: 10,
+             background: colors.tabBg,
+             display: 'flex',
+             alignItems: 'center',
+             justifyContent: 'center',
+             marginBottom: 8,
+             opacity: 0.8
+           }}
+        >
+           <div style={{ width: 16, height: 2, background: colors.textMuted, borderRadius: 1 }} />
+        </div>
+
+        <div style={{ width: 40, height: 1, background: colors.border, margin: '4px 0' }} />
+
         {/* Space tabs */}
         {[arcAccent, "#3b82f6", "#22c55e"].map((color, i) => (
           <div
             key={i}
             style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: i === 0 ? color : colors.tabBg,
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: i === 0 ? color : 'transparent',
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: 600,
               color: i === 0 ? "#fff" : colors.textMuted,
+              boxShadow: i === 0 ? "0 2px 5px rgba(0,0,0,0.15)" : "none",
             }}
           >
-            {["W", "D", "P"][i]}
+             {i === 0 ? "★" : i === 1 ? "●" : "▲"}
           </div>
         ))}
 
@@ -494,11 +599,12 @@ const ArcBrowser: React.FC<{
           style={{
             width: 36,
             height: 36,
-            borderRadius: 8,
+            borderRadius: 10,
             background: colors.tabBg,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            opacity: 0.7
           }}
         >
           <PlusIcon color={colors.textMuted} />
@@ -507,12 +613,12 @@ const ArcBrowser: React.FC<{
 
       {/* Main content area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Top bar */}
+        {/* Top bar (only if address bar enabled, though Arc often hides it) */}
         {showAddressBar && (
           <div
             style={{
-              height: 48,
-              background: colors.toolbar,
+              height: 44,
+              background: colors.bg,
               display: "flex",
               alignItems: "center",
               padding: "0 16px",
@@ -526,19 +632,19 @@ const ArcBrowser: React.FC<{
               <ChevronRight color={colors.text} />
             </div>
 
-            {/* URL bar */}
+            {/* URL Display */}
             <div
               style={{
                 flex: 1,
-                height: 32,
-                background: colors.urlBg,
+                height: 28,
+                background: colors.toolbar,
                 border: `1px solid ${colors.border}`,
                 borderRadius: 8,
                 display: "flex",
                 alignItems: "center",
-                padding: "0 12px",
+                padding: "0 10px",
                 gap: 8,
-                fontSize: 13,
+                fontSize: 12,
               }}
             >
               <LockIcon color={colors.textMuted} />

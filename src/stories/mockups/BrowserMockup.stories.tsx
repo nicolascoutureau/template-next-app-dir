@@ -44,53 +44,160 @@ const WebContent = ({ dark = false }: { dark?: boolean }) => (
       width: "100%",
       height: "100%",
       background: dark
-        ? "linear-gradient(180deg, #18181b 0%, #27272a 100%)"
-        : "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
+        ? "#09090b" // Zinc 950
+        : "#f8fafc", // Slate 50
       padding: 24,
+      fontFamily: "Inter, sans-serif",
     }}
   >
+    {/* Header / Nav */}
     <div
       style={{
-        background: dark ? "#3f3f46" : "white",
-        padding: 20,
-        borderRadius: 12,
-        marginBottom: 16,
-        boxShadow: dark ? "none" : "0 1px 3px rgba(0,0,0,0.1)",
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 32,
+        alignItems: "center",
+      }}
+    >
+      <div style={{ display: "flex", gap: 12 }}>
+        <div
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 6,
+            background: dark ? "#27272a" : "#cbd5e1",
+          }}
+        />
+        <div
+          style={{
+            width: 80,
+            height: 24,
+            borderRadius: 4,
+            background: dark ? "#27272a" : "#cbd5e1",
+          }}
+        />
+      </div>
+      <div style={{ display: "flex", gap: 12 }}>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            style={{
+              width: 60,
+              height: 16,
+              borderRadius: 4,
+              background: dark ? "#27272a" : "#cbd5e1",
+              opacity: 0.5,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+
+    {/* Hero Area */}
+    <div
+      style={{
+        background: dark ? "#18181b" : "white",
+        padding: 32,
+        borderRadius: 16,
+        marginBottom: 24,
+        boxShadow: dark
+          ? "0 0 0 1px #27272a"
+          : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
       }}
     >
       <div
         style={{
-          fontSize: 20,
-          fontWeight: 700,
-          color: dark ? "#fafafa" : "#1e293b",
-          marginBottom: 8,
+          width: "40%",
+          height: 32,
+          borderRadius: 8,
+          background: dark ? "#3f3f46" : "#e2e8f0",
         }}
-      >
-        Welcome to My Site
-      </div>
-      <div style={{ fontSize: 14, color: dark ? "#a1a1aa" : "#64748b" }}>
-        This is a sample website content displayed in the browser mockup.
+      />
+      <div
+        style={{
+          width: "80%",
+          height: 16,
+          borderRadius: 4,
+          background: dark ? "#27272a" : "#f1f5f9",
+        }}
+      />
+      <div
+        style={{
+          width: "60%",
+          height: 16,
+          borderRadius: 4,
+          background: dark ? "#27272a" : "#f1f5f9",
+        }}
+      />
+
+      <div style={{ marginTop: 16, display: "flex", gap: 12 }}>
+        <div
+          style={{
+            width: 100,
+            height: 36,
+            borderRadius: 8,
+            background: "#4f46e5",
+          }}
+        />
+        <div
+          style={{
+            width: 100,
+            height: 36,
+            borderRadius: 8,
+            background: dark ? "#27272a" : "#e2e8f0",
+          }}
+        />
       </div>
     </div>
-    <div style={{ display: "flex", gap: 16 }}>
-      <div
-        style={{
-          flex: 1,
-          background: dark ? "#3f3f46" : "white",
-          height: 100,
-          borderRadius: 8,
-          boxShadow: dark ? "none" : "0 1px 3px rgba(0,0,0,0.1)",
-        }}
-      />
-      <div
-        style={{
-          flex: 1,
-          background: dark ? "#3f3f46" : "white",
-          height: 100,
-          borderRadius: 8,
-          boxShadow: dark ? "none" : "0 1px 3px rgba(0,0,0,0.1)",
-        }}
-      />
+
+    {/* Grid */}
+    <div
+      style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24 }}
+    >
+      {[1, 2, 3].map((i) => (
+        <div
+          key={i}
+          style={{
+            background: dark ? "#18181b" : "white",
+            height: 120,
+            borderRadius: 12,
+            boxShadow: dark
+              ? "0 0 0 1px #27272a"
+              : "0 1px 3px rgba(0,0,0,0.1)",
+            padding: 16,
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: dark ? "#27272a" : "#f1f5f9",
+              marginBottom: 12,
+            }}
+          />
+          <div
+            style={{
+              width: "60%",
+              height: 16,
+              borderRadius: 4,
+              background: dark ? "#27272a" : "#e2e8f0",
+              marginBottom: 8,
+            }}
+          />
+          <div
+            style={{
+              width: "90%",
+              height: 12,
+              borderRadius: 4,
+              background: dark ? "#27272a" : "#f1f5f9",
+            }}
+          />
+        </div>
+      ))}
     </div>
   </div>
 );
@@ -321,7 +428,12 @@ export const WithImage: Story = {
       <img
         src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&h=500&fit=crop"
         alt="Content"
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "top center",
+        }}
       />
     </BrowserMockup>
   ),

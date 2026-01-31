@@ -75,12 +75,6 @@ export {
   type GradientPalette,
   type AnimatedGradientProps,
 } from "./FourColorGradient";
-export {
-  Noise,
-  type NoiseProps,
-  type NoiseBlendMode,
-} from "./Noise";
-export { Liquid, type LiquidProps } from "./Liquid";
 export { Glass, type GlassProps } from "./Glass";
 export { Reflection, type ReflectionProps } from "./Reflection";
 export { Neon, type NeonProps } from "./Neon";
