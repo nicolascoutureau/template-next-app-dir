@@ -21,19 +21,6 @@ export {
   type ClipDirection,
 } from "./ClipReveal";
 export {
-  Particles,
-  type ParticlesProps,
-  type ParticleBehavior,
-  type ParticleShape,
-} from "./Particles";
-export {
-  AmbianceBackground,
-  GradientOrbs,
-  type AmbianceBackgroundProps,
-  type GradientOrbsProps,
-  type AmbiancePreset,
-} from "./AmbianceBackground";
-export {
   GlossyShape,
   GlossyCircle,
   GlossyPill,
@@ -52,14 +39,6 @@ export {
   type GridBackgroundProps,
   type GridStyle,
 } from "./GridBackground";
-export {
-  VignetteBlur,
-  CinematicBlur,
-  DreamyBlur,
-  SubtleVignette,
-  TunnelVision,
-  type VignetteBlurProps,
-} from "./VignetteBlur";
 export {
   Tint,
   WarmTint,
@@ -102,11 +81,9 @@ export {
   type NoiseBlendMode,
 } from "./Noise";
 export { Liquid, type LiquidProps } from "./Liquid";
-export { GradientMesh, type GradientMeshProps } from "./GradientMesh";
 export { Glass, type GlassProps } from "./Glass";
 export { Reflection, type ReflectionProps } from "./Reflection";
 export { Neon, type NeonProps } from "./Neon";
-export { StarField, type StarFieldProps } from "./StarField";
 export { SpeedLines, type SpeedLinesProps } from "./SpeedLines";
 export { LensFlare, type LensFlareProps } from "./LensFlare";
 export { Pixelate, type PixelateProps } from "./Pixelate";
