@@ -5,7 +5,6 @@ import {
   type TransitionPresentation,
   type TransitionTiming,
 } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
 import { wipe } from "@remotion/transitions/wipe";
 import { slide } from "@remotion/transitions/slide";
 
@@ -29,7 +28,6 @@ export const linearTiming = remotionLinearTiming;
 export const springTiming = remotionSpringTiming;
 
 export type TransitionType =
-  | "fade"
   | "slideLeft"
   | "slideRight"
   | "slideUp"
@@ -59,7 +57,7 @@ export type TimingType = "linear" | "spring" | "smooth" | "snappy" | "expo";
 
 export function createTiming(
   type: TimingType,
-  durationInFrames: number
+  durationInFrames: number,
 ): TransitionTiming {
   switch (type) {
     case "spring":
@@ -90,8 +88,6 @@ type AnyPresentation = TransitionPresentation<any>;
 
 export function getPresentation(type: TransitionType): AnyPresentation {
   switch (type) {
-    case "fade":
-      return fade();
     case "wipeLeft":
       return wipe({ direction: "from-right" });
     case "wipeRight":
@@ -121,13 +117,13 @@ export function getPresentation(type: TransitionType): AnyPresentation {
     case "pushRight":
       return push("right");
     case "slideOverLeft":
-        return slideOver("left");
+      return slideOver("left");
     case "slideOverRight":
-        return slideOver("right");
+      return slideOver("right");
     case "slideOverUp":
-        return slideOver("top");
+      return slideOver("top");
     case "slideOverDown":
-        return slideOver("bottom");
+      return slideOver("bottom");
     case "whipPan":
       return whipPan();
     case "flashWhite":
@@ -141,12 +137,11 @@ export function getPresentation(type: TransitionType): AnyPresentation {
     case "flipVertical":
       return flip({ direction: "vertical" });
     default:
-      return fade();
+      throw new Error(`Invalid transition type: ${type}`);
   }
 }
 
 export const TRANSITION_TYPES: TransitionType[] = [
-  "fade",
   "slideLeft",
   "slideRight",
   "slideUp",

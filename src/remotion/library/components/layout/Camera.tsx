@@ -84,6 +84,18 @@ export interface CameraProps {
   wiggle?: number;
   /** Wiggle speed (default 1) */
   wiggleSpeed?: number;
+  /** 
+   * Constrain camera to content bounds to prevent showing areas outside the wrapped content.
+   * When enabled, limits zoom-out and panning based on scale.
+   * @default false
+   */
+  constrainToBounds?: boolean;
+  /**
+   * Minimum scale allowed (prevents zooming out too far).
+   * Only applies when constrainToBounds is true.
+   * @default 1
+   */
+  minScale?: number;
   /** Additional styles */
   style?: CSSProperties;
   className?: string;
@@ -102,6 +114,54 @@ function parsePosition(
     return (parseFloat(value) / 100) * dimension;
   }
   return parseFloat(value) || 0;
+}
+
+/**
+ * Calculate the maximum allowed pan distance for a given scale.
+ * At scale 1.0, no panning is allowed (content exactly fills frame).
+ * At scale 2.0, can pan up to 50% of dimension (seeing 50% of content).
+ * 
+ * Formula: maxPan = (1 - 1/scale) / 2 * dimension
+ */
+function calculateMaxPan(scale: number, dimension: number): number {
+  if (scale <= 1) return 0;
+  return ((1 - 1 / scale) / 2) * dimension;
+}
+
+/**
+ * Clamp a value between min and max.
+ */
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * Constrain camera values to keep content within bounds.
+ */
+function constrainCamera(
+  x: number,
+  y: number,
+  scale: number,
+  width: number,
+  height: number,
+  minScale: number,
+): { x: number; y: number; scale: number } {
+  // Enforce minimum scale
+  const constrainedScale = Math.max(scale, minScale);
+  
+  // Calculate max pan based on current scale
+  const maxPanX = calculateMaxPan(constrainedScale, width);
+  const maxPanY = calculateMaxPan(constrainedScale, height);
+  
+  // Clamp x and y within allowed bounds
+  const constrainedX = clamp(x, -maxPanX, maxPanX);
+  const constrainedY = clamp(y, -maxPanY, maxPanY);
+  
+  return {
+    x: constrainedX,
+    y: constrainedY,
+    scale: constrainedScale,
+  };
 }
 
 /**
@@ -221,6 +281,20 @@ function interpolateKeyframes(
  * <Camera wiggle={1}>
  *   <MyScene />
  * </Camera>
+ *
+ * @example
+ * // Constrained camera - prevents showing outside content bounds
+ * <Camera
+ *   keyframes={[
+ *     { frame: 0, scale: 1.5, x: 100, y: 50 },
+ *     { frame: 60, scale: 1, x: 0, y: 0 }, // Won't zoom out past minScale
+ *   ]}
+ *   constrainToBounds
+ *   minScale={1.2}
+ *   origin="center"
+ * >
+ *   <MyScene />
+ * </Camera>
  */
 export const Camera: React.FC<CameraProps> = ({
   children,
@@ -236,6 +310,8 @@ export const Camera: React.FC<CameraProps> = ({
   defaultEasing = cameraEasings.smooth,
   wiggle = 0,
   wiggleSpeed = 1,
+  constrainToBounds = false,
+  minScale = 1,
   style,
   className,
 }) => {
@@ -339,15 +415,28 @@ export const Camera: React.FC<CameraProps> = ({
     return { x, y, rotation: rot, rotateX: rotX, rotateY: rotY };
   }, [frame, fps, wiggle, wiggleSpeed]);
 
-  // Combine values
-  const currentValues = {
-    x: keyframeValues.x + wiggleValues.x,
-    y: keyframeValues.y + wiggleValues.y,
-    scale: keyframeValues.scale,
-    rotation: keyframeValues.rotation + wiggleValues.rotation,
-    rotateX: keyframeValues.rotateX + wiggleValues.rotateX,
-    rotateY: keyframeValues.rotateY + wiggleValues.rotateY,
-  };
+  // Combine values and optionally constrain to bounds
+  const currentValues = useMemo(() => {
+    let x = keyframeValues.x + wiggleValues.x;
+    let y = keyframeValues.y + wiggleValues.y;
+    let scale = keyframeValues.scale;
+    
+    if (constrainToBounds) {
+      const constrained = constrainCamera(x, y, scale, width, height, minScale);
+      x = constrained.x;
+      y = constrained.y;
+      scale = constrained.scale;
+    }
+    
+    return {
+      x,
+      y,
+      scale,
+      rotation: keyframeValues.rotation + wiggleValues.rotation,
+      rotateX: keyframeValues.rotateX + wiggleValues.rotateX,
+      rotateY: keyframeValues.rotateY + wiggleValues.rotateY,
+    };
+  }, [keyframeValues, wiggleValues, constrainToBounds, minScale, width, height]);
 
   const transform = useMemo(() => {
     const parts: string[] = [];
@@ -417,20 +506,32 @@ export interface ZoomProps {
   origin?: string;
   /** Easing function */
   easing?: (t: number) => number;
+  /** Constrain to prevent showing outside content bounds */
+  constrainToBounds?: boolean;
+  /** Minimum scale when constrainToBounds is enabled */
+  minScale?: number;
   style?: CSSProperties;
 }
 
 /**
  * Simple zoom effect (Ken Burns style).
+ * 
+ * @example
+ * // Safe zoom that never shows edges
+ * <Zoom from={1.2} to={1.5} constrainToBounds>
+ *   <MyScene />
+ * </Zoom>
  */
 export const Zoom: React.FC<ZoomProps> = ({
   children,
-  from = 1,
-  to = 1.2,
+  from = 1.2,
+  to = 1.4,
   startFrame = 0,
   endFrame,
   origin = "center",
   easing = cameraEasings.linear,
+  constrainToBounds = false,
+  minScale = 1,
   style,
 }) => {
   const { durationInFrames } = useVideoConfig();
@@ -443,6 +544,8 @@ export const Zoom: React.FC<ZoomProps> = ({
         { frame: effectiveEndFrame, scale: to, easing },
       ]}
       origin={origin}
+      constrainToBounds={constrainToBounds}
+      minScale={minScale}
       style={style}
     >
       {children}
@@ -460,17 +563,34 @@ export interface PanProps {
   toX?: number | string;
   /** Ending Y position */
   toY?: number | string;
+  /** 
+   * Scale/zoom level during pan.
+   * Must be > 1 to allow panning without showing edges.
+   * @default 1.3
+   */
+  scale?: number;
   /** Starting frame */
   startFrame?: number;
   /** Ending frame */
   endFrame?: number;
+  /** Focal point for zoom */
+  origin?: string;
   /** Easing function */
   easing?: (t: number) => number;
+  /** Constrain to prevent showing outside content bounds */
+  constrainToBounds?: boolean;
   style?: CSSProperties;
 }
 
 /**
- * Simple pan effect.
+ * Simple pan effect with zoom.
+ * Note: Panning requires scale > 1 to avoid showing edges.
+ * 
+ * @example
+ * // Safe pan that stays within bounds
+ * <Pan fromX={-50} toX={50} scale={1.3} constrainToBounds>
+ *   <MyScene />
+ * </Pan>
  */
 export const Pan: React.FC<PanProps> = ({
   children,
@@ -478,9 +598,12 @@ export const Pan: React.FC<PanProps> = ({
   fromY = 0,
   toX = 0,
   toY = 0,
+  scale = 1.3,
   startFrame = 0,
   endFrame,
+  origin = "center",
   easing = cameraEasings.smooth,
+  constrainToBounds = false,
   style,
 }) => {
   const { durationInFrames } = useVideoConfig();
@@ -489,9 +612,12 @@ export const Pan: React.FC<PanProps> = ({
   return (
     <Camera
       keyframes={[
-        { frame: startFrame, x: fromX, y: fromY },
-        { frame: effectiveEndFrame, x: toX, y: toY, easing },
+        { frame: startFrame, x: fromX, y: fromY, scale },
+        { frame: effectiveEndFrame, x: toX, y: toY, scale, easing },
       ]}
+      origin={origin}
+      constrainToBounds={constrainToBounds}
+      minScale={scale}
       style={style}
     >
       {children}
@@ -501,7 +627,15 @@ export const Pan: React.FC<PanProps> = ({
 
 export interface PushInProps {
   children: ReactNode;
-  /** Target scale to push into */
+  /** 
+   * Starting scale.
+   * @default 1.1
+   */
+  startScale?: number;
+  /** 
+   * Target scale to push into.
+   * @default 1.8
+   */
   targetScale?: number;
   /** Target X position */
   targetX?: number | string;
@@ -515,27 +649,40 @@ export interface PushInProps {
   origin?: string;
   /** Easing function */
   easing?: (t: number) => number;
+  /** Constrain to prevent showing outside content bounds */
+  constrainToBounds?: boolean;
+  /** Minimum scale when constrainToBounds is enabled */
+  minScale?: number;
   style?: CSSProperties;
 }
 
 /**
  * Cinematic push-in effect (zoom + optional pan).
+ * 
+ * @example
+ * // Safe push-in that never shows edges
+ * <PushIn targetScale={2} targetX={-100} targetY={-50} constrainToBounds>
+ *   <MyScene />
+ * </PushIn>
  */
 export const PushIn: React.FC<PushInProps> = ({
   children,
-  targetScale = 1.5,
+  startScale = 1.1,
+  targetScale = 1.8,
   targetX = 0,
   targetY = 0,
   duration = 60,
   startFrame = 0,
   origin = "center",
   easing = cameraEasings.pushIn,
+  constrainToBounds = false,
+  minScale = 1,
   style,
 }) => {
   return (
     <Camera
       keyframes={[
-        { frame: startFrame, x: 0, y: 0, scale: 1 },
+        { frame: startFrame, x: 0, y: 0, scale: startScale },
         {
           frame: startFrame + duration,
           x: targetX,
@@ -545,6 +692,8 @@ export const PushIn: React.FC<PushInProps> = ({
         },
       ]}
       origin={origin}
+      constrainToBounds={constrainToBounds}
+      minScale={minScale}
       style={style}
     >
       {children}
@@ -554,8 +703,16 @@ export const PushIn: React.FC<PushInProps> = ({
 
 export interface PullOutProps {
   children: ReactNode;
-  /** Starting scale */
+  /** 
+   * Starting scale (zoomed in).
+   * @default 2
+   */
   startScale?: number;
+  /**
+   * Ending scale.
+   * @default 1.1
+   */
+  endScale?: number;
   /** Starting X position */
   startX?: number | string;
   /** Starting Y position */
@@ -568,30 +725,45 @@ export interface PullOutProps {
   origin?: string;
   /** Easing function */
   easing?: (t: number) => number;
+  /** Constrain to prevent showing outside content bounds */
+  constrainToBounds?: boolean;
+  /** Minimum scale when constrainToBounds is enabled */
+  minScale?: number;
   style?: CSSProperties;
 }
 
 /**
  * Pull-out/reveal effect.
+ * 
+ * @example
+ * // Safe pull-out that never shows edges
+ * <PullOut startScale={2.5} endScale={1.2} startX={50} constrainToBounds>
+ *   <MyScene />
+ * </PullOut>
  */
 export const PullOut: React.FC<PullOutProps> = ({
   children,
-  startScale = 1.5,
+  startScale = 2,
+  endScale = 1.1,
   startX = 0,
   startY = 0,
   duration = 60,
   startFrame = 0,
   origin = "center",
   easing = cameraEasings.pullOut,
+  constrainToBounds = false,
+  minScale = 1,
   style,
 }) => {
   return (
     <Camera
       keyframes={[
         { frame: startFrame, x: startX, y: startY, scale: startScale },
-        { frame: startFrame + duration, x: 0, y: 0, scale: 1, easing },
+        { frame: startFrame + duration, x: 0, y: 0, scale: endScale, easing },
       ]}
       origin={origin}
+      constrainToBounds={constrainToBounds}
+      minScale={minScale}
       style={style}
     >
       {children}
