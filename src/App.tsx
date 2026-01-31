@@ -29,7 +29,6 @@ export const App = () => {
 
   // Get initial frame from URL hash
   const initialFrame = getFrameFromHash();
-  const shouldAutoPlay = initialFrame === null;
 
   // Calculate the player size based on composition aspect ratio
   const calculatePlayerSize = () => {
@@ -89,7 +88,7 @@ export const App = () => {
             compositionHeight={composition.height}
             compositionWidth={composition.width}
             controls
-            autoPlay={shouldAutoPlay}
+            autoPlay={false}
             loop
             style={playerSize}
             allowFullscreen
