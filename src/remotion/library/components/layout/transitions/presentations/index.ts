@@ -7,4 +7,7 @@ export { whipPan } from "./whipPan";
 export { zoomIn } from "./zoomIn";
 export { zoomOut } from "./zoomOut";
 export { slideOver } from "./slideOver";
+export { maskReveal } from "./maskReveal";
+export { clockWipe } from "./clockWipe";
+export { directionalWarp } from "./directionalWarp";
 export type { CustomProps, PresentationComponentProps } from "./types";

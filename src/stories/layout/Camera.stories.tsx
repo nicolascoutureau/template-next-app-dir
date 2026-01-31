@@ -397,6 +397,109 @@ export const ShakeEffect: Story = {
   ),
 };
 
+const FloatScene = () => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  
+  // Use sine waves with different frequencies for organic motion
+  const time = frame / fps;
+  const x = Math.sin(time * 0.8) * 12 + Math.sin(time * 1.3) * 5;
+  const y = Math.cos(time * 0.6) * 8 + Math.cos(time * 1.1) * 4;
+  const rotation = Math.sin(time * 0.5) * 0.4;
+  const scale = 1.15 + Math.sin(time * 0.7) * 0.02;
+
+  return (
+    <Camera
+      x={x}
+      y={y}
+      rotation={rotation}
+      scale={scale}
+      origin="center"
+      constrainToBounds
+      minScale={1.1}
+    >
+      <AbsoluteFill
+        style={{
+          background: "linear-gradient(135deg, #1a1a3e 0%, #0d1b2a 50%, #1b263b 100%)",
+        }}
+      >
+        {/* Subtle stars */}
+        {Array.from({ length: 30 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: `${(i * 37) % 100}%`,
+              top: `${(i * 23) % 100}%`,
+              width: 2 + (i % 3),
+              height: 2 + (i % 3),
+              borderRadius: "50%",
+              background: `rgba(255,255,255,${0.3 + (i % 5) * 0.1})`,
+            }}
+          />
+        ))}
+        {/* Floating content */}
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 72,
+              fontWeight: 800,
+              color: "white",
+              textShadow: "0 0 40px rgba(99, 102, 241, 0.5)",
+              marginBottom: 16,
+            }}
+          >
+            Floating
+          </div>
+          <div
+            style={{
+              fontSize: 24,
+              color: "rgba(255,255,255,0.6)",
+              letterSpacing: 4,
+              textTransform: "uppercase",
+            }}
+          >
+            Gentle Motion
+          </div>
+        </div>
+        {/* Ambient glow */}
+        <div
+          style={{
+            position: "absolute",
+            width: 400,
+            height: 400,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            filter: "blur(40px)",
+          }}
+        />
+      </AbsoluteFill>
+    </Camera>
+  );
+};
+
+export const FloatEffect: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={300} backgroundColor="#0a0a1a">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => <FloatScene />,
+};
+
 // ============================================================================
 // EASING COMPARISON
 // ============================================================================

@@ -18,6 +18,9 @@ import {
   whipPan,
   zoomIn,
   zoomOut,
+  maskReveal,
+  clockWipe,
+  directionalWarp,
 } from "./transitions/presentations";
 import { flip } from "./transitions/presentations/flip";
 
@@ -49,7 +52,11 @@ export type TransitionType =
   | "flashBlack"
   | "glitch"
   | "flipHorizontal"
-  | "flipVertical";
+  | "flipVertical"
+  | "maskReveal"
+  | "clockWipe"
+  | "warpLeft"
+  | "warpRight";
 
 export type TimingType = "linear" | "spring" | "smooth" | "snappy" | "expo";
 
@@ -132,6 +139,14 @@ export function getPresentation(type: TransitionType): AnyPresentation {
       return flip({ direction: "horizontal" });
     case "flipVertical":
       return flip({ direction: "vertical" });
+    case "maskReveal":
+      return maskReveal();
+    case "clockWipe":
+      return clockWipe();
+    case "warpLeft":
+      return directionalWarp("left");
+    case "warpRight":
+      return directionalWarp("right");
     default:
       throw new Error(`Invalid transition type: ${type}`);
   }
@@ -161,6 +176,10 @@ export const TRANSITION_TYPES: TransitionType[] = [
   "glitch",
   "flipHorizontal",
   "flipVertical",
+  "maskReveal",
+  "clockWipe",
+  "warpLeft",
+  "warpRight",
 ];
 
 export const TIMING_TYPES: TimingType[] = [

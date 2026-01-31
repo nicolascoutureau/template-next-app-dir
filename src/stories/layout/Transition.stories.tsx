@@ -447,6 +447,118 @@ export const ZoomOut: Story = {
   ),
 };
 
+// === MASK & WIPE TRANSITIONS ===
+
+export const MaskReveal: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [30])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("maskReveal")}
+        timing={createTiming("expo", 30)}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const ClockWipe: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [40])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("clockWipe")}
+        timing={linearTiming({ durationInFrames: 40 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+// === WARP TRANSITIONS ===
+
+export const WarpLeft: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("warpLeft")}
+        timing={createTiming("expo", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const WarpRight: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([50, 50], [20])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("warpRight")}
+        timing={createTiming("expo", 20)}
+      />
+      <TransitionSeries.Sequence durationInFrames={50}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
 // === CINEMATIC TRANSITIONS ===
 
 export const WhipPan: Story = {
@@ -654,6 +766,9 @@ export const TransitionGallery: Story = {
       { type: "flashWhite", label: "Flash W" },
       { type: "flashBlack", label: "Flash B" },
       { type: "glitch", label: "Glitch" },
+      { type: "maskReveal", label: "Iris" },
+      { type: "clockWipe", label: "Clock" },
+      { type: "warpLeft", label: "Warp" },
     ];
     
     return (
