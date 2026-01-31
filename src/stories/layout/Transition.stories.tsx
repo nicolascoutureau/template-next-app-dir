@@ -86,60 +86,6 @@ const SceneC = () => (
 
 // === BASIC TRANSITIONS ===
 
-export const FadeTransition: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper
-        durationInFrames={getTotalDuration([60, 60], [30])}
-        backgroundColor="#000"
-      >
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <TransitionSeries>
-      <TransitionSeries.Sequence durationInFrames={60}>
-        <SceneA />
-      </TransitionSeries.Sequence>
-      <TransitionSeries.Transition
-        presentation={getPresentation("fade")}
-        timing={linearTiming({ durationInFrames: 30 })}
-      />
-      <TransitionSeries.Sequence durationInFrames={60}>
-        <SceneB />
-      </TransitionSeries.Sequence>
-    </TransitionSeries>
-  ),
-};
-
-export const CrossDissolve: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper
-        durationInFrames={getTotalDuration([60, 60], [30])}
-        backgroundColor="#000"
-      >
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <TransitionSeries>
-      <TransitionSeries.Sequence durationInFrames={60}>
-        <SceneA />
-      </TransitionSeries.Sequence>
-      <TransitionSeries.Transition
-        presentation={getPresentation("crossDissolve")}
-        timing={createTiming("smooth", 30)}
-      />
-      <TransitionSeries.Sequence durationInFrames={60}>
-        <SceneB />
-      </TransitionSeries.Sequence>
-    </TransitionSeries>
-  ),
-};
-
 export const BlurDissolve: Story = {
   decorators: [
     (Story) => (
@@ -630,14 +576,14 @@ export const ThreeSceneTransition: Story = {
         <SceneA />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition
-        presentation={getPresentation("fade")}
+        presentation={getPresentation("blurDissolve")}
         timing={createTiming("smooth", 30)}
       />
       <TransitionSeries.Sequence durationInFrames={60}>
         <SceneB />
       </TransitionSeries.Sequence>
       <TransitionSeries.Transition
-        presentation={getPresentation("fade")}
+        presentation={getPresentation("blurDissolve")}
         timing={createTiming("smooth", 30)}
       />
       <TransitionSeries.Sequence durationInFrames={60}>
@@ -697,8 +643,6 @@ export const TransitionGallery: Story = {
   ],
   render: () => {
     const transitions: { type: TransitionType; label: string }[] = [
-      { type: "fade", label: "Fade" },
-      { type: "crossDissolve", label: "Dissolve" },
       { type: "blurDissolve", label: "Blur" },
       { type: "slideLeft", label: "Slide L" },
       { type: "slideOverLeft", label: "Cover L" },

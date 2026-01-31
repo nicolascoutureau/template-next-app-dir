@@ -1,5 +1,4 @@
 export { blurDissolve } from "./blurDissolve";
-export { crossDissolve } from "./crossDissolve";
 export { flashBlack } from "./flashBlack";
 export { flashWhite } from "./flashWhite";
 export { glitch } from "./glitch";

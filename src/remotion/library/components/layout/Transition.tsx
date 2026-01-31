@@ -10,7 +10,6 @@ import { slide } from "@remotion/transitions/slide";
 
 import {
   blurDissolve,
-  crossDissolve,
   flashBlack,
   flashWhite,
   glitch,
@@ -36,7 +35,6 @@ export type TransitionType =
   | "wipeRight"
   | "wipeUp"
   | "wipeDown"
-  | "crossDissolve"
   | "blurDissolve"
   | "zoomIn"
   | "zoomOut"
@@ -104,8 +102,6 @@ export function getPresentation(type: TransitionType): AnyPresentation {
       return slide({ direction: "from-bottom" });
     case "slideDown":
       return slide({ direction: "from-top" });
-    case "crossDissolve":
-      return crossDissolve();
     case "blurDissolve":
       return blurDissolve();
     case "zoomIn":
@@ -150,7 +146,6 @@ export const TRANSITION_TYPES: TransitionType[] = [
   "wipeRight",
   "wipeUp",
   "wipeDown",
-  "crossDissolve",
   "blurDissolve",
   "zoomIn",
   "zoomOut",
