@@ -5,23 +5,6 @@ import { RemotionWrapper } from "../helpers/RemotionWrapper";
 const meta: Meta<typeof BrowserMockup> = {
   title: "Mockups/BrowserMockup",
   component: BrowserMockup,
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={90} backgroundColor="#e5e7eb">
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Story />
-        </div>
-      </RemotionWrapper>
-    ),
-  ],
   argTypes: {
     browser: {
       control: "select",
@@ -202,7 +185,24 @@ const WebContent = ({ dark = false }: { dark?: boolean }) => (
   </div>
 );
 
+const defaultDecorator = (Story: any) => (
+  <RemotionWrapper durationInFrames={90} backgroundColor="#e5e7eb">
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Story />
+    </div>
+  </RemotionWrapper>
+);
+
 export const Chrome: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "chrome",
     theme: "light",
@@ -254,6 +254,7 @@ export const ChromeDark: Story = {
 };
 
 export const Safari: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "safari",
     theme: "light",
@@ -303,6 +304,7 @@ export const SafariDark: Story = {
 };
 
 export const Arc: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "arc",
     theme: "light",
@@ -352,6 +354,7 @@ export const ArcDark: Story = {
 };
 
 export const Minimal: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "minimal",
     theme: "light",
@@ -367,6 +370,7 @@ export const Minimal: Story = {
 };
 
 export const AppShowcase: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "chrome",
     theme: "light",
@@ -415,6 +419,7 @@ export const AppShowcase: Story = {
 };
 
 export const WithImage: Story = {
+  decorators: [defaultDecorator],
   args: {
     browser: "safari",
     theme: "light",
