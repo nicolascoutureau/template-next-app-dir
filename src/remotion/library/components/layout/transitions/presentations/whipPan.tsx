@@ -1,4 +1,3 @@
-import React from "react";
 import { AbsoluteFill } from "remotion";
 import type { TransitionPresentation } from "@remotion/transitions";
 import type { CustomProps, PresentationComponentProps } from "./types";
@@ -19,7 +18,6 @@ export function whipPan(): TransitionPresentation<CustomProps> {
       // Actually, for `isEntering`, we start fast and slow down.
       // For `!isEntering`, we start slow and speed up.
       
-      const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       // But here we need specific curves.
       // Entering: Decelerate (fast -> slow). easeOutCubic?
       // Exiting: Accelerate (slow -> fast). easeInCubic?

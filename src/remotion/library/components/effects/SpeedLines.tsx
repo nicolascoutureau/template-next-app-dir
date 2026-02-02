@@ -85,15 +85,10 @@ export const SpeedLines: React.FC<SpeedLinesProps> = ({
         
         <g mask="url(#center-mask)">
             {lines.map((line, i) => {
-                const x1 = cx + Math.cos(line.angle) * radius * 2; // Start far out
-                const y1 = cy + Math.sin(line.angle) * radius * 2;
-                
                 // End closer to center based on length
                 // length 1 = touches center
                 // length 0 = stays at edge
                 const rEnd = radius * 2 * (1 - line.len);
-                const x2 = cx + Math.cos(line.angle) * rEnd;
-                const y2 = cy + Math.sin(line.angle) * rEnd;
 
                 return (
                     <polygon

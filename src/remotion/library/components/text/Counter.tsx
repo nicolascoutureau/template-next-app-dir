@@ -266,9 +266,8 @@ export const RollingCounter: React.FC<RollingCounterProps> = ({
 
   const easing = getRemotionEasing(ease);
 
-  // Get the final formatted number to know digit count
+  // Get the final formatted number
   const finalFormatted = to.toFixed(decimals);
-  const digitCount = finalFormatted.replace(/[^0-9]/g, "").length;
 
   // Calculate current value with per-digit stagger
   const digits = useMemo(() => {

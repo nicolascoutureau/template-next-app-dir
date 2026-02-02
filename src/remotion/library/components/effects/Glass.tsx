@@ -1,5 +1,4 @@
 import React, { CSSProperties, ReactNode } from "react";
-import { AbsoluteFill } from "remotion";
 
 export interface GlassProps {
   children?: ReactNode;

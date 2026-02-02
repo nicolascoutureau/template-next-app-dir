@@ -1,5 +1,5 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import { useCurrentFrame, interpolate, Easing } from "remotion";
 
 /**
  * Cursor style presets.
@@ -406,7 +406,6 @@ export const Cursor: React.FC<CursorProps> = ({
   style,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   // Sort path by frame
   const sortedPath = useMemo(

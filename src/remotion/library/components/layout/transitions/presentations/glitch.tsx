@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { AbsoluteFill, random } from "remotion";
 import type { TransitionPresentation } from "@remotion/transitions";
 import type { CustomProps, PresentationComponentProps } from "./types";

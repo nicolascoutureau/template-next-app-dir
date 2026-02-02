@@ -1,5 +1,5 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 
 /**
  * Shape types for glossy shapes.

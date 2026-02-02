@@ -120,7 +120,6 @@ export const SplitScreen: React.FC<SplitScreenProps> = ({
   }, [animated, ratio, fromRatio, frame, delayFrames, durationFrames, easing]);
 
   const [first, second] = children;
-  const halfGap = gap / 2;
 
   // Container styles
   const containerStyle: CSSProperties = {

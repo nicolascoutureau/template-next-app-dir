@@ -1,6 +1,4 @@
 import { AbsoluteFill, Artifact, useCurrentFrame } from "remotion";
-import gsap from "gsap";
-import { SplitText } from "gsap/SplitText";
 import { TextAnimation } from "../library/components/text/TextAnimation";
 import { loadFont } from "@remotion/google-fonts/Inter";
 
@@ -21,7 +19,7 @@ export const Main: React.FC = () => {
           key={hmrKey}
           className="text-5xl font-bold text-center"
           style={{ fontFamily }}
-          createTimeline={({ textRef, tl }) => {
+          createTimeline={({ textRef, tl, SplitText }) => {
             // Split the text into individual characters using the ref
             const splitText = new SplitText(textRef.current, {
               type: "chars",

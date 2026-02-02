@@ -1,5 +1,5 @@
 import React from 'react';
-import { interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
+import { interpolate } from 'remotion';
 
 export interface ZoomTransitionProps {
   children: React.ReactNode;

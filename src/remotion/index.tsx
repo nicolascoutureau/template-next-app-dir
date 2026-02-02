@@ -1,4 +1,3 @@
-import React from "react";
 import "../styles/global.css";
 import { registerRoot, Composition } from "remotion";
 import { composition } from "./compositions";

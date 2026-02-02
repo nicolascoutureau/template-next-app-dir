@@ -34,8 +34,9 @@ export interface BubbleMessageProps {
   className?: string;
 }
 
-const tailPathSent = "M 0 0 L 20 0 L 0 20 Z"; // Simplified tail path
-const tailPathReceived = "M 20 0 L 0 0 L 20 20 Z";
+// Tail paths for message bubbles (kept for reference, may be used in future)
+// const tailPathSent = "M 0 0 L 20 0 L 0 20 Z";
+// const tailPathReceived = "M 20 0 L 0 0 L 20 20 Z";
 
 /**
  * Animated chat bubble message.

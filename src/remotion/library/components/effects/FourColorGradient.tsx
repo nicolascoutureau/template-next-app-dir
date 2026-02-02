@@ -2,9 +2,7 @@ import React, { useMemo, type CSSProperties, type ReactNode } from "react";
 import {
   useCurrentFrame,
   useVideoConfig,
-  interpolate,
   interpolateColors,
-  Easing,
   AbsoluteFill,
 } from "remotion";
 

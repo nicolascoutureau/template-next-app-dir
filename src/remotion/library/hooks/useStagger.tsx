@@ -197,7 +197,7 @@ export function useStagger(config: StaggerConfig = {}): UseStaggerReturn {
           amount,
           from: "start",
           grid,
-          axis,
+          axis: axis === "both" ? undefined : axis,
           ease: gsapEase,
         };
       }
@@ -224,7 +224,6 @@ export function useStagger(config: StaggerConfig = {}): UseStaggerReturn {
 export function createStagger(config: StaggerConfig): gsap.StaggerVars {
   const {
     amount = 0.5,
-    each,
     pattern = "start",
     ease = "power1.out",
     grid,
@@ -238,14 +237,23 @@ export function createStagger(config: StaggerConfig): gsap.StaggerVars {
       amount,
       from: pattern === "center" ? "center" : "start",
       grid,
-      axis,
+      axis: axis === "both" ? undefined : axis,
       ease: gsapEase,
     };
   }
 
+  const fromMap: Record<StaggerPattern, "start" | "end" | "center" | "edges" | "random"> = {
+    start: "start",
+    end: "end",
+    center: "center",
+    edges: "edges",
+    random: "random",
+    wave: "start",
+  };
+
   return {
     amount,
-    from: pattern as gsap.Position,
+    from: fromMap[pattern],
     ease: gsapEase,
   };
 }

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import {
   shadows,
-  type ShadowName,
   createColorShadow,
   createNeonGlow,
 } from "../../remotion/library/presets/shadows";

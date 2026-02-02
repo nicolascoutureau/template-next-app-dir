@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { useCurrentFrame, useVideoConfig } from "remotion";
+import { useCurrentFrame } from "remotion";
 import { Window } from "./Window";
 
 export interface CodeBlockProps {
@@ -103,7 +103,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
   className,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   // Typing effect
   const visibleCode = useMemo(() => {
@@ -113,8 +112,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
     return code.slice(0, charsToShow);
   }, [code, frame, typingSpeed]);
 
-  const renderedCode = useMemo(() => highlightCode(visibleCode, theme), [visibleCode, theme]);
-  
   const lines = visibleCode.split("\n");
   const lineCount = code.split("\n").length; // Use total lines for consistent gutter width
 

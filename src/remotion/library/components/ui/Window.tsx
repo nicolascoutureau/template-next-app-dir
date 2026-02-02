@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import { AbsoluteFill } from "remotion";
 
 export interface WindowProps {
   children: ReactNode;

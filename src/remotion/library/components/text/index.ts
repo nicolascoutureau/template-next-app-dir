@@ -18,7 +18,7 @@ export {
   NeonStream,
   PushStream,
 } from "./KineticStream";
-export { Counter, type CounterProps } from "./Counter";
+export { Counter, type CounterProps, RollingCounter, type RollingCounterProps } from "./Counter";
 export { BubbleMessage, type BubbleMessageProps } from "./BubbleMessage";
 export { KineticText, type KineticTextProps } from "./KineticText";
 export { StaggeredText, type StaggeredTextProps } from "./StaggeredText";

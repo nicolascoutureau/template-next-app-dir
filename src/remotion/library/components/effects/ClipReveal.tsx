@@ -227,7 +227,6 @@ export const ClipReveal: React.FC<ClipRevealProps> = ({
 
       case "diagonal": {
         // Diagonal wipe using polygon
-        const angleRad = (angle * Math.PI) / 180;
         const offset = (1 - progress) * 200 - 50;
 
         // Create a large polygon that moves diagonally

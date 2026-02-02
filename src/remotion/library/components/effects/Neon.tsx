@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig } from "remotion";
+import { useCurrentFrame } from "remotion";
 
 export interface NeonProps {
   children: ReactNode;
@@ -43,7 +43,6 @@ export const Neon: React.FC<NeonProps> = ({
   style,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
 
   // Flicker effect
   const flickerOp = flicker > 0

@@ -271,7 +271,7 @@ export const ProductImageReveal: Story = {
             Discover the next generation of design with our flagship product.
           </div>
         </ClipReveal>
-        <ClipReveal shape="inset" direction="up" duration={0.4} delay={0.6}>
+        <ClipReveal shape="inset" direction="bottom" duration={0.4} delay={0.6}>
           <div
             style={{
               padding: "16px 32px",
@@ -511,7 +511,7 @@ export const PortfolioCardReveal: Story = {
           <ClipReveal
             key={i}
             shape="inset"
-            direction="up"
+            direction="bottom"
             duration={0.6}
             delay={i * 0.15}
           >

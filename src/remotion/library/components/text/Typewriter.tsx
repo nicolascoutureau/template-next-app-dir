@@ -1,6 +1,6 @@
 import React, { useMemo, type CSSProperties } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import type { EasingName } from "../../presets/easings";
 
 /**
  * Props for the Typewriter component.

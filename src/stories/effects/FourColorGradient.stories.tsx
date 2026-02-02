@@ -1,13 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import React from "react";
 import { AbsoluteFill } from "remotion";
 import {
   FourColorGradient,
   AuroraGradient,
-  SunsetGradient,
-  OceanGradient,
-  NeonGradient,
-  CandyGradient,
   gradientPositions,
   gradientPalettes,
 } from "../../remotion/library/components/effects/FourColorGradient";

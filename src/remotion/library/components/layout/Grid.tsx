@@ -1,4 +1,4 @@
-import React, { useMemo, type CSSProperties, type ReactNode } from "react";
+import React, { type CSSProperties, type ReactNode } from "react";
 import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 import { getEasing, type EasingName } from "../../presets/easings";
 import { useStagger, type StaggerPattern } from "../../hooks/useStagger";

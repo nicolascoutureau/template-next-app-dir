@@ -1,4 +1,3 @@
-import React from "react";
 import { AbsoluteFill } from "remotion";
 import type { TransitionPresentation } from "@remotion/transitions";
 import type { CustomProps, PresentationComponentProps } from "./types";
@@ -21,9 +20,6 @@ export function slideOver(
       // Let's stick to the progress as passed, assuming caller uses a good timing function.
       
       const smoothProgress = progress; // Or use an internal ease if desired, but let's trust the input timing.
-
-      const xMultiplier = direction === "left" ? 1 : direction === "right" ? -1 : 0;
-      const yMultiplier = direction === "top" ? 1 : direction === "bottom" ? -1 : 0;
 
       if (isEntering) {
         // Entering scene slides IN from outside.

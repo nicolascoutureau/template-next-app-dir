@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
 import {
   TextAnimation,
-  TypewriterText,
+  Typewriter,
 } from "../../remotion/library/components/text";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
@@ -66,7 +66,7 @@ export const CinematicTitle: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(
@@ -139,7 +139,7 @@ export const SplitReveal: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
             char.style.overflow = "hidden";
           });
@@ -199,7 +199,7 @@ export const GradientMask: Story = {
             "#e7287e",
             "#f093fb",
           ];
-          split.chars.forEach((char: HTMLElement, i: number) => {
+          split.chars.forEach((char: any, i: number) => {
             char.style.display = "inline-block";
             const colorIndex = Math.floor(
               (i / split.chars.length) * colors.length,
@@ -248,17 +248,17 @@ export const ClipReveal: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             word.style.overflow = "hidden";
             word.style.paddingBottom = "10px";
           });
           // Wrap each word's content in a span for the reveal
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             const text = word.innerHTML;
             word.innerHTML = `<span style="display:inline-block">${text}</span>`;
           });
-          const innerSpans = split.words.map((w: HTMLElement) =>
+          const innerSpans = split.words.map((w: any) =>
             w.querySelector("span"),
           );
           tl.from(innerSpans, {
@@ -350,7 +350,7 @@ export const GlitchText: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement, i: number) => {
+          split.chars.forEach((char: any, i: number) => {
             char.style.display = "inline-block";
             char.style.textShadow =
               i % 2 === 0
@@ -410,7 +410,7 @@ export const ScaleRotate: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
             char.style.transformOrigin = "center bottom";
           });
@@ -462,7 +462,7 @@ export const WordByWord: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           tl.from(split.words, {
@@ -507,7 +507,7 @@ export const DropShadow: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(split.chars, {
@@ -620,19 +620,18 @@ export const TypewriterEffect: Story = {
         fontFamily: "'SF Mono', 'Fira Code', monospace",
       }}
     >
-      <TypewriterText
+      <Typewriter
+        text="$ npm install motion-primitives --save"
         speed={0.05}
         cursor
         cursorChar="|"
-        cursorColor="#4ade80"
+        cursorStyle={{ color: "#4ade80" }}
         style={{
           fontSize: 24,
           fontWeight: 400,
           color: "#4ade80",
         }}
-      >
-        {"$ npm install motion-primitives --save"}
-      </TypewriterText>
+      />
     </AbsoluteFill>
   ),
 };
@@ -663,7 +662,7 @@ export const ExpandFromCenter: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(split.chars, {
@@ -775,11 +774,11 @@ export const BlurFocus: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           // Start all words blurred except first
-          split.words.forEach((word: HTMLElement, i: number) => {
+          split.words.forEach((word: any, i: number) => {
             if (i > 0) word.style.filter = "blur(8px)";
           });
           tl.to(
@@ -826,7 +825,7 @@ export const PerspectiveFlip: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
             char.style.transformStyle = "preserve-3d";
           });
@@ -879,7 +878,7 @@ export const SlideLeftBlurReveal: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           // Initial state: all words blurred and offset
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           // Animate the container sliding left
@@ -938,7 +937,7 @@ export const CinematicTextCrawl: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           // Continuous left scroll
@@ -996,7 +995,7 @@ export const FocusReveal: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           // Slide entire text left slowly
@@ -1018,7 +1017,7 @@ export const FocusReveal: Story = {
             0,
           );
           // After revealing, words go slightly out of focus as new ones appear
-          split.words.forEach((word: HTMLElement, i: number) => {
+          split.words.forEach((word: any, i: number) => {
             tl.to(
               word,
               {
@@ -1614,13 +1613,13 @@ export const HighlightedWord: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           // Find and style the highlighted word
           const highlightWord = split.words.find(
-            (w: HTMLElement) => w.textContent === "beautiful",
-          );
+            (w: any) => w.textContent === "beautiful",
+          ) as HTMLElement | undefined;
           if (highlightWord) {
             highlightWord.style.background =
               "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
@@ -1672,7 +1671,7 @@ export const GradientHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["innovation", "creativity"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
@@ -1729,7 +1728,7 @@ export const UnderlineHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["design", "motion"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -1807,7 +1806,7 @@ export const BoxHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["faster", "smarter", "better"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -1872,7 +1871,7 @@ export const GlowHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWord = "magic";
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             if (word.textContent?.toLowerCase() === highlightWord) {
               word.style.color = "#00ff88";
@@ -1942,7 +1941,7 @@ export const MultiColorHighlight: Story = {
             design: "#667eea",
             deliver: "#4ade80",
           };
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             const text = word.textContent?.toLowerCase() || "";
             if (colorMap[text]) {
@@ -1995,7 +1994,7 @@ export const MarkerHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["important", "remember"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.position = "relative";
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
@@ -2068,7 +2067,7 @@ export const ScaleHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWord = "BIG";
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             if (word.textContent === highlightWord) {
               word.style.color = "#fff";
@@ -2130,7 +2129,7 @@ export const CircleHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWord = "key";
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             word.style.position = "relative";
             if (word.textContent?.toLowerCase() === highlightWord) {
@@ -2221,7 +2220,7 @@ export const NeonGlowHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["neon", "glow"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2285,7 +2284,7 @@ export const SplitColorHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b"];
-          split.words.forEach((word: HTMLElement, i: number) => {
+          split.words.forEach((word: any, i: number) => {
             if (i % 2 === 1) {
               word.style.color = colors[Math.floor(i / 2) % colors.length];
             }
@@ -2334,7 +2333,7 @@ export const BrushStrokeHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["creative", "brush"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2407,7 +2406,7 @@ export const DoubleUnderlineHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["double", "emphasis"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2486,7 +2485,7 @@ export const GradientBoxHighlight: Story = {
             "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
           ];
           let gradientIndex = 0;
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2554,7 +2553,7 @@ export const StrikethroughReveal: Story = {
           const split = new SplitText(textRef.current, { type: "words" });
           const strikeWords = ["old", "boring"];
           const newWords = ["new", "exciting"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             const text = word.textContent?.toLowerCase() || "";
             if (strikeWords.includes(text)) {
               word.style.position = "relative";
@@ -2624,7 +2623,7 @@ export const GlitchHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["glitch", "system"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2716,7 +2715,7 @@ export const ScanLineReveal: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["scanning", "complete"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2794,7 +2793,7 @@ export const LiquidFillHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["liquid", "flow"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2878,7 +2877,7 @@ export const ChromeHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["chrome", "metallic"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -2948,18 +2947,18 @@ export const MorphHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["transform", "evolve"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
               word.className = "morph-word";
               // Get chars within this word
-              const wordChars = Array.from(word.querySelectorAll("div")).filter(
+              const wordChars = (Array.from(word.querySelectorAll("div")) as HTMLElement[]).filter(
                 (el) => el.textContent && el.textContent.length === 1,
               );
               wordChars.forEach((char) => {
-                (char as HTMLElement).style.display = "inline-block";
-                (char as HTMLElement).className = "morph-char";
+                char.style.display = "inline-block";
+                char.className = "morph-char";
               });
             }
           });
@@ -3030,7 +3029,7 @@ export const PerspectiveFlipHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["flip", "dimension"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
             word.style.transformStyle = "preserve-3d";
             if (
@@ -3113,7 +3112,7 @@ export const ShatterHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words,chars" });
           const highlightWords = ["break", "rules"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -3206,7 +3205,7 @@ export const ElectricHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["electric", "power"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -3292,7 +3291,7 @@ export const HolographicHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["holographic", "future"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -3366,7 +3365,7 @@ export const CinematicWipeHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["cinematic", "reveal"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -3453,7 +3452,7 @@ export const ParticleTrailHighlight: Story = {
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
           const highlightWords = ["magic", "sparkle"];
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             if (
               highlightWords.includes(word.textContent?.toLowerCase() || "")
             ) {
@@ -3547,7 +3546,7 @@ export const EmojiPop: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(split.chars, {
@@ -3590,7 +3589,7 @@ export const EmojiWave: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(split.chars, {
@@ -3671,7 +3670,7 @@ export const EmojiReaction: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
           });
           tl.from(
@@ -3722,7 +3721,7 @@ export const EmojiWithText: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "words" });
-          split.words.forEach((word: HTMLElement) => {
+          split.words.forEach((word: any) => {
             word.style.display = "inline-block";
           });
           tl.from(split.words, {
@@ -3766,7 +3765,7 @@ export const EmojiBounce: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement) => {
+          split.chars.forEach((char: any) => {
             char.style.display = "inline-block";
             char.style.transformOrigin = "bottom center";
           });
@@ -3840,7 +3839,7 @@ export const EmojiGradientText: Story = {
             "#cd368a",
             "#f093fb",
           ];
-          split.chars.forEach((char: HTMLElement, i: number) => {
+          split.chars.forEach((char: any, i: number) => {
             char.style.display = "inline-block";
             // Emojis stay as-is, text gets gradient colors
             if (!/\p{Emoji}/u.test(char.textContent || "")) {
@@ -3949,7 +3948,7 @@ export const EmojiSparkle: Story = {
         }}
         createTimeline={({ textRef, tl, SplitText }) => {
           const split = new SplitText(textRef.current, { type: "chars" });
-          split.chars.forEach((char: HTMLElement, i: number) => {
+          split.chars.forEach((char: any, i: number) => {
             char.style.display = "inline-block";
             // Add sparkle to emojis
             if (/\p{Emoji}/u.test(char.textContent || "")) {

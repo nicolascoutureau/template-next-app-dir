@@ -197,7 +197,7 @@ export const Animated: Story = {
         majorGridEvery={5}
         majorGridColor="rgba(0, 0, 0, 0.1)"
         animate
-        animationSpeed={0.5}
+        velocity={20}
       />
       <ContentOverlay title="Animated" />
     </>

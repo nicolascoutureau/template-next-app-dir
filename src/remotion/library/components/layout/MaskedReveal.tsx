@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { AbsoluteFill, useVideoConfig } from "remotion";
+import { useVideoConfig } from "remotion";
 
 export type RevealType = "circle" | "wipe" | "brush" | "polygon";
 
@@ -43,14 +43,9 @@ export const MaskedReveal: React.FC<MaskedRevealProps> = ({
 
   const maskStyle = useMemo(() => {
     // Ensure progress is clamped 0-1
-    const p = Math.max(0, Math.min(1, progress));
-    
-    // Calculate radius/size based on screen diagonal to ensure full coverage
-    const diagonal = Math.sqrt(width * width + height * height);
-    const maxRadius = diagonal; 
+    const p = Math.max(0, Math.min(1, progress)); 
 
     if (type === "circle") {
-      const radius = p * maxRadius;
       const x = centerX * 100;
       const y = centerY * 100;
       
@@ -71,7 +66,6 @@ export const MaskedReveal: React.FC<MaskedRevealProps> = ({
     }
 
     if (type === "wipe") {
-       const angle = rotation * (Math.PI / 180);
        // Simple linear wipe using polygon
        // Calculate points for a rotated sliding rect is hard with simple polygon
        // Easier to use inset/rect if rotation is 0/90/180/270

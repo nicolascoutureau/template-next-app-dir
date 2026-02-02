@@ -1,4 +1,4 @@
-import React, { useMemo, useId } from "react";
+import React from "react";
 
 export interface PixelateProps {
   children: React.ReactNode;
@@ -16,9 +16,6 @@ export const Pixelate: React.FC<PixelateProps> = ({
   className,
   style,
 }) => {
-  const id = useId();
-  const filterId = `pixelate-${id}`;
-  
   // SVG filter for pixelation
   // Logic: 
   // 1. Dilate/Erode is one way, but flood+composite is better for "mosaic".

@@ -145,7 +145,6 @@ function getVariantStyles(
   hover: boolean,
   borderRadius: number,
 ): CSSProperties {
-  const lighterColor = adjustColor(color, 20);
   const darkerColor = adjustColor(color, -20);
 
   const baseStyles: CSSProperties = {

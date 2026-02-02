@@ -24,6 +24,8 @@ export interface GlowProps {
    * Decay factor for layered glow (how fast intensity drops per layer)
    */
   decay?: number;
+  /** Spread radius for additional diffuse glow */
+  spread?: number;
   /** Additional CSS styles */
   style?: CSSProperties;
   /** Additional CSS class names */

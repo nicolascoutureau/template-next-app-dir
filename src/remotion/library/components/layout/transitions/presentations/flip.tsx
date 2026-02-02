@@ -3,7 +3,7 @@ import type { TransitionPresentation } from "@remotion/transitions";
 
 export type FlipDirection = "horizontal" | "vertical";
 
-export interface FlipProps {
+export interface FlipProps extends Record<string, unknown> {
   direction?: FlipDirection;
   perspective?: number;
 }
@@ -13,6 +13,7 @@ export const flip = (props?: FlipProps): TransitionPresentation<FlipProps> => {
   const perspective = props?.perspective ?? 1000;
 
   return {
+    props: { direction, perspective },
     component: (props) => {
       const { presentationDirection, children, presentationProgress } = props;
       
