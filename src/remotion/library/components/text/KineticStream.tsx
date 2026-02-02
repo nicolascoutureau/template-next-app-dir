@@ -10,8 +10,6 @@ import {
 
 export interface KineticStreamProps {
   text: string;
-  /** Number of words to show at once */
-  wordsPerGroup?: number;
   /** Font size */
   fontSize?: number;
   /** Font weight */
@@ -36,17 +34,12 @@ export interface KineticStreamProps {
 }
 
 /**
- * Helper to group words into chunks
+ * Helper to split text into individual words
  */
-const useWordGroups = (text: string, count: number) => {
+const useWords = (text: string) => {
   return useMemo(() => {
-    const words = text.split(/\s+/).filter(Boolean);
-    const groups: string[] = [];
-    for (let i = 0; i < words.length; i += count) {
-      groups.push(words.slice(i, i + count).join(" "));
-    }
-    return groups;
-  }, [text, count]);
+    return text.split(/\s+/).filter(Boolean);
+  }, [text]);
 };
 
 /**
@@ -105,7 +98,6 @@ const useStreamTiming = (
  */
 export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | 'right' | 'alternate' }> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -116,11 +108,11 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
   
   // Easing
   // A nice snappy easing: cubic-bezier(0.65, 0, 0.35, 1)
@@ -168,7 +160,7 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
       }}
     >
         {/* Previous Word */}
-        {isTransitioning && prevGroup && (
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -177,12 +169,12 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
               opacity: interpolate(easeProgress, [0, 0.6], [1, 0]),
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
         {/* Current Word */}
-        {currentGroup && (
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -193,7 +185,7 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
                 opacity: isTransitioning ? interpolate(easeProgress, [0, 0.3], [0, 1]) : 1,
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -205,7 +197,6 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
  */
 export const SwipeStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -215,11 +206,11 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
   
   // Swipe is aggressive
   const easeProgress = isTransitioning 
@@ -252,7 +243,7 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
       }}
     >
         {/* Previous Word */}
-        {isTransitioning && prevGroup && (
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -263,12 +254,12 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
               filter: `blur(${easeProgress * 10}px)`,
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
         {/* Current Word */}
-        {currentGroup && (
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -281,7 +272,7 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
                 filter: isTransitioning ? `blur(${(1-easeProgress) * 10}px)` : 'none',
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -294,7 +285,6 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
  */
 export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -304,11 +294,11 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
   
   // Deterministic size generator based on string hash or length
   // Or simply alternate: Big, Small, Big, Small
@@ -341,8 +331,8 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
         ...style,
       }}
     >
-        {/* Exiting Group */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -351,12 +341,12 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
               opacity: interpolate(progress, [0, 0.5], [1, 0]),
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group */}
-        {currentGroup && (
+        {/* Entering Word */}
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -368,7 +358,7 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
                 willChange: "transform",
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -381,7 +371,6 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
  */
 export const StompStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "900", // Default to super bold
   color = "currentColor",
@@ -391,10 +380,10 @@ export const StompStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   
   // Stomp Animation:
   // Starts huge (Scale 5, Opacity 0)
@@ -445,7 +434,7 @@ export const StompStream: React.FC<KineticStreamProps> = ({
         {/* Previous Word (Disappears quickly) */}
         {isTransitioning && prevIndex >= 0 && (
              <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.2], [1, 0]) }}>
-                 {groups[prevIndex]}
+                 {words[prevIndex]}
              </div>
         )}
 
@@ -458,7 +447,7 @@ export const StompStream: React.FC<KineticStreamProps> = ({
                 opacity,
             }}
         >
-            {currentGroup}
+            {currentWord}
         </div>
     </div>
   );
@@ -469,7 +458,6 @@ export const StompStream: React.FC<KineticStreamProps> = ({
  */
 export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -479,11 +467,11 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
   
   // Slot machine motion: Fast vertical move with intense vertical blur
   
@@ -504,8 +492,8 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
         ...style,
       }}
     >
-        {/* Exiting Group: Moves Down/Up fast */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word: Moves Down/Up fast */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -515,12 +503,12 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
               opacity: interpolate(progress, [0, 0.8], [1, 0]),
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group: Moves In from Top */}
-        {currentGroup && (
+        {/* Entering Word: Moves In from Top */}
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -534,7 +522,7 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
                 opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1,
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -546,7 +534,6 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
  */
 export const OutlineStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "900",
   color = "currentColor",
@@ -556,10 +543,10 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   
   // Animation:
   // 0.0 - 0.3: Text appears as Outline
@@ -595,7 +582,7 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
         {/* Previous Word (Fades out) */}
         {isTransitioning && prevIndex >= 0 && (
             <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.2], [1, 0]) }}>
-                {groups[prevIndex]}
+                {words[prevIndex]}
             </div>
         )}
 
@@ -609,7 +596,7 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
                  color: "transparent",
                  opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
              }}>
-                 {currentGroup}
+                 {currentWord}
              </div>
              
              {/* Fill Layer (Reveals) */}
@@ -619,7 +606,7 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
                  opacity: fillProgress,
                  transform: `scale(${interpolate(fillProgress, [0, 1], [1.1, 1])})`, // Slight scale in effect
              }}>
-                 {currentGroup}
+                 {currentWord}
              </div>
         </div>
     </div>
@@ -632,7 +619,6 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
  */
 export const ElasticStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -642,11 +628,11 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   // Elastic easing for the enter animation
   const elasticEnter = isTransitioning 
@@ -672,8 +658,8 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
         ...style,
       }}
     >
-        {/* Exiting Group: Scales Down quickly */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word: Scales Down quickly */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -682,12 +668,12 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
               opacity: interpolate(progress, [0, 0.2], [1, 0]),
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group: Elastic Pop from 0 */}
-        {currentGroup && (
+        {/* Entering Word: Elastic Pop from 0 */}
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -697,7 +683,7 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
                 willChange: "transform",
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -710,7 +696,6 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
  */
 export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -721,11 +706,11 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   // Block Animation Timing
   // 0.0 - 0.5: Block grows to cover text
@@ -766,8 +751,8 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
                 {/* During transition, we hide the main text container and rely on logic below? 
                     Actually, we just show either Prev or Current based on phase. */}
                 {isTransitioning 
-                    ? (isPhase1 ? prevGroup : currentGroup) 
-                    : currentGroup} 
+                    ? (isPhase1 ? prevWord : currentWord) 
+                    : currentWord} 
             </div>
             
              {/* During transition, we overlay the block logic */}
@@ -775,7 +760,7 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
                  <>
                     {/* The text being covered/revealed */}
                     <div style={{ position: "absolute", top: 0, left: 0, opacity: 1 }}>
-                        {isPhase1 ? prevGroup : currentGroup}
+                        {isPhase1 ? prevWord : currentWord}
                     </div>
                     
                     {/* The Block */}
@@ -805,7 +790,6 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
  */
 export const ChromaticStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -815,10 +799,10 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   
   // Glitch intensity curve
   const intensity = isTransitioning 
@@ -832,7 +816,7 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
   const opacity = isTransitioning ? interpolate(progress, [0, 0.5, 1], [1, 0.5, 1]) : 1;
 
   // Text content swap at 50%
-  const displayText = isTransitioning && progress < 0.5 ? groups[prevIndex] : currentGroup;
+  const displayText = isTransitioning && progress < 0.5 ? words[prevIndex] : currentWord;
 
   return (
     <div
@@ -891,7 +875,6 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
  */
 export const FlipTextStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -901,11 +884,11 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   return (
     <div
@@ -925,8 +908,8 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
       }}
     >
       <div style={{ position: "relative", transformStyle: "preserve-3d", display: "grid", placeItems: "center" }}>
-        {/* Exiting Group: Flips Up/Out (Rotation X 0 -> -90) */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word: Flips Up/Out (Rotation X 0 -> -90) */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -937,12 +920,12 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
               whiteSpace: "nowrap",
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group: Flips In (Rotation X -90 -> 0) */}
-        {currentGroup && (
+        {/* Entering Word: Flips In (Rotation X -90 -> 0) */}
+        {currentWord && (
           <div
             style={{
                 position: isTransitioning ? "absolute" : "relative",
@@ -956,7 +939,7 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
                 whiteSpace: "nowrap",
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
       </div>
@@ -970,7 +953,6 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
  */
 export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -980,11 +962,11 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   return (
     <div
@@ -1003,8 +985,8 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
         ...style,
       }}
     >
-        {/* Exiting Group: Scales Up and Fades Out (Fly Through) */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word: Scales Up and Fades Out (Fly Through) */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -1015,12 +997,12 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
               willChange: "transform, opacity, filter",
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group: Scales Up from 0 (From Distance) */}
-        {currentGroup && (
+        {/* Entering Word: Scales Up from 0 (From Distance) */}
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -1032,7 +1014,7 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
                 willChange: "transform, opacity",
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -1046,7 +1028,6 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
  */
 export const BlurTextStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -1056,11 +1037,11 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   return (
     <div
@@ -1079,8 +1060,8 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
         ...style,
       }}
     >
-        {/* Exiting Group: Slides Left + Motion Blur */}
-        {isTransitioning && prevGroup && (
+        {/* Exiting Word: Slides Left + Motion Blur */}
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -1090,12 +1071,12 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
               opacity: interpolate(progress, [0, 0.5], [1, 0]),
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
-        {/* Entering Group: Slides In from Right + Motion Blur */}
-        {currentGroup && (
+        {/* Entering Word: Slides In from Right + Motion Blur */}
+        {currentWord && (
           <div
             style={{
                 position: "absolute",
@@ -1109,7 +1090,7 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
                 opacity: isTransitioning ? interpolate(progress, [0, 0.5], [0, 1]) : 1,
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
     </div>
@@ -1122,7 +1103,6 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
  */
 export const SlicedStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -1132,10 +1112,10 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   
   // Animation:
   // Top half slides in from Left
@@ -1169,7 +1149,7 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
         {/* Previous Word (Fades out) */}
         {isTransitioning && prevIndex >= 0 && (
             <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.3], [1, 0]) }}>
-                {groups[prevIndex]}
+                {words[prevIndex]}
             </div>
         )}
 
@@ -1183,7 +1163,7 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
                  transform: `translateX(${-offset}px)`,
                  opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
              }}>
-                 {currentGroup}
+                 {currentWord}
              </div>
              
              {/* Bottom Half */}
@@ -1193,7 +1173,7 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
                  transform: `translateX(${offset}px)`,
                  opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
              }}>
-                 {currentGroup}
+                 {currentWord}
              </div>
         </div>
     </div>
@@ -1206,7 +1186,6 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
  */
 export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -1216,10 +1195,10 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   
   // Unique ID for filter
   const filterId = useMemo(() => `turb-${Math.random().toString(36).substr(2, 9)}`, []);
@@ -1260,7 +1239,7 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
         {/* Previous Word (Fades out) */}
         {isTransitioning && prevIndex >= 0 && (
             <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.5], [1, 0]) }}>
-                {groups[prevIndex]}
+                {words[prevIndex]}
             </div>
         )}
 
@@ -1271,7 +1250,7 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
             opacity: isTransitioning ? interpolate(progress, [0, 0.5], [0, 1]) : 1,
             willChange: "filter",
         }}>
-            {currentGroup}
+            {currentWord}
         </div>
     </div>
   );
@@ -1282,7 +1261,6 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
  */
 export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "white",
@@ -1293,10 +1271,10 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
   duration,
   delayAfterLastWord = 0,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
+  const currentWord = words[currentIndex];
   const frame = useCurrentFrame();
   
   // Flicker effect
@@ -1307,7 +1285,7 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
   };
   
   // Base flicker
-  let opacity = 0.9 + noise(frame) * 0.1;
+  const opacity = 0.9 + noise(frame) * 0.1;
   
   // Text Shadow (Glow)
   const glow = `
@@ -1346,7 +1324,7 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
                 opacity: interpolate(progress, [0, 0.2], [1, 0]),
                 textShadow: glow 
             }}>
-                {groups[prevIndex]}
+                {words[prevIndex]}
             </div>
         )}
         
@@ -1356,7 +1334,7 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
             opacity: opacity * transitionOpacity,
             textShadow: glow,
         }}>
-            {currentGroup}
+            {currentWord}
         </div>
     </div>
   );
@@ -1374,7 +1352,6 @@ export const PushStream: React.FC<KineticStreamProps & {
   withSkew?: boolean;
 }> = ({
   text,
-  wordsPerGroup = 1,
   fontSize = 80,
   fontWeight = "bold",
   color = "currentColor",
@@ -1386,11 +1363,11 @@ export const PushStream: React.FC<KineticStreamProps & {
   direction = "up",
   withSkew = true,
 }) => {
-  const groups = useWordGroups(text, wordsPerGroup);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(groups.length, transitionDuration, duration, delayAfterLastWord);
+  const words = useWords(text);
+  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
   
-  const currentGroup = groups[currentIndex];
-  const prevGroup = groups[prevIndex];
+  const currentWord = words[currentIndex];
+  const prevWord = words[prevIndex];
 
   // Helper to calculate transform based on progress
   const getTransform = (type: "enter" | "exit", p: number) => {
@@ -1476,7 +1453,7 @@ export const PushStream: React.FC<KineticStreamProps & {
       <div style={{ position: "relative", textAlign: "center", display: "grid", placeItems: "center" }}>
         
         {/* Previous Word (Exiting) */}
-        {isTransitioning && prevGroup && (
+        {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
@@ -1486,12 +1463,12 @@ export const PushStream: React.FC<KineticStreamProps & {
               willChange: "transform, opacity",
             }}
           >
-            {prevGroup}
+            {prevWord}
           </div>
         )}
 
         {/* Current Word (Entering or Static) */}
-        {currentGroup && (
+        {currentWord && (
           <div
             style={{
               position: isTransitioning ? "absolute" : "relative",
@@ -1503,7 +1480,7 @@ export const PushStream: React.FC<KineticStreamProps & {
               opacity: 1,
             }}
           >
-            {currentGroup}
+            {currentWord}
           </div>
         )}
         
