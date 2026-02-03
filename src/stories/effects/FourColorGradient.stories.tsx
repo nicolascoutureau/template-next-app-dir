@@ -1,22 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AbsoluteFill } from "remotion";
-import {
-  FourColorGradient,
-  AuroraGradient,
-  gradientPositions,
-  gradientPalettes,
-} from "../../remotion/library/components/effects/FourColorGradient";
-import { TextAnimation } from "../../remotion/library/components/text/TextAnimation";
+import { FourColorGradient } from "../../remotion/library/components/effects/FourColorGradient";
 import { RemotionWrapper } from "../helpers/RemotionWrapper";
 
 const meta: Meta<typeof FourColorGradient> = {
   title: "Effects/FourColorGradient",
   component: FourColorGradient,
+  parameters: {
+    layout: 'fullscreen',
+  },
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={300} fps={30} width={1280} height={720}>
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   argTypes: {
-    palette: {
-      control: "select",
-      options: Object.keys(gradientPalettes),
-    },
     animationType: {
       control: "select",
       options: ["rotate", "pulse", "shift", "wave"],
@@ -41,335 +41,154 @@ type Story = StoryObj<typeof FourColorGradient>;
 // ============================================================================
 
 export const Default: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={120} backgroundColor="#000">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   args: {
-    palette: "aurora",
+    topLeft: "#22d3ee",
+    topRight: "#a855f7",
+    bottomLeft: "#10b981",
+    bottomRight: "#6366f1",
     blend: 70,
   },
-  render: (args) => <FourColorGradient {...args} />,
 };
 
-export const CustomColors: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={120} backgroundColor="#000">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      topLeft="#d8e0e8"
-      topRight="#c8d0d8"
-      bottomLeft="#e0d8e0"
-      bottomRight="#d0d0e0"
-      blend={80}
-    />
-  ),
+export const Sunset: Story = {
+  args: {
+    topLeft: "#fb923c",
+    topRight: "#f472b6",
+    bottomLeft: "#fbbf24",
+    bottomRight: "#f87171",
+    blend: 70,
+  },
 };
 
-// ============================================================================
-// PALETTE GALLERY
-// ============================================================================
+export const Ocean: Story = {
+  args: {
+    topLeft: "#06b6d4",
+    topRight: "#3b82f6",
+    bottomLeft: "#0891b2",
+    bottomRight: "#1d4ed8",
+    blend: 60,
+  },
+};
 
-export const PaletteGallery: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={90} backgroundColor="#0f0f1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => {
-    const palettes = Object.keys(gradientPalettes) as Array<
-      keyof typeof gradientPalettes
-    >;
+export const Midnight: Story = {
+  args: {
+    topLeft: "#3b82f6",
+    topRight: "#8b5cf6",
+    bottomLeft: "#1e3a8a",
+    bottomRight: "#4c1d95",
+    blend: 70,
+  },
+};
 
-    return (
-      <AbsoluteFill style={{ padding: 20 }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(5, 1fr)",
-            gap: 12,
-            height: "100%",
-          }}
-        >
-          {palettes.map((palette) => (
-            <div
-              key={palette}
-              style={{
-                position: "relative",
-                borderRadius: 12,
-                overflow: "hidden",
-              }}
-            >
-              <FourColorGradient palette={palette} />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 8,
-                  left: 8,
-                  color: "white",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                  textTransform: "capitalize",
-                }}
-              >
-                {palette}
-              </div>
-            </div>
-          ))}
-        </div>
-      </AbsoluteFill>
-    );
+export const Pastel: Story = {
+  args: {
+    topLeft: "#fdf4ff",
+    topRight: "#f0f9ff",
+    bottomLeft: "#fefce8",
+    bottomRight: "#f5f3ff",
+    blend: 80,
+  },
+};
+
+export const Fire: Story = {
+  args: {
+    topLeft: "#f97316",
+    topRight: "#ef4444",
+    bottomLeft: "#fbbf24",
+    bottomRight: "#dc2626",
+    blend: 65,
   },
 };
 
 // ============================================================================
-// ANIMATED EXAMPLES - Subtle and Professional
+// ANIMATED EXAMPLES
 // ============================================================================
 
-export const SubtleRotate: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={300} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="lavender"
-      animate
-      animationType="rotate"
-      speed={0.08}
-      blend={85}
-    />
-  ),
+export const AnimatedRotate: Story = {
+  args: {
+    topLeft: "#22d3ee",
+    topRight: "#a855f7",
+    bottomLeft: "#10b981",
+    bottomRight: "#6366f1",
+    animate: true,
+    animationType: "rotate",
+    speed: 0.3,
+    blend: 70,
+  },
 };
 
-export const GentlePulse: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={300} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="neutral"
-      animate
-      animationType="pulse"
-      speed={0.1}
-      blend={80}
-    />
-  ),
+export const AnimatedPulse: Story = {
+  args: {
+    topLeft: "#f472b6",
+    topRight: "#c084fc",
+    bottomLeft: "#fb7185",
+    bottomRight: "#a78bfa",
+    animate: true,
+    animationType: "pulse",
+    speed: 0.4,
+    blend: 75,
+  },
 };
 
-export const SoftShift: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={300} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="corporate"
-      animate
-      animationType="shift"
-      speed={0.06}
-      blend={85}
-    />
-  ),
+export const AnimatedShift: Story = {
+  args: {
+    topLeft: "#fb923c",
+    topRight: "#f472b6",
+    bottomLeft: "#fbbf24",
+    bottomRight: "#f87171",
+    animate: true,
+    animationType: "shift",
+    speed: 0.25,
+    blend: 70,
+  },
 };
 
-export const CalmWave: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={300} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="sage"
-      animate
-      animationType="wave"
-      speed={0.08}
-      blend={85}
-    />
-  ),
+export const AnimatedWave: Story = {
+  args: {
+    topLeft: "#06b6d4",
+    topRight: "#3b82f6",
+    bottomLeft: "#0891b2",
+    bottomRight: "#1d4ed8",
+    animate: true,
+    animationType: "wave",
+    speed: 0.3,
+    blend: 65,
+  },
 };
 
 // ============================================================================
-// PRESET COMPONENTS - Professional Use Cases
+// CUSTOM POSITIONS
 // ============================================================================
 
-export const CorporateBackground: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={240} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="corporate"
-      animate
-      animationType="shift"
-      speed={0.05}
-      blend={85}
-    />
-  ),
+export const CenteredPositions: Story = {
+  args: {
+    topLeft: "#22d3ee",
+    topRight: "#a855f7",
+    bottomLeft: "#10b981",
+    bottomRight: "#6366f1",
+    positions: {
+      topLeft: { x: 30, y: 30 },
+      topRight: { x: 70, y: 30 },
+      bottomLeft: { x: 30, y: 70 },
+      bottomRight: { x: 70, y: 70 },
+    },
+    blend: 60,
+  },
 };
 
-export const ElegantNeutral: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={240} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="neutral"
-      animate
-      animationType="pulse"
-      speed={0.06}
-      blend={85}
-    />
-  ),
-};
-
-export const SoftLavender: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={240} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="lavender"
-      animate
-      animationType="wave"
-      speed={0.07}
-      blend={85}
-    />
-  ),
-};
-
-export const NaturalSage: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={240} backgroundColor="#1a1a1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="sage"
-      animate
-      animationType="rotate"
-      speed={0.04}
-      blend={85}
-    />
-  ),
-};
-
-export const DeepMidnight: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={240} backgroundColor="#0a0a0a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => (
-    <FourColorGradient
-      palette="midnight"
-      animate
-      animationType="shift"
-      speed={0.05}
-      blend={80}
-    />
-  ),
-};
-
-// ============================================================================
-// POSITION PRESETS
-// ============================================================================
-
-export const PositionPresets: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={90} backgroundColor="#0f0f1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
-  render: () => {
-    const positionPresets = [
-      { name: "Corners", positions: gradientPositions.corners },
-      { name: "Edges", positions: gradientPositions.edges },
-      { name: "Diamond", positions: gradientPositions.diamond },
-      { name: "Centered", positions: gradientPositions.centered },
-    ];
-
-    return (
-      <AbsoluteFill style={{ padding: 20 }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 16,
-            height: "100%",
-          }}
-        >
-          {positionPresets.map(({ name, positions }) => (
-            <div
-              key={name}
-              style={{
-                position: "relative",
-                borderRadius: 16,
-                overflow: "hidden",
-              }}
-            >
-              <FourColorGradient palette="aurora" positions={positions} />
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 12,
-                  left: 12,
-                  color: "white",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  textShadow: "0 2px 8px rgba(0,0,0,0.5)",
-                }}
-              >
-                {name}
-              </div>
-            </div>
-          ))}
-        </div>
-      </AbsoluteFill>
-    );
+export const DiamondPositions: Story = {
+  args: {
+    topLeft: "#f97316",
+    topRight: "#ef4444",
+    bottomLeft: "#fbbf24",
+    bottomRight: "#dc2626",
+    positions: {
+      topLeft: { x: 50, y: 10 },
+      topRight: { x: 90, y: 50 },
+      bottomLeft: { x: 10, y: 50 },
+      bottomRight: { x: 50, y: 90 },
+    },
+    blend: 55,
   },
 };
 
@@ -378,13 +197,6 @@ export const PositionPresets: Story = {
 // ============================================================================
 
 export const BlendComparison: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={90} backgroundColor="#0f0f1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   render: () => {
     const blends = [40, 55, 70, 85, 100];
 
@@ -407,7 +219,13 @@ export const BlendComparison: Story = {
                 overflow: "hidden",
               }}
             >
-              <FourColorGradient palette="sunset" blend={blend} />
+              <FourColorGradient
+                topLeft="#fb923c"
+                topRight="#f472b6"
+                bottomLeft="#fbbf24"
+                bottomRight="#f87171"
+                blend={blend}
+              />
               <div
                 style={{
                   position: "absolute",
@@ -435,13 +253,17 @@ export const BlendComparison: Story = {
 // ============================================================================
 
 export const WithNoise: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={120} backgroundColor="#000">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
+  args: {
+    topLeft: "#3b82f6",
+    topRight: "#8b5cf6",
+    bottomLeft: "#1e3a8a",
+    bottomRight: "#4c1d95",
+    noise: 0.15,
+    blend: 70,
+  },
+};
+
+export const NoiseComparison: Story = {
   render: () => (
     <AbsoluteFill style={{ display: "flex", gap: 20, padding: 20 }}>
       <div
@@ -452,7 +274,13 @@ export const WithNoise: Story = {
           position: "relative",
         }}
       >
-        <FourColorGradient palette="midnight" noise={0} />
+        <FourColorGradient
+          topLeft="#3b82f6"
+          topRight="#8b5cf6"
+          bottomLeft="#1e3a8a"
+          bottomRight="#4c1d95"
+          noise={0}
+        />
         <div
           style={{
             position: "absolute",
@@ -475,7 +303,13 @@ export const WithNoise: Story = {
           position: "relative",
         }}
       >
-        <FourColorGradient palette="midnight" noise={0.15} />
+        <FourColorGradient
+          topLeft="#3b82f6"
+          topRight="#8b5cf6"
+          bottomLeft="#1e3a8a"
+          bottomRight="#4c1d95"
+          noise={0.15}
+        />
         <div
           style={{
             position: "absolute",
@@ -498,7 +332,13 @@ export const WithNoise: Story = {
           position: "relative",
         }}
       >
-        <FourColorGradient palette="midnight" noise={0.3} />
+        <FourColorGradient
+          topLeft="#3b82f6"
+          topRight="#8b5cf6"
+          bottomLeft="#1e3a8a"
+          bottomRight="#4c1d95"
+          noise={0.3}
+        />
         <div
           style={{
             position: "absolute",
@@ -521,16 +361,17 @@ export const WithNoise: Story = {
 // WITH CONTENT
 // ============================================================================
 
-export const WithText: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={150} backgroundColor="#000">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
+export const WithContent: Story = {
   render: () => (
-    <AuroraGradient>
+    <FourColorGradient
+      topLeft="#22d3ee"
+      topRight="#a855f7"
+      bottomLeft="#10b981"
+      bottomRight="#6366f1"
+      animate
+      animationType="wave"
+      speed={0.2}
+    >
       <AbsoluteFill
         style={{
           display: "flex",
@@ -540,47 +381,30 @@ export const WithText: Story = {
           gap: 20,
         }}
       >
-        <TextAnimation
+        <h1
           style={{
             fontSize: 64,
             fontWeight: 800,
             color: "white",
             textShadow: "0 4px 30px rgba(0,0,0,0.3)",
-          }}
-          createTimeline={({ textRef, tl, SplitText }) => {
-            const split = new SplitText(textRef.current, { type: "chars" });
-            tl.from(split.chars, {
-              opacity: 0,
-              y: 50,
-              rotateX: -90,
-              duration: 0.6,
-              stagger: 0.04,
-              ease: "back.out(1.7)",
-            });
-            return tl;
+            margin: 0,
+            fontFamily: "system-ui, sans-serif",
           }}
         >
-          Beautiful
-        </TextAnimation>
-        <TextAnimation
+          4-Color Gradient
+        </h1>
+        <p
           style={{
             fontSize: 24,
             color: "rgba(255,255,255,0.8)",
-          }}
-          createTimeline={({ textRef, tl }) => {
-            tl.from(textRef.current, {
-              opacity: 0,
-              y: 20,
-              duration: 0.5,
-              delay: 0.5,
-            });
-            return tl;
+            margin: 0,
+            fontFamily: "system-ui, sans-serif",
           }}
         >
-          4-Color Gradient Background
-        </TextAnimation>
+          Fully customizable colors
+        </p>
       </AbsoluteFill>
-    </AuroraGradient>
+    </FourColorGradient>
   ),
 };
 
@@ -589,13 +413,6 @@ export const WithText: Story = {
 // ============================================================================
 
 export const AnimationComparison: Story = {
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={180} backgroundColor="#0f0f1a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   render: () => {
     const animations = [
       { name: "Rotate", type: "rotate" as const },
@@ -624,7 +441,10 @@ export const AnimationComparison: Story = {
               }}
             >
               <FourColorGradient
-                palette="candy"
+                topLeft="#f472b6"
+                topRight="#c084fc"
+                bottomLeft="#fb7185"
+                bottomRight="#a78bfa"
                 animate
                 animationType={type}
                 speed={0.4}

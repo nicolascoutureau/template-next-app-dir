@@ -59,22 +59,17 @@ export {
 } from "./Tint";
 export {
   FourColorGradient,
-  AuroraGradient,
-  SunsetGradient,
-  OceanGradient,
-  NeonGradient,
-  CandyGradient,
-  CorporateGradient,
-  NeutralGradient,
-  LavenderGradient,
-  SageGradient,
-  gradientPositions,
-  gradientPalettes,
   type FourColorGradientProps,
   type ColorPoint,
-  type GradientPalette,
-  type AnimatedGradientProps,
+  type FourColorAnimationType,
 } from "./FourColorGradient";
+export {
+  LinearGradient,
+  type LinearGradientProps,
+  type ColorStop,
+  type GradientDirection,
+  type GradientAnimationType,
+} from "./LinearGradient";
 export { Glass, type GlassProps } from "./Glass";
 export { Reflection, type ReflectionProps } from "./Reflection";
 export { Neon, type NeonProps } from "./Neon";
