@@ -75,9 +75,6 @@ export const Pixelate: React.FC<PixelateProps> = ({
             transformOrigin: "top left",
              // Force hardware acceleration and pixelated rendering
             imageRendering: "pixelated", 
-            // Also standard property
-            // @ts-ignore
-            imageRendering: "crisp-edges",
         }}>
             {children}
         </div>
