@@ -37,6 +37,8 @@ export interface TextAnimationProps {
   style?: CSSProperties;
   /** Enable 3D perspective */
   perspective?: number;
+  /** Starting frame for the animation (default: 0) */
+  startFrom?: number;
 }
 
 /**
@@ -61,17 +63,22 @@ export const TextAnimation: React.FC<TextAnimationProps> = ({
   className,
   style,
   perspective = 1000,
+  startFrom = 0,
 }) => {
   const textRef = useRef<HTMLDivElement>(null);
 
-  const animationContainerRef = useGsapTimeline<HTMLDivElement>(() => {
-    const tl = gsap.timeline();
-    return createTimeline({
-      textRef,
-      tl,
-      SplitText,
-    });
-  });
+  const animationContainerRef = useGsapTimeline<HTMLDivElement>(
+    () => {
+      const tl = gsap.timeline();
+      return createTimeline({
+        textRef,
+        tl,
+        SplitText,
+      });
+    },
+    [],
+    { startFrom },
+  );
 
   return (
     <div
@@ -109,6 +116,8 @@ export interface TextAnimationPresetProps {
   className?: string;
   /** Additional CSS styles */
   style?: CSSProperties;
+  /** Starting frame for the animation (default: 0) */
+  startFrom?: number;
 }
 
 /**
@@ -121,10 +130,12 @@ export const FadeInChars: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, { opacity: 0, y: 20, duration, stagger, ease });
@@ -145,10 +156,12 @@ export const FadeInWords: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "words" });
       tl.from(split.words, { opacity: 0, y: 15, duration, stagger, ease });
@@ -169,10 +182,12 @@ export const RevealLines: React.FC<TextAnimationPresetProps> = ({
   ease = "power3.out",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "lines" });
       tl.from(split.lines, { opacity: 0, y: 30, duration, stagger, ease });
@@ -193,10 +208,12 @@ export const ScrambleText: React.FC<TextAnimationPresetProps> = ({
   ease = "none",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
@@ -224,10 +241,12 @@ export const BounceChars: React.FC<TextAnimationPresetProps> = ({
   ease = "elastic.out(1, 0.3)",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
@@ -255,11 +274,13 @@ export const FlipInChars: React.FC<TextAnimationPresetProps> = ({
   ease = "back.out(1.7)",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
     perspective={800}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
@@ -287,11 +308,13 @@ export const RotateInWords: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
     perspective={1000}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "words" });
       tl.from(split.words, {
@@ -322,10 +345,12 @@ export const WaveText: React.FC<
   amplitude = 30,
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
@@ -363,6 +388,7 @@ export const SlideInText: React.FC<
   distance = 100,
   className,
   style,
+  startFrom,
 }) => {
   const getOffset = () => {
     switch (direction) {
@@ -383,6 +409,7 @@ export const SlideInText: React.FC<
     <TextAnimation
       className={className}
       style={style}
+      startFrom={startFrom}
       createTimeline={({ textRef, tl, SplitText }) => {
         const split = new SplitText(textRef.current, { type: "chars" });
         tl.from(split.chars, {
@@ -412,10 +439,12 @@ export const HackerText: React.FC<
   chars = "01",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       const charsArray = chars.split("");
@@ -534,10 +563,12 @@ export const BlurReveal: React.FC<TextAnimationPresetProps> = ({
   ease = "power2.out",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
@@ -565,10 +596,12 @@ export const GlitchText: React.FC<TextAnimationPresetProps> = ({
   ease = "rough({ strength: 2, points: 10, template: none, taper: none, randomize: true, clamp: false })",
   className,
   style,
+  startFrom,
 }) => (
   <TextAnimation
     className={className}
     style={style}
+    startFrom={startFrom}
     createTimeline={({ textRef, tl, SplitText }) => {
       const split = new SplitText(textRef.current, { type: "chars" });
       tl.from(split.chars, {
