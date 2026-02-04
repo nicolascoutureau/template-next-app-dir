@@ -47,12 +47,13 @@ export const CorporateSlideshow: React.FC = () => {
   );
 
   // Define transitions between scenes (length = scenes.length - 1)
+  // Using creative Akella-style transitions
   const transitions: TransitionSpec[] = useMemo(
     () => [
-      { type: "wipe", durationInFrames: 25, direction: "down" },     // intro → strategy
-      { type: "dissolve", durationInFrames: 30, seed: 42, softness: 0.1 }, // strategy → values
-      { type: "wipe", durationInFrames: 25, direction: "left" },     // values → team
-      { type: "fade", durationInFrames: 20 },                        // team → cta
+      { type: "morph", durationInFrames: 35, intensity: 0.25 },           // intro → strategy: organic wave distortion
+      { type: "cube", durationInFrames: 30, direction: "left" },          // strategy → values: 3D cube rotation
+      { type: "ripple", durationInFrames: 35, frequency: 25, amplitude: 0.08 }, // values → team: water ripple
+      { type: "rgbShift", durationInFrames: 25, intensity: 0.8 },         // team → cta: chromatic aberration
     ],
     []
   );
@@ -391,113 +392,113 @@ const ImageWithBorder: React.FC<{
   strokeDelay = 0,
   strokeDuration = 30,
 }) => {
-  const frame = useCurrentFrame();
-  
-  // Animate stroke drawing
-  const strokeProgress = interpolate(
-    frame,
-    [strokeDelay, strokeDelay + strokeDuration],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
-  
-  // Content fades in after stroke completes
-  const contentOpacity = interpolate(
-    frame,
-    [strokeDelay + strokeDuration * 0.5, strokeDelay + strokeDuration * 0.8],
-    [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
+    const frame = useCurrentFrame();
 
-  const fullPath = useMemo(() => {
-    const points: THREE.Vector3[] = [];
-    const hw = width / 2;
-    const hh = height / 2;
-    const r = Math.min(radius, hw, hh);
-    const segments = 8;
+    // Animate stroke drawing
+    const strokeProgress = interpolate(
+      frame,
+      [strokeDelay, strokeDelay + strokeDuration],
+      [0, 1],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
 
-    points.push(new THREE.Vector3(-hw + r, hh, 0));
-    points.push(new THREE.Vector3(hw - r, hh, 0));
+    // Content fades in after stroke completes
+    const contentOpacity = interpolate(
+      frame,
+      [strokeDelay + strokeDuration * 0.5, strokeDelay + strokeDuration * 0.8],
+      [0, 1],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    );
 
-    for (let i = 0; i <= segments; i++) {
-      const angle = Math.PI / 2 - (i / segments) * (Math.PI / 2);
-      points.push(
-        new THREE.Vector3(
-          hw - r + Math.cos(angle) * r,
-          hh - r + Math.sin(angle) * r,
-          0,
-        ),
-      );
-    }
+    const fullPath = useMemo(() => {
+      const points: THREE.Vector3[] = [];
+      const hw = width / 2;
+      const hh = height / 2;
+      const r = Math.min(radius, hw, hh);
+      const segments = 8;
 
-    points.push(new THREE.Vector3(hw, -hh + r, 0));
+      points.push(new THREE.Vector3(-hw + r, hh, 0));
+      points.push(new THREE.Vector3(hw - r, hh, 0));
 
-    for (let i = 0; i <= segments; i++) {
-      const angle = 0 - (i / segments) * (Math.PI / 2);
-      points.push(
-        new THREE.Vector3(
-          hw - r + Math.cos(angle) * r,
-          -hh + r + Math.sin(angle) * r,
-          0,
-        ),
-      );
-    }
+      for (let i = 0; i <= segments; i++) {
+        const angle = Math.PI / 2 - (i / segments) * (Math.PI / 2);
+        points.push(
+          new THREE.Vector3(
+            hw - r + Math.cos(angle) * r,
+            hh - r + Math.sin(angle) * r,
+            0,
+          ),
+        );
+      }
 
-    points.push(new THREE.Vector3(-hw + r, -hh, 0));
+      points.push(new THREE.Vector3(hw, -hh + r, 0));
 
-    for (let i = 0; i <= segments; i++) {
-      const angle = -Math.PI / 2 - (i / segments) * (Math.PI / 2);
-      points.push(
-        new THREE.Vector3(
-          -hw + r + Math.cos(angle) * r,
-          -hh + r + Math.sin(angle) * r,
-          0,
-        ),
-      );
-    }
+      for (let i = 0; i <= segments; i++) {
+        const angle = 0 - (i / segments) * (Math.PI / 2);
+        points.push(
+          new THREE.Vector3(
+            hw - r + Math.cos(angle) * r,
+            -hh + r + Math.sin(angle) * r,
+            0,
+          ),
+        );
+      }
 
-    points.push(new THREE.Vector3(-hw, hh - r, 0));
+      points.push(new THREE.Vector3(-hw + r, -hh, 0));
 
-    for (let i = 0; i <= segments; i++) {
-      const angle = Math.PI - (i / segments) * (Math.PI / 2);
-      points.push(
-        new THREE.Vector3(
-          -hw + r + Math.cos(angle) * r,
-          hh - r + Math.sin(angle) * r,
-          0,
-        ),
-      );
-    }
+      for (let i = 0; i <= segments; i++) {
+        const angle = -Math.PI / 2 - (i / segments) * (Math.PI / 2);
+        points.push(
+          new THREE.Vector3(
+            -hw + r + Math.cos(angle) * r,
+            -hh + r + Math.sin(angle) * r,
+            0,
+          ),
+        );
+      }
 
-    points.push(new THREE.Vector3(-hw + r, hh, 0));
-    return points;
-  }, [width, height, radius]);
+      points.push(new THREE.Vector3(-hw, hh - r, 0));
 
-  const visiblePath = useMemo(() => {
-    if (strokeProgress <= 0) return [];
-    const numPoints = Math.ceil(fullPath.length * strokeProgress);
-    return fullPath.slice(0, Math.max(2, numPoints));
-  }, [fullPath, strokeProgress]);
+      for (let i = 0; i <= segments; i++) {
+        const angle = Math.PI - (i / segments) * (Math.PI / 2);
+        points.push(
+          new THREE.Vector3(
+            -hw + r + Math.cos(angle) * r,
+            hh - r + Math.sin(angle) * r,
+            0,
+          ),
+        );
+      }
 
-  return (
-    <group position={position}>
-      {visiblePath.length >= 2 && (
-        <Line
-          points={visiblePath}
-          color={strokeColor}
-          lineWidth={strokeWidth * 150}
-          position={[0, 0, 0.05]}
-        />
-      )}
-      {contentOpacity > 0 && (
-        <Image
-          url={url}
-          scale={[width - strokeWidth * 2, height - strokeWidth * 2]}
-          radius={Math.max(0, radius - strokeWidth)}
-          transparent
-          opacity={contentOpacity}
-        />
-      )}
-    </group>
-  );
-};
+      points.push(new THREE.Vector3(-hw + r, hh, 0));
+      return points;
+    }, [width, height, radius]);
+
+    const visiblePath = useMemo(() => {
+      if (strokeProgress <= 0) return [];
+      const numPoints = Math.ceil(fullPath.length * strokeProgress);
+      return fullPath.slice(0, Math.max(2, numPoints));
+    }, [fullPath, strokeProgress]);
+
+    return (
+      <group position={position}>
+        {visiblePath.length >= 2 && (
+          <Line
+            points={visiblePath}
+            color={strokeColor}
+            lineWidth={strokeWidth * 150}
+            position={[0, 0, 0.05]}
+          />
+        )}
+        {contentOpacity > 0 && (
+          <Image
+            url={url}
+            scale={[width - strokeWidth * 2, height - strokeWidth * 2]}
+            radius={Math.max(0, radius - strokeWidth)}
+            transparent
+            opacity={contentOpacity}
+          />
+        )}
+      </group>
+    );
+  };

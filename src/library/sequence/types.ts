@@ -15,7 +15,18 @@ export type TransitionSpec =
   | { type: "glitch"; durationInFrames: number; seed?: number; intensity?: number }
   | { type: "pixelate"; durationInFrames: number; size?: number }
   | { type: "zoom"; durationInFrames: number; intensity?: number }
-  | { type: "flip"; durationInFrames: number; direction: "horizontal" | "vertical" };
+  | { type: "flip"; durationInFrames: number; direction: "horizontal" | "vertical" }
+  // Creative transitions inspired by Akella's webGLImageTransitions
+  | { type: "morph"; durationInFrames: number; intensity?: number }
+  | { type: "directionalWarp"; durationInFrames: number; direction?: "left" | "right" | "up" | "down"; intensity?: number }
+  | { type: "swirl"; durationInFrames: number; intensity?: number }
+  | { type: "ripple"; durationInFrames: number; frequency?: number; amplitude?: number }
+  | { type: "lens"; durationInFrames: number; intensity?: number }
+  | { type: "wind"; durationInFrames: number; intensity?: number }
+  | { type: "dreamyZoom"; durationInFrames: number; intensity?: number }
+  | { type: "cube"; durationInFrames: number; direction?: "left" | "right" | "up" | "down" }
+  | { type: "rgbShift"; durationInFrames: number; intensity?: number }
+  | { type: "gridFlip"; durationInFrames: number; rows?: number; cols?: number };
 
 /**
  * Scene specification for SceneStack.
