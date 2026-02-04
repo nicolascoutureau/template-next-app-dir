@@ -989,72 +989,10 @@ export const Main: React.FC = () => {
           }}
         >
           {/* ============================================================== */}
-          {/* SHADER BACKGROUNDS                                             */}
-          {/* ============================================================== */}
-
-          {/* Scene 1: Subtle gradient orbs - dark and slow */}
-          <Sequence from={scene1Start} durationInFrames={scene1Duration} layout="none">
-            <BackgroundLayer>
-              <GradientOrbs
-                colors={["#2d1b4e", "#1a3a4a", "#1e1e2e"]}
-                backgroundColor="#030014"
-                blur={0.85}
-                orbSize={0.5}
-                speed={0.15}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* Scene 2: Very subtle wave grid */}
-          <Sequence from={scene2Start} durationInFrames={scene2Duration} layout="none">
-            <BackgroundLayer>
-              <WaveGridBackground
-                lineColor="#3b2d5a"
-                glowColor="#1a4a5a"
-                backgroundColor="#030014"
-                speed={0.15}
-                gridDensity={12}
-                amplitude={0.06}
-                perspective={0.25}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* Scene 3: Soft gradient orbs */}
-          <Sequence from={scene3Start} durationInFrames={scene3Duration} layout="none">
-            <BackgroundLayer>
-              <GradientOrbs
-                colors={["#2a1f4a", "#1a3545", "#251a3a"]}
-                backgroundColor="#050510"
-                blur={0.9}
-                orbSize={0.45}
-                speed={0.12}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* Scene 4: Subtle metaballs */}
-          <Sequence from={scene4Start} durationInFrames={scene4Duration} layout="none">
-            <BackgroundLayer>
-              <MetaballsBackground
-                primaryColor="#2d1b4e"
-                secondaryColor="#1a3a4a"
-                backgroundColor="#030014"
-                speed={0.2}
-                sharpness={0.25}
-                glow={false}
-              />
-            </BackgroundLayer>
-          </Sequence>
-
-          {/* ============================================================== */}
           {/* SCENE TRANSITIONS - Smooth crossfades                          */}
           {/* ============================================================== */}
 
 
-          {/* ============================================================== */}
-          {/* LIGHTING                                                       */}
-          {/* ============================================================== */}
 
           {/* ============================================================== */}
           {/* MULTI-LAYER PARTICLES - Subtle accents                         */}

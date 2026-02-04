@@ -1,5 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { createPortal, useFrame, useThree } from "@react-three/fiber";
+import { useFBO } from "@react-three/drei";
 import type { TransitionSpec } from "./types";
 
 export interface SceneTransitionRendererProps {
@@ -13,17 +15,307 @@ export interface SceneTransitionRendererProps {
   mode: TransitionSpec;
 }
 
+// =============================================================================
+// SHARED VERTEX SHADER (Clip Space)
+// =============================================================================
+
+// This vertex shader ignores the camera and positions the quad 
+// to cover the entire screen in clip space (-1 to 1)
+const vertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = vec4(position.xy, 0.0, 1.0);
+  }
+`;
+
+// =============================================================================
+// TRANSITION FRAGMENT SHADERS
+// =============================================================================
+
+const fadeFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  varying vec2 vUv;
+
+  void main() {
+    vec4 colorFrom = texture2D(uTextureFrom, vUv);
+    vec4 colorTo = texture2D(uTextureTo, vUv);
+    
+    // Blend in Linear space (textures are already Linear)
+    vec4 blended = mix(colorFrom, colorTo, uProgress);
+    
+    gl_FragColor = blended;
+    
+    // Tonemapping will be applied by the main renderer to this result
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const wipeFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform int uDirection; // 0=left, 1=right, 2=up, 3=down
+  uniform float uSoftness;
+  varying vec2 vUv;
+
+  void main() {
+    vec4 colorFrom = texture2D(uTextureFrom, vUv);
+    vec4 colorTo = texture2D(uTextureTo, vUv);
+    
+    float edge;
+    if (uDirection == 0) { edge = vUv.x; }
+    else if (uDirection == 1) { edge = 1.0 - vUv.x; }
+    else if (uDirection == 2) { edge = 1.0 - vUv.y; }
+    else { edge = vUv.y; }
+    
+    float mask = smoothstep(uProgress - uSoftness, uProgress + uSoftness, edge);
+    
+    vec4 blended = mix(colorTo, colorFrom, mask);
+    gl_FragColor = blended;
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const dissolveFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform float uSeed;
+  uniform float uSoftness;
+  varying vec2 vUv;
+
+  // Simplex noise for organic dissolve
+  vec3 mod289_n(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec2 mod289_n(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec3 permute(vec3 x) { return mod289_n(((x * 34.0) + 1.0) * x); }
+
+  float snoise(vec2 v) {
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                       -0.577350269189626, 0.024390243902439);
+    vec2 i  = floor(v + dot(v, C.yy));
+    vec2 x0 = v - i + dot(i, C.xx);
+    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod289_n(i);
+    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0))
+                           + i.x + vec3(0.0, i1.x, 1.0));
+    vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy),
+                           dot(x12.zw, x12.zw)), 0.0);
+    m = m * m;
+    m = m * m;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);
+    vec3 g;
+    g.x = a0.x * x0.x + h.x * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+  }
+
+  void main() {
+    vec4 colorFrom = texture2D(uTextureFrom, vUv);
+    vec4 colorTo = texture2D(uTextureTo, vUv);
+    
+    // Multi-octave noise
+    float noise = snoise(vUv * 8.0 + uSeed) * 0.5 + 0.5;
+    noise += snoise(vUv * 16.0 + uSeed * 2.0) * 0.25;
+    noise += snoise(vUv * 32.0 + uSeed * 3.0) * 0.125;
+    noise = noise / 1.875; 
+    
+    float mask = smoothstep(uProgress - uSoftness, uProgress + uSoftness, noise);
+    
+    gl_FragColor = mix(colorTo, colorFrom, mask);
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const glitchFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform float uSeed;
+  uniform float uIntensity;
+  varying vec2 vUv;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy + uSeed, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float glitchAmount = sin(uProgress * 3.14159) * uIntensity;
+    
+    // Horizontal slice displacement
+    float sliceY = floor(uv.y * 20.0) / 20.0;
+    float slice = rand(vec2(sliceY, uSeed));
+    if (slice > 0.7) {
+      uv.x += (rand(vec2(sliceY + uProgress, uSeed)) - 0.5) * glitchAmount * 0.3;
+    }
+    
+    // RGB channel splitting
+    float rgbOffset = glitchAmount * 0.02;
+    vec4 colorFrom, colorTo;
+    
+    colorFrom.r = texture2D(uTextureFrom, uv + vec2(rgbOffset, 0.0)).r;
+    colorFrom.g = texture2D(uTextureFrom, uv).g;
+    colorFrom.b = texture2D(uTextureFrom, uv - vec2(rgbOffset, 0.0)).b;
+    colorFrom.a = 1.0;
+    
+    colorTo.r = texture2D(uTextureTo, uv + vec2(rgbOffset, 0.0)).r;
+    colorTo.g = texture2D(uTextureTo, uv).g;
+    colorTo.b = texture2D(uTextureTo, uv - vec2(rgbOffset, 0.0)).b;
+    colorTo.a = 1.0;
+    
+    vec4 blended = mix(colorFrom, colorTo, uProgress);
+    
+    // Add effects in linear space
+    float scanLine = sin(uv.y * 800.0) * 0.04 * glitchAmount;
+    float noise = (rand(uv * 100.0 + uProgress) - 0.5) * glitchAmount * 0.2;
+    blended.rgb += scanLine + noise;
+    
+    gl_FragColor = blended;
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const pixelateFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform float uPixelSize;
+  uniform vec2 uResolution;
+  varying vec2 vUv;
+
+  void main() {
+    // Pixel size peaks at midpoint
+    float pixelAmount = sin(uProgress * 3.14159) * uPixelSize;
+    float pixels = max(1.0, pixelAmount);
+    
+    vec2 pixelatedUv = floor(vUv * uResolution / pixels) * pixels / uResolution;
+    
+    vec4 colorFrom = texture2D(uTextureFrom, pixelatedUv);
+    vec4 colorTo = texture2D(uTextureTo, pixelatedUv);
+    
+    gl_FragColor = mix(colorFrom, colorTo, uProgress);
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const zoomFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform float uIntensity;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 center = vec2(0.5, 0.5);
+    
+    // Zoom from scene scales up and blurs out
+    float zoomFrom = 1.0 + uProgress * uIntensity;
+    vec2 uvFrom = center + (vUv - center) / zoomFrom;
+    
+    // Zoom to scene scales down from larger
+    float zoomTo = 1.0 + (1.0 - uProgress) * uIntensity;
+    vec2 uvTo = center + (vUv - center) / zoomTo;
+    
+    // Sample with slight blur via multiple samples
+    vec4 colorFrom = vec4(0.0);
+    vec4 colorTo = vec4(0.0);
+    
+    float blurFrom = uProgress * 0.01 * uIntensity;
+    float blurTo = (1.0 - uProgress) * 0.01 * uIntensity;
+    
+    // Box blur samples
+    for (float x = -1.0; x <= 1.0; x += 1.0) {
+      for (float y = -1.0; y <= 1.0; y += 1.0) {
+        colorFrom += texture2D(uTextureFrom, uvFrom + vec2(x, y) * blurFrom);
+        colorTo += texture2D(uTextureTo, uvTo + vec2(x, y) * blurTo);
+      }
+    }
+    colorFrom /= 9.0;
+    colorTo /= 9.0;
+    
+    gl_FragColor = mix(colorFrom, colorTo, uProgress);
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+const flipFragmentShader = `
+  uniform sampler2D uTextureFrom;
+  uniform sampler2D uTextureTo;
+  uniform float uProgress;
+  uniform int uDirection; // 0=horizontal, 1=vertical
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uv = vUv;
+    
+    // Flip around center
+    float angle = uProgress * 3.14159;
+    float scale = abs(cos(angle));
+    
+    if (uDirection == 0) { // horizontal
+      uv.x = 0.5 + (uv.x - 0.5) / max(scale, 0.001);
+    } else { // vertical
+      uv.y = 0.5 + (uv.y - 0.5) / max(scale, 0.001);
+    }
+    
+    // Check if UV is out of bounds (edge of flip)
+    bool outOfBounds = uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0;
+    
+    vec4 color;
+    if (outOfBounds) {
+      color = vec4(0.0, 0.0, 0.0, 1.0);
+    } else if (uProgress < 0.5) {
+      color = texture2D(uTextureFrom, uv);
+    } else {
+      // Mirror UV for back side
+      if (uDirection == 0) {
+        uv.x = 1.0 - uv.x;
+      } else {
+        uv.y = 1.0 - uv.y;
+      }
+      color = texture2D(uTextureTo, uv);
+    }
+    
+    // Add subtle shadow at edges during flip
+    float shadow = 1.0 - sin(uProgress * 3.14159) * 0.3;
+    color.rgb *= shadow;
+    
+    gl_FragColor = color;
+    
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }
+`;
+
+// =============================================================================
+// MAIN COMPONENT
+// =============================================================================
+
 /**
- * SceneTransitionRenderer - Renders Three.js transitions between two scenes.
+ * SceneTransitionRenderer - GPU-accelerated transitions using FBOs and shaders.
  * 
- * Handles various transition types:
- * - fade: Opacity crossfade with overlay planes
- * - wipe: Directional wipe using positioned planes
- * - dissolve: Noise-based dissolve effect
- * - glitch: RGB offset glitch effect
- * - pixelate: Scale-based pixelation simulation
- * - zoom: Zoom scale transition
- * - flip: 3D rotation flip transition
+ * Renders both scenes to offscreen render targets, then blends them using
+ * custom shader materials for each transition type.
  */
 export const SceneTransitionRenderer: React.FC<SceneTransitionRendererProps> = ({
   from,
@@ -31,390 +323,179 @@ export const SceneTransitionRenderer: React.FC<SceneTransitionRendererProps> = (
   progress,
   mode,
 }) => {
-  return (
-    <group>
-      <TransitionRenderer
-        from={from}
-        to={to}
-        progress={progress}
-        mode={mode}
-      />
-    </group>
-  );
-};
+  const { size, camera, gl } = useThree();
+  const meshRef = useRef<THREE.Mesh>(null);
+  const dpr = gl.getPixelRatio();
 
-interface TransitionRendererProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  mode: TransitionSpec;
-}
+  // Create FBOs for both scenes
+  // Use SRGBColorSpace to ensure rendered content is correctly encoded
+  const fboFrom = useFBO(size.width * dpr, size.height * dpr, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    format: THREE.RGBAFormat,
+    type: THREE.UnsignedByteType, // Standard type prevents some HDR issues
+    colorSpace: THREE.SRGBColorSpace,
+  });
 
-const TransitionRenderer: React.FC<TransitionRendererProps> = ({
-  from,
-  to,
-  progress,
-  mode,
-}) => {
-  switch (mode.type) {
-    case "fade":
-      return <FadeTransition from={from} to={to} progress={progress} />;
-    case "wipe":
-      return <WipeTransition from={from} to={to} progress={progress} direction={mode.direction} />;
-    case "dissolve":
-      return <DissolveTransition from={from} to={to} progress={progress} softness={mode.softness} />;
-    case "glitch":
-      return <GlitchTransition from={from} to={to} progress={progress} intensity={mode.intensity} />;
-    case "pixelate":
-      return <PixelateTransition from={from} to={to} progress={progress} size={mode.size} />;
-    case "zoom":
-      return <ZoomTransition from={from} to={to} progress={progress} intensity={mode.intensity} />;
-    case "flip":
-      return <FlipTransition from={from} to={to} progress={progress} direction={mode.direction} />;
-    default:
-      return <FadeTransition from={from} to={to} progress={progress} />;
-  }
-};
+  const fboTo = useFBO(size.width * dpr, size.height * dpr, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    format: THREE.RGBAFormat,
+    type: THREE.UnsignedByteType,
+    colorSpace: THREE.SRGBColorSpace,
+  });
 
-// =============================================================================
-// FADE TRANSITION
-// =============================================================================
+  // Create scenes for portals
+  const sceneFrom = useMemo(() => new THREE.Scene(), []);
+  const sceneTo = useMemo(() => new THREE.Scene(), []);
 
-interface FadeTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-}
-
-const FadeTransition: React.FC<FadeTransitionProps> = ({ from, to, progress }) => {
-  return (
-    <group>
-      {/* Outgoing scene with fade-out overlay */}
-      <group>
-        {from}
-        <mesh position={[0, 0, 5]} renderOrder={999}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-      {/* Incoming scene with fade-in overlay */}
-      <group position={[0, 0, 0.01]}>
-        {to}
-        <mesh position={[0, 0, 5]} renderOrder={1000}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={1 - progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-    </group>
-  );
-};
-
-// =============================================================================
-// WIPE TRANSITION
-// =============================================================================
-
-interface WipeTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  direction: "left" | "right" | "up" | "down";
-}
-
-const WipeTransition: React.FC<WipeTransitionProps> = ({ from, to, progress, direction }) => {
-  // Incoming scene position offset
-  const toPosition = useMemo(() => {
-    const offset = 50 * (1 - progress);
-    switch (direction) {
-      case "left":
-        return new THREE.Vector3(-offset, 0, 0.01);
-      case "right":
-        return new THREE.Vector3(offset, 0, 0.01);
-      case "up":
-        return new THREE.Vector3(0, offset, 0.01);
-      case "down":
-        return new THREE.Vector3(0, -offset, 0.01);
-      default:
-        return new THREE.Vector3(-offset, 0, 0.01);
-    }
-  }, [progress, direction]);
-
-  return (
-    <group>
-      {/* Outgoing scene */}
-      <group>{from}</group>
-      {/* Incoming scene slides in */}
-      <group position={toPosition}>
-        {to}
-      </group>
-    </group>
-  );
-};
-
-// =============================================================================
-// DISSOLVE TRANSITION
-// =============================================================================
-
-interface DissolveTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  softness?: number;
-}
-
-const DissolveTransition: React.FC<DissolveTransitionProps> = ({
-  from,
-  to,
-  progress,
-  softness = 0.08
-}) => {
-  // Adjusted progress with softness for smoother dissolve
-  const adjustedProgress = Math.min(1, Math.max(0, (progress - softness) / (1 - 2 * softness)));
-
-  return (
-    <group>
-      {/* Outgoing scene */}
-      <group>
-        {from}
-        <mesh position={[0, 0, 5]} renderOrder={999}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={adjustedProgress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-      {/* Incoming scene */}
-      <group position={[0, 0, 0.01]}>
-        {to}
-        <mesh position={[0, 0, 5]} renderOrder={1000}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={1 - adjustedProgress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-    </group>
-  );
-};
-
-// =============================================================================
-// GLITCH TRANSITION
-// =============================================================================
-
-interface GlitchTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  intensity?: number;
-}
-
-const GlitchTransition: React.FC<GlitchTransitionProps> = ({
-  from,
-  to,
-  progress,
-  intensity = 0.5
-}) => {
-  // Create glitch offset based on progress
-  const glitchOffset = useMemo(() => {
-    const glitchAmount = intensity * Math.sin(progress * Math.PI) * 0.5;
-    return {
-      from: new THREE.Vector3(glitchAmount, glitchAmount * 0.3, 0),
-      to: new THREE.Vector3(-glitchAmount, -glitchAmount * 0.3, 0.01),
+  // Get shader and uniforms based on transition type
+  const { fragmentShader, uniforms } = useMemo(() => {
+    const baseUniforms = {
+      uTextureFrom: { value: fboFrom.texture },
+      uTextureTo: { value: fboTo.texture },
+      uProgress: { value: 0 },
     };
-  }, [progress, intensity]);
 
-  return (
-    <group>
-      {/* Outgoing scene with glitch offset */}
-      <group position={glitchOffset.from}>
-        {from}
-        <mesh position={[0, 0, 5]} renderOrder={999}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-      {/* Incoming scene with inverse glitch offset */}
-      <group position={glitchOffset.to}>
-        {to}
-        <mesh position={[0, 0, 5]} renderOrder={1000}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={1 - progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-    </group>
-  );
-};
+    switch (mode.type) {
+      case "fade":
+        return {
+          fragmentShader: fadeFragmentShader,
+          uniforms: baseUniforms,
+        };
 
-// =============================================================================
-// PIXELATE TRANSITION
-// =============================================================================
+      case "wipe":
+        return {
+          fragmentShader: wipeFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uDirection: {
+              value:
+                mode.direction === "left" ? 0 :
+                  mode.direction === "right" ? 1 :
+                    mode.direction === "up" ? 2 : 3,
+            },
+            uSoftness: { value: 0.02 },
+          },
+        };
 
-interface PixelateTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  size?: number;
-}
+      case "dissolve":
+        return {
+          fragmentShader: dissolveFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uSeed: { value: mode.seed ?? 0 },
+            uSoftness: { value: mode.softness ?? 0.08 },
+          },
+        };
 
-const PixelateTransition: React.FC<PixelateTransitionProps> = ({
-  from,
-  to,
-  progress,
-  size = 10
-}) => {
-  // Simulate pixelation with scale jitter at midpoint
-  const scaleEffect = useMemo(() => {
-    const pixelProgress = Math.sin(progress * Math.PI);
-    const scaleFactor = 1 - (pixelProgress * 0.02 * (size / 10));
-    return Math.max(0.9, scaleFactor);
-  }, [progress, size]);
+      case "glitch":
+        return {
+          fragmentShader: glitchFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uSeed: { value: mode.seed ?? 0 },
+            uIntensity: { value: mode.intensity ?? 0.5 },
+          },
+        };
 
-  return (
-    <group>
-      {/* Outgoing scene */}
-      <group scale={[scaleEffect, scaleEffect, 1]}>
-        {from}
-        <mesh position={[0, 0, 5]} renderOrder={999}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-      {/* Incoming scene */}
-      <group scale={[scaleEffect, scaleEffect, 1]} position={[0, 0, 0.01]}>
-        {to}
-        <mesh position={[0, 0, 5]} renderOrder={1000}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={1 - progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-    </group>
-  );
-};
+      case "pixelate":
+        return {
+          fragmentShader: pixelateFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uPixelSize: { value: mode.size ?? 10 },
+            uResolution: { value: new THREE.Vector2(size.width, size.height) },
+          },
+        };
 
-// =============================================================================
-// ZOOM TRANSITION
-// =============================================================================
+      case "zoom":
+        return {
+          fragmentShader: zoomFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uIntensity: { value: mode.intensity ?? 0.3 },
+          },
+        };
 
-interface ZoomTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  intensity?: number;
-}
+      case "flip":
+        return {
+          fragmentShader: flipFragmentShader,
+          uniforms: {
+            ...baseUniforms,
+            uDirection: { value: mode.direction === "horizontal" ? 0 : 1 },
+          },
+        };
 
-const ZoomTransition: React.FC<ZoomTransitionProps> = ({
-  from,
-  to,
-  progress,
-  intensity = 0.3
-}) => {
-  const fromScale = 1 + progress * intensity;
-  const toScale = 1 + (1 - progress) * intensity;
-
-  return (
-    <group>
-      {/* Outgoing scene zooms in and fades */}
-      <group scale={[fromScale, fromScale, 1]}>
-        {from}
-        <mesh position={[0, 0, 5]} renderOrder={999}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-      {/* Incoming scene zooms from larger and fades in */}
-      <group scale={[toScale, toScale, 1]} position={[0, 0, 0.01]}>
-        {to}
-        <mesh position={[0, 0, 5]} renderOrder={1000}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={1 - progress}
-            depthTest={false}
-          />
-        </mesh>
-      </group>
-    </group>
-  );
-};
-
-// =============================================================================
-// FLIP TRANSITION
-// =============================================================================
-
-interface FlipTransitionProps {
-  from: React.ReactNode;
-  to: React.ReactNode;
-  progress: number;
-  direction: "horizontal" | "vertical";
-}
-
-const FlipTransition: React.FC<FlipTransitionProps> = ({
-  from,
-  to,
-  progress,
-  direction
-}) => {
-  const rotation = useMemo(() => {
-    const angle = progress * Math.PI;
-    if (direction === "horizontal") {
-      return new THREE.Euler(0, angle, 0);
+      default:
+        return {
+          fragmentShader: fadeFragmentShader,
+          uniforms: baseUniforms,
+        };
     }
-    return new THREE.Euler(angle, 0, 0);
-  }, [progress, direction]);
+  }, [mode, fboFrom.texture, fboTo.texture, size.width, size.height]);
 
-  const showFrom = progress < 0.5;
+  // Update uniforms every frame
+  useFrame(({ gl }) => {
+    // Save previous state
+    const originalTarget = gl.getRenderTarget();
+    const originalToneMapping = gl.toneMapping;
+    const originalOutputColorSpace = gl.outputColorSpace;
+
+    // Disable tone mapping/encoding for intermediate FBO render
+    // We want Linear HDR data in the FBOs
+    gl.toneMapping = THREE.NoToneMapping;
+    gl.outputColorSpace = THREE.LinearSRGBColorSpace;
+
+    // Render "from" scene to FBO
+    gl.setRenderTarget(fboFrom);
+    gl.render(sceneFrom, camera);
+
+    // Render "to" scene to FBO
+    gl.setRenderTarget(fboTo);
+    gl.render(sceneTo, camera);
+
+    // Restore original state for final render
+    gl.toneMapping = originalToneMapping;
+    gl.outputColorSpace = originalOutputColorSpace;
+    gl.setRenderTarget(originalTarget);
+
+    // Update progress uniform
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uProgress.value = progress;
+    }
+  });
 
   return (
-    <group rotation={rotation}>
-      {showFrom ? (
-        <group>{from}</group>
-      ) : (
-        <group rotation={direction === "horizontal" ? [0, Math.PI, 0] : [Math.PI, 0, 0]}>
-          {to}
-        </group>
+    <>
+      {/* Portal for "from" scene */}
+      {createPortal(
+        <>{from}</>,
+        sceneFrom
       )}
-    </group>
+
+      {/* Portal for "to" scene */}
+      {createPortal(
+        <>{to}</>,
+        sceneTo
+      )}
+
+      {/* Fullscreen quad with transition shader */}
+      {/* Render order is important for transparency */}
+      <mesh ref={meshRef} renderOrder={1000} frustumCulled={false}>
+        {/* Plane fills clip space (-1 to 1) via vertex shader */}
+        <planeGeometry args={[2, 2]} />
+        <shaderMaterial
+          vertexShader={vertexShader}
+          fragmentShader={fragmentShader}
+          uniforms={uniforms}
+          transparent
+          depthTest={false}
+          depthWrite={false}
+        />
+      </mesh>
+    </>
   );
 };
 

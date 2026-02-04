@@ -182,15 +182,6 @@ export {
   type SceneAnimationProps,
   type SceneAnimationConfig,
   type SceneAnimationResult,
-  // Scene Transition (fade in/out)
-  SceneTransition,
-  useSceneTransition,
-  type SceneTransitionProps,
-  type SceneTransitionConfig,
-  type SceneTransitionResult,
-  // Combined convenience component
-  SceneContainer,
-  type SceneContainerProps,
 } from "./scenes";
 
 // Sequence components (declarative scene sequencing - 3D)
