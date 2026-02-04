@@ -95,6 +95,7 @@ export const App = () => {
             allowFullscreen
             doubleClickToFullscreen
             initialFrame={initialFrame ?? 0}
+            numberOfSharedAudioTags={10}
           />
         </div>
       </div>
