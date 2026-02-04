@@ -92,6 +92,7 @@ const highlightCode = (code: string, theme: "dark" | "light") => {
  */
 export const CodeBlock: React.FC<CodeBlockProps> = ({
   code,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   language = "typescript",
   lineNumbers = true,
   highlightLines = [],

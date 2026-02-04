@@ -64,6 +64,7 @@ export const Typewriter: React.FC<TypewriterProps> = ({
   cursorChar = "|",
   cursorBlinkRate = 0.5,
   hideCursorOnComplete = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ease = "linear",
   style,
   className,

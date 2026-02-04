@@ -55,6 +55,7 @@ export const KineticText: React.FC<KineticTextProps> = ({
   skew = 0,
   style,
   className,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   duration,
 }) => {
   const frame = useCurrentFrame();

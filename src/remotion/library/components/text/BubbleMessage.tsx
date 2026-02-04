@@ -265,7 +265,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({
 
   return (
     <div className={className} style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", ...style }}>
-      {messages.map((msg, i) => {
+      {messages.map((msg) => {
         const msgDelay = accumulatedDelay;
         // Add delay for next message based on current message length or explicit delay
         const textLength = typeof msg.text === "string" ? msg.text.length : 20;

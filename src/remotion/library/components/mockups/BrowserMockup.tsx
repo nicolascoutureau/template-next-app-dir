@@ -45,6 +45,7 @@ export interface BrowserMockupProps {
 // Icons
 // ============================================
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TrafficLights = ({ theme }: { theme: BrowserTheme }) => (
   <div style={{ display: "flex", gap: 8 }}>
     <div

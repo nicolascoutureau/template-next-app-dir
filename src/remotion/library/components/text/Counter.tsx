@@ -130,6 +130,7 @@ export const Counter: React.FC<CounterProps> = ({
   separator = ",",
   decimalSeparator = ".",
   tabularNums = true,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   animation = "instant",
   abbreviate = false,
   ease = "smooth",

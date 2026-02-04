@@ -185,7 +185,7 @@ const WebContent = ({ dark = false }: { dark?: boolean }) => (
   </div>
 );
 
-const defaultDecorator = (Story: any) => (
+const defaultDecorator = (Story: React.ComponentType) => (
   <RemotionWrapper durationInFrames={90} backgroundColor="#e5e7eb">
     <div
       style={{
