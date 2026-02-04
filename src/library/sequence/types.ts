@@ -11,7 +11,11 @@ import { ComponentType } from "react";
 export type TransitionSpec =
   | { type: "fade"; durationInFrames: number }
   | { type: "wipe"; durationInFrames: number; direction: "left" | "right" | "up" | "down" }
-  | { type: "dissolve"; durationInFrames: number; seed: number; softness?: number };
+  | { type: "dissolve"; durationInFrames: number; seed?: number; softness?: number }
+  | { type: "glitch"; durationInFrames: number; seed?: number; intensity?: number }
+  | { type: "pixelate"; durationInFrames: number; size?: number }
+  | { type: "zoom"; durationInFrames: number; intensity?: number }
+  | { type: "flip"; durationInFrames: number; direction: "horizontal" | "vertical" };
 
 /**
  * Scene specification for SceneStack.

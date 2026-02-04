@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Light leak style presets.
@@ -17,7 +20,7 @@ export type LightLeakStyle =
  * Props for the `LightLeak` component.
  */
 export type LightLeakProps = {
-  /** Content to overlay light leak on. */
+  /** Content to overlay light leak on (3D children). */
   children: ReactNode;
   /** Frame at which light leak starts. */
   startFrame?: number;
@@ -33,21 +36,15 @@ export type LightLeakProps = {
   angle?: number;
   /** Maximum opacity of the light leak. */
   maxOpacity?: number;
-  /** Position offset (0-1). */
-  position?: { x: number; y: number };
-  /** Blend mode for the overlay. */
-  blendMode?: CSSProperties["mixBlendMode"];
+  /** Position offset [x, y] normalized (0-1). */
+  position?: [number, number];
   /** Whether to animate position. */
   animated?: boolean;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
 };
 
 const getLeakColors = (
   leakStyle: LightLeakStyle,
-  customColors?: string[],
+  customColors?: string[]
 ): string[] => {
   switch (leakStyle) {
     case "warm":
@@ -69,26 +66,68 @@ const getLeakColors = (
   }
 };
 
+// Light leak shader
+const leakVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const leakFragmentShader = `
+  uniform vec3 uColor1;
+  uniform vec3 uColor2;
+  uniform vec3 uColor3;
+  uniform float uIntensity;
+  uniform float uAngle;
+  uniform vec2 uPosition;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uv = vUv;
+    
+    // Radial gradient from position
+    float dist = length(uv - uPosition);
+    float radial = 1.0 - smoothstep(0.0, 0.8, dist);
+    radial = pow(radial, 1.5);
+    
+    // Directional gradient based on angle
+    float angleRad = uAngle * 3.14159 / 180.0;
+    vec2 dir = vec2(cos(angleRad), sin(angleRad));
+    float linear = dot(uv - 0.5, dir) + 0.5;
+    
+    // Combine gradients
+    float t = (radial * 0.6 + linear * 0.4);
+    
+    // Color interpolation
+    vec3 color;
+    if (t < 0.5) {
+      color = mix(uColor1, uColor2, t * 2.0);
+    } else {
+      color = mix(uColor2, uColor3, (t - 0.5) * 2.0);
+    }
+    
+    // Soft falloff
+    float alpha = radial * uIntensity;
+    alpha = pow(alpha, 0.8);
+    
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
+
 /**
- * `LightLeak` creates cinematic light leak/flare effects.
+ * `LightLeak` creates cinematic light leak/flare effects in 3D.
  * Adds the organic, analog feel of light bleeding onto film.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Warm film light leak
- * <LightLeak leakStyle="warm" durationInFrames={45}>
- *   <Content />
- * </LightLeak>
- *
- * // Rainbow flare with animation
- * <LightLeak leakStyle="rainbow" animated maxOpacity={0.6}>
- *   <Content />
- * </LightLeak>
- *
- * // Custom colors
- * <LightLeak leakStyle="custom" colors={["#ff0000", "#0000ff"]}>
- *   <Content />
- * </LightLeak>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <LightLeak leakStyle="warm" durationInFrames={45}>
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </LightLeak>
+ * </ThreeCanvas>
  * ```
  */
 export const LightLeak = ({
@@ -100,97 +139,85 @@ export const LightLeak = ({
   colors,
   angle = 45,
   maxOpacity = 0.5,
-  position = { x: 0.3, y: 0.3 },
-  blendMode = "screen",
+  position = [0.3, 0.3],
   animated = true,
-  className,
-  style,
 }: LightLeakProps) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const meshRef = useRef<THREE.Mesh>(null);
+
   const leakColors = getLeakColors(leakStyle, colors);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   const easedProgress = easing(progress);
-
-  // Intensity peaks in the middle
   const intensity = Math.sin(easedProgress * Math.PI);
 
   // Animated position offset
   const animOffset = animated
     ? {
-        x: Math.sin(easedProgress * Math.PI * 2) * 0.2,
-        y: Math.cos(easedProgress * Math.PI * 1.5) * 0.15,
-      }
+      x: Math.sin(easedProgress * Math.PI * 2) * 0.2,
+      y: Math.cos(easedProgress * Math.PI * 1.5) * 0.15,
+    }
     : { x: 0, y: 0 };
 
-  const posX = (position.x + animOffset.x) * 100;
-  const posY = (position.y + animOffset.y) * 100;
+  const posX = position[0] + animOffset.x;
+  const posY = position[1] + animOffset.y;
 
-  // Build gradient
-  const gradientStops = leakColors
-    .map((color, i) => {
-      const pos = (i / (leakColors.length - 1)) * 100;
-      return `${color} ${pos}%`;
-    })
-    .join(", ");
+  const aspect = width / height;
+  const overlaySize = 20;
 
-  const containerStyle: CSSProperties = {
-    position: "relative",
-    ...style,
-  };
+  const threeColors = useMemo(() => {
+    const normalized = [...leakColors];
+    while (normalized.length < 3) {
+      normalized.push(normalized[normalized.length - 1]);
+    }
+    return normalized.slice(0, 3).map((c) => new THREE.Color(c));
+  }, [leakColors]);
 
-  const leakStyle1: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    pointerEvents: "none",
-    opacity: intensity * maxOpacity,
-    mixBlendMode: blendMode,
-    background: `
-      radial-gradient(
-        ellipse 80% 60% at ${posX}% ${posY}%,
-        ${leakColors[0]}40,
-        transparent 70%
-      ),
-      linear-gradient(
-        ${angle}deg,
-        ${gradientStops}
-      )
-    `,
-    filter: `blur(${40 + intensity * 20}px)`,
-  };
+  const uniforms = useMemo(
+    () => ({
+      uColor1: { value: threeColors[0] },
+      uColor2: { value: threeColors[1] },
+      uColor3: { value: threeColors[2] },
+      uIntensity: { value: 0 },
+      uAngle: { value: angle },
+      uPosition: { value: new THREE.Vector2(posX, posY) },
+    }),
+    [threeColors, angle, posX, posY]
+  );
 
-  // Secondary leak layer for more organic look
-  const leakStyle2: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    pointerEvents: "none",
-    opacity: intensity * maxOpacity * 0.6,
-    mixBlendMode: "overlay",
-    background: `
-      radial-gradient(
-        ellipse 60% 80% at ${100 - posX}% ${100 - posY}%,
-        ${leakColors[leakColors.length - 1]}30,
-        transparent 60%
-      )
-    `,
-    filter: `blur(${60 + intensity * 30}px)`,
-  };
+  useFrame(() => {
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uIntensity.value = intensity * maxOpacity;
+      material.uniforms.uPosition.value.set(posX, posY);
+    }
+  });
 
   return (
-    <div className={className} style={containerStyle}>
+    <group>
       {children}
+
+      {/* Light leak overlay */}
       {intensity > 0.01 && (
-        <>
-          <div style={leakStyle1} />
-          <div style={leakStyle2} />
-        </>
+        <mesh ref={meshRef} position={[0, 0, 4]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={leakVertexShader}
+            fragmentShader={leakFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
       )}
-    </div>
+    </group>
   );
 };

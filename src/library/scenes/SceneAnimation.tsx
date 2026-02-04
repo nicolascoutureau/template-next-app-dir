@@ -80,14 +80,17 @@ export interface SceneAnimationProps {
 /**
  * 3D component that provides Ken Burns style camera movement.
  * Wraps content with subtle zoom and vertical drift animation.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * <SceneAnimation localFrame={localFrame} sceneDuration={120}>
- *   <mesh>
- *     <boxGeometry />
- *   </mesh>
- * </SceneAnimation>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <SceneAnimation localFrame={localFrame} sceneDuration={120}>
+ *     <mesh>
+ *       <boxGeometry />
+ *     </mesh>
+ *   </SceneAnimation>
+ * </ThreeCanvas>
  *
  * // With custom zoom
  * <SceneAnimation
@@ -123,43 +126,5 @@ export const SceneAnimation: React.FC<SceneAnimationProps> = ({
     <group scale={[scale, scale, 1]} position={position}>
       {children}
     </group>
-  );
-};
-
-/**
- * 2D/DOM version of SceneAnimation using CSS transforms.
- */
-export const SceneAnimation2D: React.FC<
-  Omit<SceneAnimationProps, "positionOffset"> & {
-    style?: React.CSSProperties;
-    className?: string;
-  }
-> = ({
-  children,
-  localFrame,
-  sceneDuration,
-  config,
-  disableZoom = false,
-  disableYDrift = false,
-  style,
-  className,
-}) => {
-  const { zoom, yDrift } = useSceneAnimation(localFrame, sceneDuration, config);
-
-  const scale = disableZoom ? 1 : zoom;
-  const y = disableYDrift ? 0 : yDrift * 100; // Convert to pixels
-
-  const containerStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    transform: `scale(${scale}) translateY(${y}px)`,
-    transformOrigin: "center center",
-    ...style,
-  };
-
-  return (
-    <div style={containerStyle} className={className}>
-      {children}
-    </div>
   );
 };

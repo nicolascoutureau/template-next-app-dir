@@ -1,18 +1,46 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import * as THREE from "three";
 
 export interface VerticalStripRevealProps {
+  /** Content to reveal (3D children) */
   children: ReactNode;
+  /** Number of vertical strips */
   strips?: number;
+  /** Frame at which animation starts */
   startFrame?: number;
+  /** Duration of each strip's animation in frames */
   durationInFrames?: number;
+  /** Delay between each strip starting (in frames) */
   staggerDelay?: number;
+  /** Direction of strip reveal */
   direction?: "left-to-right" | "right-to-left" | "center-out" | "edges-in";
+  /** Reveal mode */
   revealMode?: "slide" | "fade" | "scale";
-  className?: string;
-  style?: CSSProperties;
+  /** Size of the reveal area [width, height] */
+  size?: [number, number];
+  /** Color of mask strips */
+  maskColor?: string;
 }
 
+/**
+ * `VerticalStripReveal` creates a staggered vertical strip reveal effect in 3D.
+ * Use inside a ThreeCanvas.
+ *
+ * @example
+ * ```tsx
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <VerticalStripReveal
+ *     strips={5}
+ *     durationInFrames={30}
+ *     direction="center-out"
+ *   >
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </VerticalStripReveal>
+ * </ThreeCanvas>
+ * ```
+ */
 export const VerticalStripReveal = ({
   children,
   strips = 5,
@@ -21,88 +49,76 @@ export const VerticalStripReveal = ({
   staggerDelay = 4,
   direction = "center-out",
   revealMode = "slide",
-  className,
-  style,
+  size = [10, 6],
+  maskColor = "#000000",
 }: VerticalStripRevealProps) => {
   const frame = useCurrentFrame();
+  const { height: videoHeight } = useVideoConfig();
   const localFrame = frame - startFrame;
 
-  const stripOrder = getStripOrder(strips, direction);
-  const stripWidth = 100 / strips;
+  const stripOrder = useMemo(() => getStripOrder(strips, direction), [strips, direction]);
+  const stripWidth = size[0] / strips;
+
+  const color = useMemo(() => new THREE.Color(maskColor), [maskColor]);
 
   if (localFrame < 0) {
     return null;
   }
 
+  // Calculate total animation time to know when it's fully revealed
+  const maxDelay = Math.max(...stripOrder) * staggerDelay;
+  const totalAnimationDuration = maxDelay + durationInFrames;
+  const isFullyRevealed = localFrame >= totalAnimationDuration;
+
   return (
-    <div
-      className={className}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        ...style,
-      }}
-    >
-      {stripOrder.map((orderIndex, i) => {
-        const stripDelay = orderIndex * staggerDelay;
-        const stripLocalFrame = localFrame - stripDelay;
+    <group>
+      {/* Content layer */}
+      {children}
 
-        const progress = interpolate(
-          stripLocalFrame,
-          [0, durationInFrames],
-          [0, 1],
-          {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: Easing.out(Easing.cubic),
-          }
-        );
+      {/* Mask strips that slide/fade away to reveal content */}
+      {!isFullyRevealed &&
+        stripOrder.map((orderIndex, i) => {
+          const stripDelay = orderIndex * staggerDelay;
+          const stripLocalFrame = localFrame - stripDelay;
 
-        const stripStyle = getStripStyle(
-          revealMode,
-          progress,
-          i,
-          stripWidth
-        );
+          const progress = interpolate(
+            stripLocalFrame,
+            [0, durationInFrames],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            }
+          );
 
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: `${i * stripWidth}%`,
-              width: `${stripWidth}%`,
-              height: "100%",
-              overflow: "hidden",
-              ...stripStyle,
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: `${-i * stripWidth}%`,
-                width: `${strips * 100}%`,
-                height: "100%",
-                transform: `translateX(${(i * 100) / strips}%)`,
-              }}
+          // Skip rendering if strip animation is complete
+          if (progress >= 1) return null;
+
+          const stripX = -size[0] / 2 + stripWidth / 2 + i * stripWidth;
+          const { position, scale, opacity } = getStripTransform(
+            revealMode,
+            progress,
+            stripX,
+            size[1]
+          );
+
+          return (
+            <mesh
+              key={i}
+              position={[position[0], position[1], 0.1]}
+              scale={[scale[0], scale[1], 1]}
             >
-              <div
-                style={{
-                  width: `${100 / strips}%`,
-                  height: "100%",
-                }}
-              >
-                {children}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+              <planeGeometry args={[stripWidth * 1.01, size[1] * 1.01]} />
+              <meshBasicMaterial
+                color={color}
+                transparent={revealMode === "fade"}
+                opacity={opacity}
+              />
+            </mesh>
+          );
+        })}
+    </group>
   );
 };
 
@@ -139,27 +155,40 @@ function getStripOrder(
   }
 }
 
-function getStripStyle(
+function getStripTransform(
   revealMode: "slide" | "fade" | "scale",
   progress: number,
-  _stripIndex: number,
-  _stripWidth: number
-): CSSProperties {
+  stripX: number,
+  height: number
+): {
+  position: [number, number];
+  scale: [number, number];
+  opacity: number;
+} {
   switch (revealMode) {
     case "slide":
       return {
-        transform: `translateY(${(1 - progress) * 100}%)`,
+        position: [stripX, -progress * height, ],
+        scale: [1, 1],
+        opacity: 1,
       };
     case "fade":
       return {
-        opacity: progress,
+        position: [stripX, 0],
+        scale: [1, 1],
+        opacity: 1 - progress,
       };
     case "scale":
       return {
-        transform: `scaleY(${progress})`,
-        transformOrigin: "top",
+        position: [stripX, 0],
+        scale: [1, 1 - progress],
+        opacity: 1,
       };
     default:
-      return {};
+      return {
+        position: [stripX, 0],
+        scale: [1, 1],
+        opacity: 1,
+      };
   }
 }

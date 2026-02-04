@@ -1,6 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing, random } from "remotion";
-import { useMemo } from "react";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing, random } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Particle dissolve pattern.
@@ -16,7 +18,7 @@ export type DissolvePattern =
  * Props for the `ParticleDissolve` component.
  */
 export type ParticleDissolveProps = {
-  /** Content to dissolve. */
+  /** Content to dissolve (3D children). */
   children: ReactNode;
   /** Frame at which dissolve starts. */
   startFrame?: number;
@@ -26,54 +28,100 @@ export type ParticleDissolveProps = {
   easing?: (t: number) => number;
   /** Dissolve pattern. */
   pattern?: DissolvePattern;
-  /** Number of particle columns. */
-  columns?: number;
-  /** Number of particle rows. */
-  rows?: number;
   /** Whether this is a reveal (in) or dissolve (out). */
   mode?: "in" | "out";
   /** Intensity of particle movement. */
   intensity?: number;
-  /** Stagger delay between particles (0-1). */
-  stagger?: number;
   /** Seed for randomization. */
   seed?: number;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
 };
 
-interface Particle {
-  x: number;
-  y: number;
-  delay: number;
-  angle: number;
-  distance: number;
-  rotation: number;
-  scale: number;
-}
+// Particle dissolve shader
+const dissolveVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const dissolveFragmentShader = `
+  uniform float uProgress;
+  uniform float uIntensity;
+  uniform float uTime;
+  uniform int uPattern;
+  uniform float uSeed;
+  varying vec2 vUv;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co + uSeed, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    
+    float a = rand(i);
+    float b = rand(i + vec2(1.0, 0.0));
+    float c = rand(i + vec2(0.0, 1.0));
+    float d = rand(i + vec2(1.0, 1.0));
+    
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float t = uTime;
+    
+    float dissolve = 0.0;
+    
+    if (uPattern == 0) {
+      // Scatter - random noise-based dissolve
+      dissolve = noise(uv * 10.0 + t);
+    } else if (uPattern == 1) {
+      // Vortex - spiral dissolve from center
+      vec2 centered = uv - 0.5;
+      float angle = atan(centered.y, centered.x);
+      float dist = length(centered);
+      dissolve = (angle / 6.28318 + 0.5) * 0.5 + dist;
+    } else if (uPattern == 2) {
+      // Explosion - radial from center
+      float dist = length(uv - 0.5);
+      dissolve = dist;
+    } else if (uPattern == 3) {
+      // Gravity - top to bottom
+      dissolve = 1.0 - uv.y + noise(uv * 5.0) * 0.3;
+    } else {
+      // Wind - left to right with turbulence
+      dissolve = uv.x + sin(uv.y * 10.0 + t) * 0.1;
+    }
+    
+    // Threshold for visibility
+    float threshold = uProgress * (1.0 + uIntensity * 0.5);
+    float alpha = smoothstep(threshold, threshold - 0.1, dissolve);
+    
+    // Add some edge glow effect
+    float edge = smoothstep(threshold - 0.1, threshold, dissolve) - alpha;
+    vec3 color = vec3(0.0);
+    color += vec3(1.0, 0.5, 0.2) * edge * 2.0; // Orange glow at dissolve edge
+    
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
 
 /**
- * `ParticleDissolve` breaks content into animated particles.
- * Creates stunning dissolve/materialize effects.
+ * `ParticleDissolve` creates particle-based dissolve effects in 3D.
+ * Content appears to dissolve or materialize with various patterns.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Scatter dissolve
- * <ParticleDissolve pattern="scatter" mode="out">
- *   <Content />
- * </ParticleDissolve>
- *
- * // Vortex reveal
- * <ParticleDissolve pattern="vortex" mode="in">
- *   <Content />
- * </ParticleDissolve>
- *
- * // Explosion effect
- * <ParticleDissolve pattern="explosion" intensity={2}>
- *   <Content />
- * </ParticleDissolve>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <ParticleDissolve pattern="scatter" mode="out">
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </ParticleDissolve>
+ * </ThreeCanvas>
  * ```
  */
 export const ParticleDissolve = ({
@@ -82,195 +130,82 @@ export const ParticleDissolve = ({
   durationInFrames = 45,
   easing = Easing.out(Easing.cubic),
   pattern = "scatter",
-  columns = 10,
-  rows = 10,
   mode = "out",
   intensity = 1,
-  stagger = 0.4,
   seed = 0,
-  className,
-  style,
 }: ParticleDissolveProps) => {
   const frame = useCurrentFrame();
-
-  // Generate particle data
-  const particles = useMemo((): Particle[] => {
-    const result: Particle[] = [];
-
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        const x = col / columns;
-        const y = row / rows;
-        const idx = row * columns + col;
-
-        // Random values for this particle
-        const randomAngle = random(`angle-${idx}-${seed}`) * Math.PI * 2;
-        const randomDistance =
-          (0.5 + random(`dist-${idx}-${seed}`) * 0.5) * intensity;
-        const randomRotation = (random(`rot-${idx}-${seed}`) - 0.5) * 720;
-        const randomScale = 0.5 + random(`scale-${idx}-${seed}`) * 0.5;
-
-        // Calculate delay based on pattern
-        let delay: number;
-        const centerX = 0.5;
-        const centerY = 0.5;
-        const distFromCenter = Math.sqrt(
-          Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2),
-        );
-
-        switch (pattern) {
-          case "vortex":
-            const angle = Math.atan2(y - centerY, x - centerX);
-            delay =
-              ((angle + Math.PI) / (Math.PI * 2)) * 0.5 + distFromCenter * 0.5;
-            break;
-          case "explosion":
-            delay = distFromCenter;
-            break;
-          case "gravity":
-            delay = 1 - y; // Top particles go first
-            break;
-          case "wind":
-            delay = x; // Left to right
-            break;
-          case "scatter":
-          default:
-            delay = random(`delay-${idx}-${seed}`);
-            break;
-        }
-
-        result.push({
-          x,
-          y,
-          delay,
-          angle: randomAngle,
-          distance: randomDistance * 200,
-          rotation: randomRotation,
-          scale: randomScale,
-        });
-      }
-    }
-
-    // Normalize delays to 0-1 range
-    const maxDelay = Math.max(...result.map((p) => p.delay));
-    const minDelay = Math.min(...result.map((p) => p.delay));
-    result.forEach((p) => {
-      p.delay = (p.delay - minDelay) / (maxDelay - minDelay);
-    });
-
-    return result;
-  }, [columns, rows, pattern, intensity, seed]);
+  const { fps, width, height } = useVideoConfig();
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   const easedProgress = easing(progress);
   const effectProgress = mode === "in" ? 1 - easedProgress : easedProgress;
 
-  const containerStyle: CSSProperties = {
-    position: "relative",
-    overflow: "hidden",
-    ...style,
-  };
+  const patternIndex = { scatter: 0, vortex: 1, explosion: 2, gravity: 3, wind: 4 }[pattern];
 
-  const cellWidth = 100 / columns;
-  const cellHeight = 100 / rows;
+  const aspect = width / height;
+  const overlaySize = 20;
+
+  const uniforms = useMemo(
+    () => ({
+      uProgress: { value: 0 },
+      uIntensity: { value: intensity },
+      uTime: { value: 0 },
+      uPattern: { value: patternIndex },
+      uSeed: { value: seed },
+    }),
+    [intensity, patternIndex, seed]
+  );
+
+  useFrame(() => {
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uProgress.value = effectProgress;
+      material.uniforms.uTime.value = ((frame - startFrame) / fps);
+    }
+  });
+
+  // Simple opacity for content
+  const contentOpacity = mode === "in" ? easedProgress : 1 - easedProgress;
 
   return (
-    <div className={className} style={containerStyle}>
-      {/* Hidden content for sizing */}
-      <div style={{ visibility: "hidden" }}>{children}</div>
+    <group>
+      {/* Opacity overlay for content */}
+      {contentOpacity < 0.99 && (
+        <mesh position={[0, 0, 4.5]} renderOrder={98}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={1 - contentOpacity}
+            depthTest={false}
+          />
+        </mesh>
+      )}
+      
+      {children}
 
-      {/* Particle grid */}
-      {particles.map((particle, i) => {
-        // Calculate this particle's animation progress
-        const particleProgress = Math.min(
-          1,
-          Math.max(
-            0,
-            (effectProgress - particle.delay * stagger) / (1 - stagger),
-          ),
-        );
-
-        // Movement calculations based on pattern
-        let offsetX: number;
-        let offsetY: number;
-
-        switch (pattern) {
-          case "vortex":
-            const vortexAngle = particle.angle + particleProgress * Math.PI * 4;
-            offsetX =
-              Math.cos(vortexAngle) * particle.distance * particleProgress;
-            offsetY =
-              Math.sin(vortexAngle) * particle.distance * particleProgress;
-            break;
-          case "explosion":
-            const explosionAngle = Math.atan2(
-              particle.y - 0.5,
-              particle.x - 0.5,
-            );
-            offsetX =
-              Math.cos(explosionAngle) * particle.distance * particleProgress;
-            offsetY =
-              Math.sin(explosionAngle) * particle.distance * particleProgress;
-            break;
-          case "gravity":
-            offsetX = (random(`gx-${i}-${seed}`) - 0.5) * 50 * particleProgress;
-            offsetY = particle.distance * particleProgress * 1.5;
-            break;
-          case "wind":
-            offsetX = particle.distance * particleProgress;
-            offsetY =
-              Math.sin(particle.x * 10 + particleProgress * 5) *
-              30 *
-              particleProgress;
-            break;
-          case "scatter":
-          default:
-            offsetX =
-              Math.cos(particle.angle) * particle.distance * particleProgress;
-            offsetY =
-              Math.sin(particle.angle) * particle.distance * particleProgress;
-            break;
-        }
-
-        const rotation = particle.rotation * particleProgress;
-        const scale = 1 - particleProgress * (1 - particle.scale);
-        const opacity = 1 - particleProgress;
-
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: `${particle.x * 100}%`,
-              top: `${particle.y * 100}%`,
-              width: `${cellWidth}%`,
-              height: `${cellHeight}%`,
-              overflow: "hidden",
-              transform: `translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`,
-              opacity,
-              transformOrigin: "center center",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: `-${((particle.x * 100) / cellWidth) * 100}%`,
-                top: `-${((particle.y * 100) / cellHeight) * 100}%`,
-                width: `${columns * 100}%`,
-                height: `${rows * 100}%`,
-              }}
-            >
-              {children}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+      {/* Dissolve effect overlay */}
+      {effectProgress > 0.01 && effectProgress < 0.99 && (
+        <mesh ref={meshRef} position={[0, 0, 5]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={dissolveVertexShader}
+            fragmentShader={dissolveFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+    </group>
   );
 };

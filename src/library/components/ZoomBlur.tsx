@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Zoom blur direction.
@@ -10,7 +13,7 @@ export type ZoomDirection = "in" | "out";
  * Props for the `ZoomBlur` component.
  */
 export type ZoomBlurProps = {
-  /** Content to apply zoom blur to. */
+  /** Content to apply zoom blur to (3D children). */
   children: ReactNode;
   /** Frame at which effect starts. */
   startFrame?: number;
@@ -20,41 +23,67 @@ export type ZoomBlurProps = {
   easing?: (t: number) => number;
   /** Direction of zoom blur. */
   direction?: ZoomDirection;
-  /** Number of blur layers (more = smoother but heavier). */
-  layers?: number;
   /** Maximum scale difference for blur trail. */
   intensity?: number;
-  /** Origin point for zoom (CSS transform-origin). */
-  origin?: string;
+  /** Origin point [x, y] normalized (0-1). */
+  origin?: [number, number];
   /** Whether to fade in/out during effect. */
   fade?: boolean;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
 };
 
+// Radial blur shader
+const zoomBlurVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const zoomBlurFragmentShader = `
+  uniform float uIntensity;
+  uniform vec2 uOrigin;
+  uniform float uDirection; // 0 = in, 1 = out
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uv = vUv;
+    vec2 centered = uv - uOrigin;
+    float dist = length(centered);
+    
+    // Radial blur lines
+    float angle = atan(centered.y, centered.x);
+    float radialLines = sin(angle * 20.0) * 0.5 + 0.5;
+    
+    // Blur increases towards edges (for "in") or center (for "out")
+    float blurFactor;
+    if (uDirection < 0.5) {
+      blurFactor = dist;
+    } else {
+      blurFactor = 1.0 - dist;
+    }
+    
+    float alpha = blurFactor * uIntensity * radialLines * 0.5;
+    
+    // Color trails
+    vec3 color = vec3(1.0);
+    
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
+
 /**
- * `ZoomBlur` creates radial motion blur effects.
+ * `ZoomBlur` creates radial motion blur effects in 3D.
  * Simulates the speed/impact feeling of rapid zoom movements.
- * Uses multiple layers to create a convincing motion trail.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Zoom blur in (impact entrance)
- * <ZoomBlur direction="in" durationInFrames={20}>
- *   <Content />
- * </ZoomBlur>
- *
- * // Zoom blur out (speed exit)
- * <ZoomBlur direction="out" startFrame={60}>
- *   <Content />
- * </ZoomBlur>
- *
- * // High intensity from corner
- * <ZoomBlur intensity={0.5} origin="top left" layers={12}>
- *   <Content />
- * </ZoomBlur>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <ZoomBlur direction="in" durationInFrames={20}>
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </ZoomBlur>
+ * </ThreeCanvas>
  * ```
  */
 export const ZoomBlur = ({
@@ -63,20 +92,19 @@ export const ZoomBlur = ({
   durationInFrames = 20,
   easing = Easing.out(Easing.cubic),
   direction = "in",
-  layers = 8,
   intensity = 0.3,
-  origin = "center",
+  origin = [0.5, 0.5],
   fade = true,
-  className,
-  style,
 }: ZoomBlurProps) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   const easedProgress = easing(progress);
@@ -87,63 +115,60 @@ export const ZoomBlur = ({
   // Base opacity
   const baseOpacity = direction === "in" ? easedProgress : 1 - easedProgress;
 
-  const containerStyle: CSSProperties = {
-    position: "relative",
-    transformOrigin: origin,
-    ...style,
-  };
+  // Scale animation
+  const scaleOffset = effectStrength * intensity;
+  const currentScale = direction === "in" ? 1 - scaleOffset * 0.3 : 1 + scaleOffset * 0.3;
 
-  // If effect is complete or not started, just show content
-  if (effectStrength < 0.01) {
-    return (
-      <div
-        className={className}
-        style={{ ...containerStyle, opacity: fade ? baseOpacity : 1 }}
-      >
-        {children}
-      </div>
-    );
-  }
+  const aspect = width / height;
+  const overlaySize = 20;
 
-  // Generate blur layers
-  const blurLayers = Array.from({ length: layers }).map((_, i) => {
-    const layerProgress = i / (layers - 1);
+  const uniforms = useMemo(
+    () => ({
+      uIntensity: { value: 0 },
+      uOrigin: { value: new THREE.Vector2(origin[0], origin[1]) },
+      uDirection: { value: direction === "in" ? 0 : 1 },
+    }),
+    [origin, direction]
+  );
 
-    // Scale varies from 1 to 1+intensity based on layer
-    const scaleOffset = layerProgress * intensity * effectStrength;
-    const scale = direction === "in" ? 1 + scaleOffset : 1 - scaleOffset * 0.5;
-
-    // Blur increases for outer layers
-    const blur = layerProgress * 3 * effectStrength;
-
-    // Opacity decreases for outer layers
-    const layerOpacity = (1 - layerProgress * 0.7) / layers;
-
-    return { scale, blur, layerOpacity };
+  useFrame(() => {
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uIntensity.value = effectStrength * intensity;
+    }
   });
 
   return (
-    <div className={className} style={containerStyle}>
-      {blurLayers.map((layer, i) => (
-        <div
-          key={i}
-          style={{
-            position: i === 0 ? "relative" : "absolute",
-            inset: i === 0 ? undefined : 0,
-            transform: `scale(${layer.scale})`,
-            transformOrigin: origin,
-            filter: `blur(${layer.blur}px)`,
-            opacity:
-              i === 0
-                ? fade
-                  ? baseOpacity
-                  : 1
-                : layer.layerOpacity * (fade ? baseOpacity : 1),
-          }}
-        >
-          {children}
-        </div>
-      ))}
-    </div>
+    <group scale={[currentScale, currentScale, 1]}>
+      {/* Fade overlay */}
+      {fade && baseOpacity < 0.99 && (
+        <mesh position={[0, 0, 4.5]} renderOrder={98}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={1 - baseOpacity}
+            depthTest={false}
+          />
+        </mesh>
+      )}
+
+      {children}
+
+      {/* Zoom blur overlay */}
+      {effectStrength > 0.01 && (
+        <mesh ref={meshRef} position={[0, 0, 5]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={zoomBlurVertexShader}
+            fragmentShader={zoomBlurFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+    </group>
   );
 };

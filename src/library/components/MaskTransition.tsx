@@ -1,26 +1,29 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
- * Advanced mask shapes.
+ * Mask shapes for transitions.
  */
 export type MaskShape =
-  | "blinds-horizontal"
-  | "blinds-vertical"
-  | "grid"
-  | "spiral"
+  | "circle"
   | "star"
   | "hexagon"
+  | "diamond"
   | "heart"
-  | "angular"
-  | "radial-bars"
-  | "checkerboard";
+  | "wipe-left"
+  | "wipe-right"
+  | "wipe-up"
+  | "wipe-down"
+  | "iris";
 
 /**
  * Props for the `MaskTransition` component.
  */
 export type MaskTransitionProps = {
-  /** Content to reveal/hide. */
+  /** Content to reveal/hide (3D children). */
   children: ReactNode;
   /** Shape of the mask. */
   shape?: MaskShape;
@@ -32,347 +35,208 @@ export type MaskTransitionProps = {
   easing?: (t: number) => number;
   /** Whether this is a reveal or hide. */
   mode?: "in" | "out";
-  /** Number of segments (for blinds, grid, etc). */
-  segments?: number;
-  /** Origin point (0-1 normalized). */
-  origin?: { x: number; y: number };
-  /** Stagger delay between segments (0-1). */
-  stagger?: number;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
+  /** Origin point [x, y] normalized (0-1). */
+  origin?: [number, number];
+  /** Softness of mask edge (0-1). */
+  softness?: number;
+  /** Color of the mask/wipe. */
+  maskColor?: string;
+};
+
+// Mask shader
+const maskVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const maskFragmentShader = `
+  uniform float uProgress;
+  uniform int uShape;
+  uniform vec2 uOrigin;
+  uniform float uSoftness;
+  uniform vec3 uColor;
+  varying vec2 vUv;
+
+  #define PI 3.14159265359
+
+  float circleMask(vec2 uv, vec2 origin, float progress) {
+    float dist = length(uv - origin);
+    return smoothstep(progress * 1.5, progress * 1.5 - uSoftness, dist);
+  }
+
+  float starMask(vec2 uv, vec2 origin, float progress) {
+    vec2 centered = uv - origin;
+    float angle = atan(centered.y, centered.x);
+    float radius = length(centered);
+    
+    // Star shape (5 points)
+    float starRadius = 0.5 + 0.3 * cos(angle * 5.0);
+    float targetRadius = progress * 1.5 * starRadius;
+    
+    return smoothstep(targetRadius, targetRadius - uSoftness, radius);
+  }
+
+  float hexagonMask(vec2 uv, vec2 origin, float progress) {
+    vec2 centered = uv - origin;
+    float angle = atan(centered.y, centered.x);
+    float radius = length(centered);
+    
+    // Hexagon shape
+    float hexRadius = 1.0 / cos(mod(angle, PI / 3.0) - PI / 6.0);
+    float targetRadius = progress * 1.2 * hexRadius;
+    
+    return smoothstep(targetRadius, targetRadius - uSoftness, radius);
+  }
+
+  float diamondMask(vec2 uv, vec2 origin, float progress) {
+    vec2 centered = abs(uv - origin);
+    float dist = centered.x + centered.y;
+    return smoothstep(progress * 2.0, progress * 2.0 - uSoftness, dist);
+  }
+
+  float heartMask(vec2 uv, vec2 origin, float progress) {
+    vec2 centered = (uv - origin) * 2.0;
+    centered.y -= 0.3;
+    
+    float a = centered.x * centered.x + centered.y * centered.y - 0.3;
+    float heart = a * a * a - centered.x * centered.x * centered.y * centered.y * centered.y;
+    
+    return smoothstep(progress * 0.5, progress * 0.5 - uSoftness * 0.5, heart);
+  }
+
+  float wipeMask(vec2 uv, int direction, float progress) {
+    float coord;
+    if (direction == 0) coord = uv.x; // left
+    else if (direction == 1) coord = 1.0 - uv.x; // right
+    else if (direction == 2) coord = uv.y; // up
+    else coord = 1.0 - uv.y; // down
+    
+    return smoothstep(progress, progress - uSoftness, coord);
+  }
+
+  float irisMask(vec2 uv, vec2 origin, float progress) {
+    float dist = length(uv - origin);
+    float iris = smoothstep(progress * 1.5 + 0.1, progress * 1.5, dist);
+    return 1.0 - iris;
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float mask = 0.0;
+    
+    if (uShape == 0) mask = circleMask(uv, uOrigin, uProgress);
+    else if (uShape == 1) mask = starMask(uv, uOrigin, uProgress);
+    else if (uShape == 2) mask = hexagonMask(uv, uOrigin, uProgress);
+    else if (uShape == 3) mask = diamondMask(uv, uOrigin, uProgress);
+    else if (uShape == 4) mask = heartMask(uv, uOrigin, uProgress);
+    else if (uShape == 5) mask = wipeMask(uv, 0, uProgress);
+    else if (uShape == 6) mask = wipeMask(uv, 1, uProgress);
+    else if (uShape == 7) mask = wipeMask(uv, 2, uProgress);
+    else if (uShape == 8) mask = wipeMask(uv, 3, uProgress);
+    else if (uShape == 9) mask = irisMask(uv, uOrigin, uProgress);
+    
+    // Invert mask (we're drawing what should be hidden)
+    float alpha = 1.0 - mask;
+    
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
+const shapeMap: Record<MaskShape, number> = {
+  circle: 0,
+  star: 1,
+  hexagon: 2,
+  diamond: 3,
+  heart: 4,
+  "wipe-left": 5,
+  "wipe-right": 6,
+  "wipe-up": 7,
+  "wipe-down": 8,
+  iris: 9,
 };
 
 /**
- * Generate clip-path for advanced mask shapes.
- */
-function getMaskClipPath(
-  shape: MaskShape,
-  progress: number,
-  segments: number,
-  origin: { x: number; y: number },
-  stagger: number,
-): string {
-  const p = progress;
-
-  switch (shape) {
-    case "blinds-horizontal": {
-      const paths: string[] = [];
-      for (let i = 0; i < segments; i++) {
-        const segmentProgress = Math.min(
-          1,
-          Math.max(0, (p - (i * stagger) / segments) / (1 - stagger)),
-        );
-        const y = (i / segments) * 100;
-        const h = (1 / segments) * 100;
-        if (segmentProgress > 0) {
-          paths.push(
-            `${0}% ${y}%, ${segmentProgress * 100}% ${y}%, ${segmentProgress * 100}% ${y + h}%, 0% ${y + h}%`,
-          );
-        }
-      }
-      return paths.length > 0
-        ? `polygon(${paths.join(", ")})`
-        : "polygon(0 0, 0 0)";
-    }
-
-    case "blinds-vertical": {
-      const paths: string[] = [];
-      for (let i = 0; i < segments; i++) {
-        const segmentProgress = Math.min(
-          1,
-          Math.max(0, (p - (i * stagger) / segments) / (1 - stagger)),
-        );
-        const x = (i / segments) * 100;
-        const w = (1 / segments) * 100;
-        if (segmentProgress > 0) {
-          paths.push(
-            `${x}% 0%, ${x + w}% 0%, ${x + w}% ${segmentProgress * 100}%, ${x}% ${segmentProgress * 100}%`,
-          );
-        }
-      }
-      return paths.length > 0
-        ? `polygon(${paths.join(", ")})`
-        : "polygon(0 0, 0 0)";
-    }
-
-    case "spiral": {
-      const turns = 2;
-      const maxRadius = 150;
-      const points: string[] = [];
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-
-      for (let i = 0; i <= 60; i++) {
-        const angle = (i / 60) * Math.PI * 2 * turns;
-        const radius = (i / 60) * maxRadius * p;
-        const x = cx + Math.cos(angle) * radius;
-        const y = cy + Math.sin(angle) * radius;
-        points.push(`${x}% ${y}%`);
-      }
-      // Close the spiral with center
-      points.push(`${cx}% ${cy}%`);
-
-      return `polygon(${points.join(", ")})`;
-    }
-
-    case "star": {
-      const points: string[] = [];
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-      const outerRadius = p * 150;
-      const innerRadius = outerRadius * 0.4;
-      const numPoints = 5;
-
-      for (let i = 0; i < numPoints * 2; i++) {
-        const angle = (i * Math.PI) / numPoints - Math.PI / 2;
-        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        const x = cx + Math.cos(angle) * radius;
-        const y = cy + Math.sin(angle) * radius;
-        points.push(`${x}% ${y}%`);
-      }
-
-      return `polygon(${points.join(", ")})`;
-    }
-
-    case "hexagon": {
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-      const radius = p * 150;
-      const points: string[] = [];
-
-      for (let i = 0; i < 6; i++) {
-        const angle = (i * Math.PI) / 3 - Math.PI / 6;
-        const x = cx + Math.cos(angle) * radius;
-        const y = cy + Math.sin(angle) * radius;
-        points.push(`${x}% ${y}%`);
-      }
-
-      return `polygon(${points.join(", ")})`;
-    }
-
-    case "heart": {
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-      const size = p * 150;
-
-      // Simplified heart shape using polygon
-      return `polygon(
-        ${cx}% ${cy + size * 0.3}%,
-        ${cx + size * 0.5}% ${cy - size * 0.2}%,
-        ${cx + size * 0.5}% ${cy - size * 0.5}%,
-        ${cx + size * 0.25}% ${cy - size * 0.6}%,
-        ${cx}% ${cy - size * 0.35}%,
-        ${cx - size * 0.25}% ${cy - size * 0.6}%,
-        ${cx - size * 0.5}% ${cy - size * 0.5}%,
-        ${cx - size * 0.5}% ${cy - size * 0.2}%
-      )`;
-    }
-
-    case "angular": {
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-      const radius = 200;
-      const sweepAngle = p * 360;
-      const points: string[] = [`${cx}% ${cy}%`];
-
-      for (let angle = -90; angle <= -90 + sweepAngle; angle += 5) {
-        const rad = (angle * Math.PI) / 180;
-        const x = cx + Math.cos(rad) * radius;
-        const y = cy + Math.sin(rad) * radius;
-        points.push(`${x}% ${y}%`);
-      }
-
-      return `polygon(${points.join(", ")})`;
-    }
-
-    case "radial-bars": {
-      const cx = origin.x * 100;
-      const cy = origin.y * 100;
-      const numBars = segments;
-      const points: string[] = [];
-      const radius = 200;
-
-      for (let i = 0; i < numBars; i++) {
-        const barProgress = Math.min(
-          1,
-          Math.max(0, (p - (i * stagger) / numBars) / (1 - stagger)),
-        );
-        const startAngle = (i / numBars) * Math.PI * 2 - Math.PI / 2;
-        const endAngle = ((i + 0.8) / numBars) * Math.PI * 2 - Math.PI / 2;
-        const barRadius = radius * barProgress;
-
-        if (barProgress > 0) {
-          points.push(`${cx}% ${cy}%`);
-          points.push(
-            `${cx + Math.cos(startAngle) * barRadius}% ${cy + Math.sin(startAngle) * barRadius}%`,
-          );
-          points.push(
-            `${cx + Math.cos(endAngle) * barRadius}% ${cy + Math.sin(endAngle) * barRadius}%`,
-          );
-        }
-      }
-
-      return points.length > 0
-        ? `polygon(${points.join(", ")})`
-        : "polygon(0 0, 0 0)";
-    }
-
-    case "grid": {
-      // Grid is handled separately with multiple divs
-      return "none";
-    }
-
-    case "checkerboard": {
-      // Checkerboard is handled separately with multiple divs
-      return "none";
-    }
-
-    default:
-      return `inset(0 ${(1 - p) * 100}% 0 0)`;
-  }
-}
-
-/**
- * `MaskTransition` provides advanced mask-based reveals.
- * Goes beyond basic shapes with creative patterns like blinds,
- * spirals, stars, and radial bars.
+ * `MaskTransition` provides shape-based mask reveals in 3D.
+ * Creates cinematic wipes and reveals using various shapes.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Horizontal blinds reveal
- * <MaskTransition shape="blinds-horizontal" segments={8}>
- *   <Content />
- * </MaskTransition>
- *
- * // Star burst from center
- * <MaskTransition shape="star" origin={{ x: 0.5, y: 0.5 }}>
- *   <Content />
- * </MaskTransition>
- *
- * // Spiral reveal
- * <MaskTransition shape="spiral" durationInFrames={60}>
- *   <Content />
- * </MaskTransition>
- *
- * // Staggered vertical blinds
- * <MaskTransition shape="blinds-vertical" segments={12} stagger={0.5}>
- *   <Content />
- * </MaskTransition>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <MaskTransition shape="circle" origin={[0.5, 0.5]}>
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </MaskTransition>
+ * </ThreeCanvas>
  * ```
  */
 export const MaskTransition = ({
   children,
-  shape = "blinds-horizontal",
+  shape = "circle",
   startFrame = 0,
   durationInFrames = 30,
   easing = Easing.out(Easing.cubic),
   mode = "in",
-  segments = 6,
-  origin = { x: 0.5, y: 0.5 },
-  stagger = 0.3,
-  className,
-  style,
+  origin = [0.5, 0.5],
+  softness = 0.1,
+  maskColor = "#000000",
 }: MaskTransitionProps) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const meshRef = useRef<THREE.Mesh>(null);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   const easedProgress = easing(progress);
   const effectProgress = mode === "in" ? easedProgress : 1 - easedProgress;
 
-  // Handle grid and checkerboard separately
-  if (shape === "grid" || shape === "checkerboard") {
-    const gridSize = Math.ceil(Math.sqrt(segments));
-    const cells: { x: number; y: number; delay: number }[] = [];
+  const aspect = width / height;
+  const overlaySize = 20;
 
-    for (let row = 0; row < gridSize; row++) {
-      for (let col = 0; col < gridSize; col++) {
-        const delay =
-          shape === "checkerboard"
-            ? ((row + col) % 2) * 0.3 + (row + col) * 0.05
-            : Math.sqrt(
-                Math.pow(col - gridSize / 2, 2) +
-                  Math.pow(row - gridSize / 2, 2),
-              ) * 0.1;
-        cells.push({ x: col, y: row, delay });
-      }
-    }
+  const color = useMemo(() => new THREE.Color(maskColor), [maskColor]);
 
-    const maxDelay = Math.max(...cells.map((c) => c.delay));
-
-    return (
-      <div
-        className={className}
-        style={{ position: "relative", overflow: "hidden", ...style }}
-      >
-        <div style={{ visibility: "hidden" }}>{children}</div>
-        {cells.map((cell, i) => {
-          const cellProgress = Math.min(
-            1,
-            Math.max(
-              0,
-              (effectProgress - (cell.delay * stagger) / maxDelay) /
-                (1 - stagger),
-            ),
-          );
-          const cellSize = 100 / gridSize;
-
-          return (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${cell.x * cellSize}%`,
-                top: `${cell.y * cellSize}%`,
-                width: `${cellSize}%`,
-                height: `${cellSize}%`,
-                overflow: "hidden",
-                transform: `scale(${cellProgress})`,
-                opacity: cellProgress,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  left: `-${cell.x * 100}%`,
-                  top: `-${cell.y * 100}%`,
-                  width: `${gridSize * 100}%`,
-                  height: `${gridSize * 100}%`,
-                }}
-              >
-                {children}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
-
-  const clipPath = getMaskClipPath(
-    shape,
-    effectProgress,
-    segments,
-    origin,
-    stagger,
+  const uniforms = useMemo(
+    () => ({
+      uProgress: { value: 0 },
+      uShape: { value: shapeMap[shape] },
+      uOrigin: { value: new THREE.Vector2(origin[0], origin[1]) },
+      uSoftness: { value: softness },
+      uColor: { value: color },
+    }),
+    [shape, origin, softness, color]
   );
 
-  const maskStyle: CSSProperties = {
-    clipPath,
-    WebkitClipPath: clipPath,
-    ...style,
-  };
+  useFrame(() => {
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uProgress.value = effectProgress;
+    }
+  });
 
   return (
-    <div className={className} style={maskStyle}>
+    <group>
       {children}
-    </div>
+
+      {/* Mask overlay */}
+      {effectProgress < 0.99 && (
+        <mesh ref={meshRef} position={[0, 0, 5]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={maskVertexShader}
+            fragmentShader={maskFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+          />
+        </mesh>
+      )}
+    </group>
   );
 };

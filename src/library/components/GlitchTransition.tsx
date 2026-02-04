@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, random } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, random } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Glitch effect intensity.
@@ -10,7 +13,7 @@ export type GlitchIntensity = "subtle" | "medium" | "intense" | "chaos";
  * Props for the `GlitchTransition` component.
  */
 export type GlitchTransitionProps = {
-  /** Content to apply glitch effect to. */
+  /** Content to apply glitch effect to (3D children). */
   children: ReactNode;
   /** Frame at which glitch starts. */
   startFrame?: number;
@@ -22,72 +25,93 @@ export type GlitchTransitionProps = {
   rgbSplit?: boolean;
   /** Whether to include scan lines. */
   scanLines?: boolean;
-  /** Whether to include horizontal slice displacement. */
-  sliceDisplacement?: boolean;
   /** Whether this is a reveal (glitch in) or hide (glitch out). */
   mode?: "in" | "out";
   /** Seed for randomization (for reproducible results). */
   seed?: number;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
 };
 
 const getIntensityValues = (intensity: GlitchIntensity) => {
   switch (intensity) {
     case "subtle":
-      return {
-        rgbOffset: 3,
-        sliceCount: 3,
-        displacement: 10,
-        flickerRate: 0.1,
-      };
+      return { rgbOffset: 0.01, flickerRate: 0.1, displacement: 0.02 };
     case "medium":
-      return {
-        rgbOffset: 8,
-        sliceCount: 6,
-        displacement: 30,
-        flickerRate: 0.3,
-      };
+      return { rgbOffset: 0.03, flickerRate: 0.3, displacement: 0.05 };
     case "intense":
-      return {
-        rgbOffset: 15,
-        sliceCount: 10,
-        displacement: 60,
-        flickerRate: 0.5,
-      };
+      return { rgbOffset: 0.06, flickerRate: 0.5, displacement: 0.1 };
     case "chaos":
-      return {
-        rgbOffset: 25,
-        sliceCount: 15,
-        displacement: 100,
-        flickerRate: 0.7,
-      };
+      return { rgbOffset: 0.1, flickerRate: 0.7, displacement: 0.15 };
   }
 };
 
+// Shader for glitch overlay effects
+const glitchVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const glitchFragmentShader = `
+  uniform float uIntensity;
+  uniform float uTime;
+  uniform float uScanLines;
+  uniform float uRgbSplit;
+  uniform vec3 uRgbOffset;
+  varying vec2 vUv;
+
+  float rand(vec2 co) {
+    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float t = uTime;
+    
+    // Scan lines
+    float scanLine = 0.0;
+    if (uScanLines > 0.0) {
+      scanLine = sin(uv.y * 800.0) * 0.04 * uIntensity;
+    }
+    
+    // RGB split/chromatic aberration
+    float rgbStrength = uRgbSplit * uIntensity;
+    vec3 color = vec3(0.0);
+    
+    if (rgbStrength > 0.01) {
+      // Red channel offset
+      color.r = rand(uv + uRgbOffset.xy * rgbStrength);
+      // Green channel
+      color.g = rand(uv);
+      // Blue channel offset
+      color.b = rand(uv - uRgbOffset.xy * rgbStrength);
+      color *= 0.3 * uIntensity;
+    }
+    
+    // Noise overlay
+    float noise = rand(uv * 100.0 + t) * 0.1 * uIntensity;
+    
+    // Combine effects
+    float alpha = (scanLine + noise + length(color) * 0.5) * uIntensity;
+    
+    gl_FragColor = vec4(color + vec3(noise), alpha);
+  }
+`;
+
 /**
- * `GlitchTransition` creates digital distortion effects.
- * Includes RGB split, scan lines, and slice displacement for
- * a authentic glitch aesthetic.
+ * `GlitchTransition` creates digital distortion effects in 3D.
+ * Includes RGB split, scan lines, and displacement for authentic glitch aesthetic.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Glitch in reveal
- * <GlitchTransition mode="in" durationInFrames={20}>
- *   <Content />
- * </GlitchTransition>
- *
- * // Intense glitch with all effects
- * <GlitchTransition intensity="intense" rgbSplit scanLines sliceDisplacement>
- *   <Content />
- * </GlitchTransition>
- *
- * // Subtle chromatic aberration only
- * <GlitchTransition intensity="subtle" rgbSplit>
- *   <Content />
- * </GlitchTransition>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   {/* Glitch in reveal *\/}
+ *   <GlitchTransition mode="in" durationInFrames={20}>
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </GlitchTransition>
+ * </ThreeCanvas>
  * ```
  */
 export const GlitchTransition = ({
@@ -97,21 +121,20 @@ export const GlitchTransition = ({
   intensity = "medium",
   rgbSplit = true,
   scanLines = true,
-  sliceDisplacement = true,
   mode = "in",
   seed = 0,
-  className,
-  style,
 }: GlitchTransitionProps) => {
   const frame = useCurrentFrame();
-  const { rgbOffset, sliceCount, displacement, flickerRate } =
-    getIntensityValues(intensity);
+  const { fps, width, height } = useVideoConfig();
+  const overlayRef = useRef<THREE.Mesh>(null);
+
+  const { rgbOffset, flickerRate, displacement } = getIntensityValues(intensity);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   // Invert progress for "out" mode
@@ -121,175 +144,73 @@ export const GlitchTransition = ({
   const glitchIntensity = effectProgress * Math.sin(effectProgress * Math.PI);
 
   // Random flicker based on frame
-  const shouldFlicker =
-    random(`flicker-${frame}-${seed}`) < flickerRate * glitchIntensity;
+  const shouldFlicker = random(`flicker-${frame}-${seed}`) < flickerRate * glitchIntensity;
 
-  // RGB offset calculations
-  const rgbX = rgbSplit
-    ? rgbOffset * glitchIntensity * (random(`rgb-x-${frame}-${seed}`) - 0.5) * 2
-    : 0;
-  const rgbY = rgbSplit
-    ? rgbOffset * glitchIntensity * (random(`rgb-y-${frame}-${seed}`) - 0.5) * 2
-    : 0;
-
-  // Generate slices
-  const slices = sliceDisplacement
-    ? Array.from({ length: sliceCount }).map((_, i) => {
-        const sliceRandom = random(`slice-${i}-${frame}-${seed}`);
-        const isActive = sliceRandom < glitchIntensity * 0.5;
-        const y = (i / sliceCount) * 100;
-        const height =
-          (1 / sliceCount) * 100 + random(`slice-h-${i}-${frame}-${seed}`) * 5;
-        const offsetX = isActive
-          ? (random(`slice-x-${i}-${frame}-${seed}`) - 0.5) *
-            displacement *
-            glitchIntensity
-          : 0;
-
-        return { y, height, offsetX, isActive };
-      })
-    : [];
+  // Displacement offset for content
+  const dispX = displacement * glitchIntensity * (random(`disp-x-${frame}-${seed}`) - 0.5) * 2;
+  const dispY = displacement * glitchIntensity * (random(`disp-y-${frame}-${seed}`) - 0.5) * 2;
 
   // Base opacity with flicker
   const baseOpacity = mode === "in" ? progress : 1 - progress;
   const opacity = shouldFlicker ? baseOpacity * 0.3 : baseOpacity;
 
-  const containerStyle: CSSProperties = {
-    position: "relative",
-    ...style,
-  };
+  const aspect = width / height;
+  const overlaySize = 20;
 
-  const layerStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-  };
+  const uniforms = useMemo(
+    () => ({
+      uIntensity: { value: 0 },
+      uTime: { value: 0 },
+      uScanLines: { value: scanLines ? 1 : 0 },
+      uRgbSplit: { value: rgbSplit ? 1 : 0 },
+      uRgbOffset: { value: new THREE.Vector3(rgbOffset, rgbOffset * 0.5, 0) },
+    }),
+    [scanLines, rgbSplit, rgbOffset]
+  );
+
+  useFrame(() => {
+    if (overlayRef.current) {
+      const material = overlayRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uIntensity.value = glitchIntensity;
+      material.uniforms.uTime.value = frame / fps;
+    }
+  });
 
   return (
-    <div className={className} style={containerStyle}>
-      {/* Red channel */}
-      {rgbSplit && glitchIntensity > 0.1 && (
-        <div
-          style={{
-            ...layerStyle,
-            transform: `translate(${rgbX}px, ${rgbY}px)`,
-            opacity: opacity * 0.8,
-            mixBlendMode: "screen",
-            filter: "url(#redChannel)",
-          }}
-        >
-          <div
-            style={{
-              filter: "grayscale(100%) brightness(1.2)",
-              color: "#ff0000",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                filter: "drop-shadow(0 0 0 #ff0000)",
-                opacity: 0.7,
-              }}
-            >
-              {children}
-            </div>
-          </div>
-        </div>
-      )}
+    <group>
+      {/* Content with displacement and opacity */}
+      <group position={[dispX, dispY, 0]}>
+        <group>
+          {/* Fade overlay for opacity control */}
+          {opacity < 0.99 && (
+            <mesh position={[0, 0, 4.5]} renderOrder={98}>
+              <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+              <meshBasicMaterial
+                color="#000000"
+                transparent
+                opacity={1 - opacity}
+                depthTest={false}
+              />
+            </mesh>
+          )}
+          {children}
+        </group>
+      </group>
 
-      {/* Blue channel */}
-      {rgbSplit && glitchIntensity > 0.1 && (
-        <div
-          style={{
-            ...layerStyle,
-            transform: `translate(${-rgbX}px, ${-rgbY}px)`,
-            opacity: opacity * 0.8,
-            mixBlendMode: "screen",
-          }}
-        >
-          <div
-            style={{
-              position: "relative",
-              filter: "hue-rotate(240deg) saturate(3)",
-              opacity: 0.7,
-            }}
-          >
-            {children}
-          </div>
-        </div>
+      {/* Glitch overlay effects */}
+      {glitchIntensity > 0.01 && (
+        <mesh ref={overlayRef} position={[0, 0, 5]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={glitchVertexShader}
+            fragmentShader={glitchFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
       )}
-
-      {/* Main content layer with slices */}
-      <div style={{ ...layerStyle, opacity }}>
-        {sliceDisplacement && slices.some((s) => s.isActive) ? (
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "100%",
-              overflow: "hidden",
-            }}
-          >
-            {slices.map((slice, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  top: `${slice.y}%`,
-                  height: `${slice.height}%`,
-                  overflow: "hidden",
-                  transform: `translateX(${slice.offsetX}px)`,
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: `-${slice.y}%`,
-                    height: `${(100 / slice.height) * 100}%`,
-                  }}
-                >
-                  {children}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          children
-        )}
-      </div>
-
-      {/* Scan lines overlay */}
-      {scanLines && (
-        <div
-          style={{
-            ...layerStyle,
-            opacity: 0.15 * glitchIntensity,
-            pointerEvents: "none",
-            background: `repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(0, 0, 0, 0.8) 2px,
-              rgba(0, 0, 0, 0.8) 4px
-            )`,
-          }}
-        />
-      )}
-
-      {/* Random noise flicker */}
-      {shouldFlicker && (
-        <div
-          style={{
-            ...layerStyle,
-            opacity: 0.1,
-            pointerEvents: "none",
-            background: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
-      )}
-    </div>
+    </group>
   );
 };

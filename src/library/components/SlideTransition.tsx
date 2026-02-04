@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing, spring } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate, Easing, spring } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Advanced slide effect types.
@@ -21,7 +24,7 @@ export type SlideDirection = "left" | "right" | "up" | "down";
  * Props for the `SlideTransition` component.
  */
 export type SlideTransitionProps = {
-  /** Content to slide. */
+  /** Content to slide (3D children). */
   children: ReactNode;
   /** Direction of the slide. */
   direction?: SlideDirection;
@@ -33,30 +36,22 @@ export type SlideTransitionProps = {
   effect?: SlideEffect;
   /** Whether this is a slide in or out. */
   mode?: "in" | "out";
-  /** Distance to slide (percentage of container). */
+  /** Distance to slide (in world units). */
   distance?: number;
   /** Whether to blur during motion. */
   motionBlur?: boolean;
-  /** Motion blur intensity (0-1). */
-  blurIntensity?: number;
   /** Whether to fade during slide. */
   fade?: boolean;
   /** Whether to scale during slide. */
   scale?: boolean;
-  /** Scale amount (1 = no scale). */
+  /** Scale amount (0-1, where 1 = no scale). */
   scaleAmount?: number;
   /** Whether to rotate during slide (3D tilt). */
   rotate?: boolean;
-  /** Rotation amount in degrees. */
+  /** Rotation amount in radians. */
   rotateAmount?: number;
-  /** Whether to add shadow during motion. */
-  shadow?: boolean;
   /** FPS for spring calculation. */
   fps?: number;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
 };
 
 /**
@@ -75,37 +70,58 @@ const getEasing = (effect: SlideEffect): ((t: number) => number) => {
     case "momentum":
       return Easing.bezier(0.19, 1, 0.22, 1);
     case "spring":
-      return (t: number) => t; // Spring is handled differently
+      return (t: number) => t;
     default:
       return Easing.out(Easing.cubic);
   }
 };
 
+// Motion blur shader
+const blurVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const blurFragmentShader = `
+  uniform float uBlur;
+  uniform float uDirection; // 0 = horizontal, 1 = vertical
+  uniform vec3 uColor;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uv = vUv;
+    
+    // Directional blur effect
+    float blur;
+    if (uDirection < 0.5) {
+      // Horizontal
+      blur = abs(uv.x - 0.5) * 2.0;
+    } else {
+      // Vertical
+      blur = abs(uv.y - 0.5) * 2.0;
+    }
+    
+    float alpha = (1.0 - blur) * uBlur * 0.3;
+    
+    gl_FragColor = vec4(uColor, alpha);
+  }
+`;
+
 /**
- * `SlideTransition` provides advanced directional slide effects.
+ * `SlideTransition` provides advanced directional slide effects in 3D.
  * Includes physics-based animations, motion blur, and 3D transforms.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Elastic slide from left
- * <SlideTransition direction="left" effect="elastic">
- *   <Content />
- * </SlideTransition>
- *
- * // Bouncy slide with motion blur
- * <SlideTransition direction="up" effect="bounce" motionBlur>
- *   <Content />
- * </SlideTransition>
- *
- * // Spring physics slide with 3D rotation
- * <SlideTransition effect="spring" rotate scale>
- *   <Content />
- * </SlideTransition>
- *
- * // Slide out with shadow
- * <SlideTransition mode="out" direction="right" shadow fade>
- *   <Content />
- * </SlideTransition>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   <SlideTransition direction="left" effect="elastic">
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </SlideTransition>
+ * </ThreeCanvas>
  * ```
  */
 export const SlideTransition = ({
@@ -115,20 +131,18 @@ export const SlideTransition = ({
   durationInFrames = 30,
   effect = "smooth",
   mode = "in",
-  distance = 100,
+  distance = 10,
   motionBlur = false,
-  blurIntensity = 0.5,
   fade = false,
   scale = false,
   scaleAmount = 0.9,
   rotate = false,
-  rotateAmount = 15,
-  shadow = false,
+  rotateAmount = 0.3,
   fps = 30,
-  className,
-  style,
 }: SlideTransitionProps) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const blurRef = useRef<THREE.Mesh>(null);
 
   // Calculate progress based on effect type
   let progress: number;
@@ -149,7 +163,7 @@ export const SlideTransition = ({
       frame,
       [startFrame, startFrame + durationInFrames],
       [0, 1],
-      { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     );
     progress = easing(rawProgress);
   }
@@ -158,17 +172,17 @@ export const SlideTransition = ({
   const animProgress = mode === "in" ? progress : 1 - progress;
 
   // Calculate movement offset
-  const getOffset = () => {
+  const getOffset = (): [number, number, number] => {
     const remaining = (1 - animProgress) * distance;
     switch (direction) {
       case "left":
-        return { x: -remaining, y: 0 };
+        return [-remaining, 0, 0];
       case "right":
-        return { x: remaining, y: 0 };
+        return [remaining, 0, 0];
       case "up":
-        return { x: 0, y: -remaining };
+        return [0, remaining, 0];
       case "down":
-        return { x: 0, y: remaining };
+        return [0, -remaining, 0];
     }
   };
 
@@ -176,9 +190,8 @@ export const SlideTransition = ({
 
   // Motion blur based on velocity
   const velocity = Math.abs(1 - animProgress);
-  const blur = motionBlur ? velocity * 20 * blurIntensity : 0;
-  const blurDirection =
-    direction === "left" || direction === "right" ? "X" : "Y";
+  const blurAmount = motionBlur ? velocity : 0;
+  const isHorizontal = direction === "left" || direction === "right";
 
   // Scale calculation
   const currentScale = scale
@@ -186,83 +199,73 @@ export const SlideTransition = ({
     : 1;
 
   // Rotation calculation (3D tilt effect)
-  const rotation = rotate
-    ? (1 - animProgress) *
-      rotateAmount *
-      (direction === "right" || direction === "down" ? -1 : 1)
-    : 0;
-  const rotationAxis =
-    direction === "left" || direction === "right" ? "Y" : "X";
-
-  // Shadow based on distance from resting position
-  const shadowOpacity = shadow ? velocity * 0.3 : 0;
-  const shadowOffset = velocity * 20;
+  const rotation: [number, number, number] = [0, 0, 0];
+  if (rotate) {
+    const rotAmount = (1 - animProgress) * rotateAmount;
+    if (isHorizontal) {
+      rotation[1] = direction === "right" ? -rotAmount : rotAmount;
+    } else {
+      rotation[0] = direction === "down" ? rotAmount : -rotAmount;
+    }
+  }
 
   // Opacity
   const opacity = fade ? animProgress : 1;
 
-  const containerStyle: CSSProperties = {
-    perspective: rotate ? "1000px" : undefined,
-    ...style,
-  };
+  const aspect = width / height;
+  const overlaySize = 20;
 
-  const contentStyle: CSSProperties = {
-    transform: `
-      translate(${offset.x}%, ${offset.y}%)
-      scale(${currentScale})
-      rotate${rotationAxis}(${rotation}deg)
-    `,
-    filter: blur > 0.5 ? `blur(${blur}px)` : undefined,
-    opacity,
-    boxShadow:
-      shadow && shadowOpacity > 0.01
-        ? `${direction === "right" ? -shadowOffset : direction === "left" ? shadowOffset : 0}px 
-         ${direction === "down" ? -shadowOffset : direction === "up" ? shadowOffset : 0}px 
-         ${shadowOffset * 2}px 
-         rgba(0, 0, 0, ${shadowOpacity})`
-        : undefined,
-    transformStyle: rotate ? "preserve-3d" : undefined,
-  };
+  const blurUniforms = useMemo(
+    () => ({
+      uBlur: { value: 0 },
+      uDirection: { value: isHorizontal ? 0 : 1 },
+      uColor: { value: new THREE.Color("#ffffff") },
+    }),
+    [isHorizontal]
+  );
 
-  // Motion blur layers
-  if (motionBlur && blur > 1) {
-    const layers = 5;
-    return (
-      <div className={className} style={containerStyle}>
-        {Array.from({ length: layers }).map((_, i) => {
-          const layerOffset = (i / (layers - 1) - 0.5) * blur * 0.5;
-          const layerOpacity = 1 - Math.abs(i / (layers - 1) - 0.5) * 1.5;
-
-          return (
-            <div
-              key={i}
-              style={{
-                ...contentStyle,
-                position: i === 0 ? "relative" : "absolute",
-                inset: i === 0 ? undefined : 0,
-                transform: `
-                  translate(${offset.x + (blurDirection === "X" ? layerOffset : 0)}%, ${offset.y + (blurDirection === "Y" ? layerOffset : 0)}%)
-                  scale(${currentScale})
-                  rotate${rotationAxis}(${rotation}deg)
-                `,
-                opacity:
-                  i === Math.floor(layers / 2)
-                    ? opacity
-                    : layerOpacity * opacity * 0.3,
-                filter: `blur(${blur * 0.2}px)`,
-              }}
-            >
-              {children}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  useFrame(() => {
+    if (blurRef.current) {
+      const material = blurRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uBlur.value = blurAmount;
+    }
+  });
 
   return (
-    <div className={className} style={containerStyle}>
-      <div style={contentStyle}>{children}</div>
-    </div>
+    <group
+      position={offset}
+      rotation={rotation}
+      scale={[currentScale, currentScale, 1]}
+    >
+      {/* Fade overlay */}
+      {fade && opacity < 0.99 && (
+        <mesh position={[0, 0, 4.5]} renderOrder={98}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={1 - opacity}
+            depthTest={false}
+          />
+        </mesh>
+      )}
+
+      {children}
+
+      {/* Motion blur overlay */}
+      {motionBlur && blurAmount > 0.01 && (
+        <mesh ref={blurRef} position={[0, 0, 5]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={blurVertexShader}
+            fragmentShader={blurFragmentShader}
+            uniforms={blurUniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+    </group>
   );
 };

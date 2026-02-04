@@ -1,5 +1,8 @@
-import type { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame, interpolate, Easing } from "remotion";
+import type { ReactNode } from "react";
+import { useMemo, useRef } from "react";
+import { useCurrentFrame, interpolate, Easing, useVideoConfig } from "remotion";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 /**
  * Blur transition type.
@@ -10,7 +13,7 @@ export type BlurType = "focus" | "defocus" | "rack" | "motion";
  * Props for the `BlurTransition` component.
  */
 export type BlurTransitionProps = {
-  /** Content to apply blur transition to. */
+  /** Content to apply blur transition to (3D children). */
   children: ReactNode;
   /** Type of blur effect. */
   type?: BlurType;
@@ -20,7 +23,7 @@ export type BlurTransitionProps = {
   durationInFrames?: number;
   /** Easing function. */
   easing?: (t: number) => number;
-  /** Maximum blur amount in pixels. */
+  /** Maximum blur amount (shader intensity 0-1). */
   maxBlur?: number;
   /** Whether to fade opacity alongside blur. */
   fade?: boolean;
@@ -28,36 +31,67 @@ export type BlurTransitionProps = {
   breathe?: boolean;
   /** Direction for motion blur: angle in degrees. */
   motionAngle?: number;
-  /** Optional className. */
-  className?: string;
-  /** Additional styles. */
-  style?: CSSProperties;
+  /** Color of blur overlay. */
+  blurColor?: string;
 };
 
+// Shader for blur overlay effect
+const blurVertexShader = `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const blurFragmentShader = `
+  uniform float uBlur;
+  uniform float uOpacity;
+  uniform vec3 uColor;
+  uniform float uMotionAngle;
+  uniform bool uIsMotion;
+  varying vec2 vUv;
+
+  void main() {
+    vec2 uv = vUv;
+    
+    if (uIsMotion) {
+      // Motion blur - radial lines effect
+      float angle = uMotionAngle * 3.14159 / 180.0;
+      vec2 dir = vec2(cos(angle), sin(angle));
+      vec2 center = uv - 0.5;
+      float d = abs(dot(center, dir));
+      float motionStrength = uBlur * (1.0 - d * 2.0);
+      motionStrength = max(0.0, motionStrength);
+      gl_FragColor = vec4(uColor, motionStrength * uOpacity * 0.5);
+    } else {
+      // Regular blur - soft glow overlay
+      float dist = length(uv - 0.5);
+      float blurEffect = smoothstep(0.0, 0.7, 1.0 - dist) * uBlur;
+      gl_FragColor = vec4(uColor, blurEffect * uOpacity * 0.3);
+    }
+  }
+`;
+
 /**
- * `BlurTransition` creates cinematic blur effects.
+ * `BlurTransition` creates cinematic blur effects in 3D space.
  * Simulates camera focus pulls, depth of field, and motion blur.
+ * Use inside a ThreeCanvas.
  *
  * @example
  * ```tsx
- * // Focus in (blur to sharp)
- * <BlurTransition type="focus" durationInFrames={30}>
- *   <Content />
- * </BlurTransition>
+ * <ThreeCanvas width={1920} height={1080} camera={{ position: [0, 0, 5], fov: 50 }}>
+ *   {/* Focus in (blur to sharp) *\/}
+ *   <BlurTransition type="focus" durationInFrames={30}>
+ *     <Image3D url="/my-image.jpg" scale={4} />
+ *   </BlurTransition>
+ * </ThreeCanvas>
  *
- * // Defocus out (sharp to blur)
+ * @example
+ * ```tsx
+ * {/* Defocus out (sharp to blur) *\/}
  * <BlurTransition type="defocus" startFrame={60}>
- *   <Content />
- * </BlurTransition>
- *
- * // Rack focus (blur → sharp → blur)
- * <BlurTransition type="rack" durationInFrames={60}>
- *   <Content />
- * </BlurTransition>
- *
- * // With depth breathing effect
- * <BlurTransition type="focus" breathe maxBlur={20}>
- *   <Content />
+ *   <mesh><boxGeometry /></mesh>
  * </BlurTransition>
  * ```
  */
@@ -67,20 +101,21 @@ export const BlurTransition = ({
   startFrame = 0,
   durationInFrames = 30,
   easing = Easing.out(Easing.cubic),
-  maxBlur = 15,
+  maxBlur = 0.8,
   fade = true,
   breathe = false,
   motionAngle = 0,
-  className,
-  style,
+  blurColor = "#ffffff",
 }: BlurTransitionProps) => {
   const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
+  const overlayRef = useRef<THREE.Mesh>(null);
 
   const progress = interpolate(
     frame,
     [startFrame, startFrame + durationInFrames],
     [0, 1],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
   const easedProgress = easing(progress);
@@ -121,50 +156,63 @@ export const BlurTransition = ({
       blur = 0;
   }
 
-  // For motion blur, we use multiple layers with offset
-  if (type === "motion" && blur > 0) {
-    const layers = 5;
-    const angleRad = (motionAngle * Math.PI) / 180;
+  const color = useMemo(() => new THREE.Color(blurColor), [blurColor]);
 
-    return (
-      <div className={className} style={{ position: "relative", ...style }}>
-        {Array.from({ length: layers }).map((_, i) => {
-          const layerProgress = i / (layers - 1);
-          const offset = (layerProgress - 0.5) * blur * 2;
-          const x = Math.cos(angleRad) * offset;
-          const y = Math.sin(angleRad) * offset;
-          const layerOpacity =
-            (1 - Math.abs(layerProgress - 0.5) * 1.5) * (opacity / layers);
+  const uniforms = useMemo(
+    () => ({
+      uBlur: { value: 0 },
+      uOpacity: { value: 1 },
+      uColor: { value: color },
+      uMotionAngle: { value: motionAngle },
+      uIsMotion: { value: type === "motion" },
+    }),
+    [color, motionAngle, type]
+  );
 
-          return (
-            <div
-              key={i}
-              style={{
-                position: i === 0 ? "relative" : "absolute",
-                inset: i === 0 ? undefined : 0,
-                transform: `translate(${x}px, ${y}px)`,
-                opacity: i === Math.floor(layers / 2) ? opacity : layerOpacity,
-                filter: `blur(${blur * 0.3}px)`,
-              }}
-            >
-              {children}
-            </div>
-          );
-        })}
-      </div>
-    );
-  }
+  // Update uniforms
+  useFrame(() => {
+    if (overlayRef.current) {
+      const material = overlayRef.current.material as THREE.ShaderMaterial;
+      material.uniforms.uBlur.value = blur;
+      material.uniforms.uOpacity.value = opacity;
+    }
+  });
 
-  const blurStyle: CSSProperties = {
-    filter: `blur(${blur}px)`,
-    opacity,
-    transform: `scale(${scale})`,
-    ...style,
-  };
+  // Calculate overlay size to cover the viewport
+  const aspect = width / height;
+  const overlaySize = 20; // Large enough to cover typical camera views
 
   return (
-    <div className={className} style={blurStyle}>
+    <group scale={[scale, scale, 1]}>
       {children}
-    </div>
+
+      {/* Blur overlay effect */}
+      {blur > 0.01 && (
+        <mesh ref={overlayRef} position={[0, 0, 4]} renderOrder={100}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <shaderMaterial
+            vertexShader={blurVertexShader}
+            fragmentShader={blurFragmentShader}
+            uniforms={uniforms}
+            transparent
+            depthTest={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      )}
+
+      {/* Fade overlay for opacity control */}
+      {fade && opacity < 0.99 && (
+        <mesh position={[0, 0, 5]} renderOrder={101}>
+          <planeGeometry args={[overlaySize * aspect, overlaySize]} />
+          <meshBasicMaterial
+            color="#000000"
+            transparent
+            opacity={1 - opacity}
+            depthTest={false}
+          />
+        </mesh>
+      )}
+    </group>
   );
 };

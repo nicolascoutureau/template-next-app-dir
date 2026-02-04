@@ -1,24 +1,39 @@
 /**
  * @module library
  *
- * A collection of professional 3D text animation components for React Three Fiber + Remotion.
+ * A collection of professional 3D animation components for React Three Fiber + Remotion.
+ * All components are designed to work inside a ThreeCanvas.
  */
 
-// Re-export everything from backgrounds folder
+// Re-export everything from backgrounds folder (all Three.js shaders)
 export {
-  // Backgrounds (all optimized for performance)
+  // Gradient Background
   GradientBackground,
   type GradientBackgroundProps,
   type GradientType,
+  // Fluid Gradient (flowing gradient with organic movement)
+  FluidGradient,
+  type FluidGradientProps,
   LavaShader,
   type LavaShaderProps,
+  // Aurora Background (subtle aurora/wave effect)
+  AuroraBackground,
+  type AuroraBackgroundProps,
+  type AuroraStyle,
   PlasmaBackground,
   type PlasmaBackgroundProps,
   type PlasmaStyle,
+  // Soft Blobs (organic shapes with breathing motion)
+  SoftBlobs,
+  type SoftBlobsProps,
   MetaballsBackground,
   type MetaballsBackgroundProps,
+  // Subtle Grid (minimal grid pattern)
+  SubtleGrid,
+  type SubtleGridProps,
   WaveGridBackground,
   type WaveGridBackgroundProps,
+  // Gradient Orbs (floating gradient orbs)
   GradientOrbs,
   type GradientOrbsProps,
 } from "./backgrounds";
@@ -89,7 +104,7 @@ export {
 // Utilities
 export { FPSMonitor, useFPS, type FPSMonitorProps } from "./utils";
 
-// Media components
+// Media components (3D)
 export {
   MediaFrame,
   type MediaFrameProps,
@@ -98,13 +113,13 @@ export {
   type ImageFit,
 } from "./media";
 
-// Decorative components
+// Decorative components (3D)
 export { ColorBarHeader, type ColorBarHeaderProps } from "./decorative";
 
-// Layout components
+// Layout components (3D groups)
 export { AsymmetricLayout, type AsymmetricLayoutProps } from "./layouts";
 
-// Transition components
+// Transition components (3D)
 export {
   VerticalStripReveal,
   type VerticalStripRevealProps,
@@ -118,21 +133,57 @@ export {
   type FlipUnderTransitionResult,
 } from "./transitions";
 
-// Effects components
+// Effects components (3D shaders)
 export { Glow, type GlowProps, Shimmer, type ShimmerProps } from "./effects";
 
-// Scene components (camera movement & animations)
+// 3D transition/effect components
+export {
+  // Blur-based transitions
+  BlurTransition,
+  type BlurTransitionProps,
+  type BlurType,
+  RackFocus,
+  type RackFocusProps,
+  ZoomBlur,
+  type ZoomBlurProps,
+  type ZoomDirection,
+  // Digital effects
+  GlitchTransition,
+  type GlitchTransitionProps,
+  type GlitchIntensity,
+  // Light effects
+  LightLeak,
+  type LightLeakProps,
+  type LightLeakStyle,
+  // Distortion effects
+  LiquidWarp,
+  type LiquidWarpProps,
+  type LiquidStyle,
+  // Mask-based transitions
+  MaskTransition,
+  type MaskTransitionProps,
+  type MaskShape,
+  // Particle effects
+  ParticleDissolve,
+  type ParticleDissolveProps,
+  type DissolvePattern,
+  // Slide transitions
+  SlideTransition,
+  type SlideTransitionProps,
+  type SlideEffect,
+  type SlideDirection,
+} from "./components";
+
+// Scene components (3D camera movement & animations)
 export {
   // Animation (Ken Burns style zoom/drift)
   SceneAnimation,
-  SceneAnimation2D,
   useSceneAnimation,
   type SceneAnimationProps,
   type SceneAnimationConfig,
   type SceneAnimationResult,
   // Scene Transition (fade in/out)
   SceneTransition,
-  SceneTransition2D,
   useSceneTransition,
   type SceneTransitionProps,
   type SceneTransitionConfig,
@@ -142,7 +193,7 @@ export {
   type SceneContainerProps,
 } from "./scenes";
 
-// Sequence components (declarative scene sequencing)
+// Sequence components (declarative scene sequencing - 3D)
 export {
   // SceneStack - LLM-friendly API (recommended)
   SceneStack,

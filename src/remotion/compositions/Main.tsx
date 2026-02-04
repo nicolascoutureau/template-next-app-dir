@@ -60,45 +60,6 @@ const easeOutExpo = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
 // SCENE TRANSITION OVERLAY - Crossfade between scenes
 // ============================================================================
 
-const SceneTransition: React.FC<{
-  startFrame: number;
-  duration: number;
-  type?: "fadeOut" | "fadeIn" | "lightLeak";
-  color?: string;
-}> = ({ startFrame, duration, type = "fadeOut", color = colors.background }) => {
-  const frame = useCurrentFrame();
-
-  const localFrame = frame - startFrame;
-  if (localFrame < 0 || localFrame > duration) return null;
-
-  const progress = localFrame / duration;
-
-  if (type === "lightLeak") {
-    // Subtle cinematic light leak transition
-    const intensity = Math.sin(progress * Math.PI);
-    return (
-      <mesh position={[0, 0, 10]}>
-        <planeGeometry args={[30, 20]} />
-        <meshBasicMaterial
-          color={colors.primary}
-          transparent
-          opacity={intensity * 0.12}
-          blending={THREE.AdditiveBlending}
-        />
-      </mesh>
-    );
-  }
-
-  const opacity =
-    type === "fadeOut" ? easeInOutQuart(progress) : 1 - easeInOutQuart(progress);
-
-  return (
-    <mesh position={[0, 0, 10]}>
-      <planeGeometry args={[30, 20]} />
-      <meshBasicMaterial color={color} transparent opacity={opacity} />
-    </mesh>
-  );
-};
 
 // ============================================================================
 // CINEMATIC VIGNETTE - Subtle edge darkening
@@ -390,7 +351,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             y: 0.3,
             rotationX: Math.PI / 8,
           });
-          
+
           // Main entrance with refined easing
           tl.to(chars, {
             opacity: 1,
@@ -400,7 +361,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.035,
             ease: "power3.out",
           }, 0.2);
-          
+
           // Subtle breathing - very gentle
           tl.to(chars, {
             y: 0.02,
@@ -409,7 +370,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             yoyo: true,
             repeat: -1,
           }, 1.2);
-          
+
           // Exit animation
           tl.to(chars, {
             opacity: 0,
@@ -418,7 +379,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.02,
             ease: "power2.in",
           }, 3.5);
-          
+
           return tl;
         }}
       />
@@ -437,7 +398,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
         }}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, scale: 0.8, y: 0.4 });
-          
+
           // Elegant scale-up entrance
           tl.to(chars, {
             opacity: 1,
@@ -447,7 +408,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.04,
             ease: "power2.out",
           }, 0.6);
-          
+
           // Exit
           tl.to(chars, {
             opacity: 0,
@@ -457,7 +418,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.015,
             ease: "power2.in",
           }, 3.5);
-          
+
           return tl;
         }}
       />
@@ -478,7 +439,7 @@ const Scene1Opening: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
         exitDelay={exitFrame - 20}
         size={0.3}
       />
-      
+
       {/* Light streak for dramatic effect */}
       <LightStreak position={[0, 0.3, 1]} color={colors.primary} delay={15} duration={40} />
     </group>
@@ -507,7 +468,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
         color={colors.gray}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, x: -0.1 });
-          
+
           tl.to(chars, {
             opacity: 0.8,
             x: 0,
@@ -515,7 +476,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
             stagger: 0.015,
             ease: "power2.out",
           }, 0);
-          
+
           // Exit
           tl.to(chars, {
             opacity: 0,
@@ -523,7 +484,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
             duration: 0.3,
             ease: "power2.in",
           }, 4.5);
-          
+
           return tl;
         }}
       />
@@ -545,7 +506,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
         createTimeline={({ tl, chars }) => {
           // Start hidden and far
           tl.set(chars, { opacity: 0, z: -3, rotationY: Math.PI * 0.6, scale: 0.3 });
-          
+
           // Cinematic reveal - each letter emerges
           tl.to(chars, {
             opacity: 1,
@@ -556,7 +517,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
             stagger: 0.08,
             ease: "expo.out",
           }, 0.4);
-          
+
           // Very subtle depth breathing
           tl.to(chars, {
             z: 0.05,
@@ -565,7 +526,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
             yoyo: true,
             repeat: -1,
           }, 1.8);
-          
+
           // Exit with elegance
           tl.to(chars, {
             opacity: 0,
@@ -575,7 +536,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
             stagger: 0.03,
             ease: "power3.in",
           }, 4.5);
-          
+
           return tl;
         }}
       />
@@ -600,11 +561,11 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
           // Reveal each word with timing
           segments.forEach((seg, i) => {
             const startTime = 1.4 + i * 0.2;
-            tl.to(seg.state, { 
-              opacity: 1, 
-              y: 0, 
-              duration: 0.4, 
-              ease: "power2.out" 
+            tl.to(seg.state, {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              ease: "power2.out"
             }, startTime);
             tl.to(seg.chars, {
               opacity: 1,
@@ -613,17 +574,17 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
               ease: "power2.out",
             }, startTime);
           });
-          
+
           // Exit all segments
           segments.forEach((seg, i) => {
-            tl.to(seg.state, { 
-              opacity: 0, 
-              y: -0.1, 
-              duration: 0.3, 
-              ease: "power2.in" 
+            tl.to(seg.state, {
+              opacity: 0,
+              y: -0.1,
+              duration: 0.3,
+              ease: "power2.in"
             }, 4.5 + i * 0.05);
           });
-          
+
           return tl;
         }}
       />
@@ -644,7 +605,7 @@ const Scene2ProductReveal: React.FC<{ exitFrame: number }> = ({ exitFrame }) => 
         exitDelay={exitFrame - 20}
         size={0.35}
       />
-      
+
       {/* Light effects for product name emphasis */}
       <LightStreak position={[0, 0.4, 2]} color={colors.secondary} delay={30} duration={50} />
     </group>
@@ -670,14 +631,14 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             tl.set(word.state, { opacity: 0, y: 0.2 }, 0);
             tl.set(word.chars, { opacity: 0 }, 0);
           });
-          
+
           words.forEach((word, i) => {
             const startTime = i * 0.12;
-            tl.to(word.state, { 
-              opacity: 1, 
-              y: 0, 
-              duration: 0.4, 
-              ease: "power2.out" 
+            tl.to(word.state, {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              ease: "power2.out"
             }, startTime);
             tl.to(word.chars, {
               opacity: 1,
@@ -686,16 +647,16 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
               ease: "power2.out",
             }, startTime);
           });
-          
+
           // Exit
           words.forEach((word, i) => {
-            tl.to(word.state, { 
-              opacity: 0, 
-              duration: 0.3, 
-              ease: "power2.in" 
+            tl.to(word.state, {
+              opacity: 0,
+              duration: 0.3,
+              ease: "power2.in"
             }, 3.5 + i * 0.03);
           });
-          
+
           return tl;
         }}
       />
@@ -709,7 +670,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
         color={colors.primary}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, x: -0.3 });
-          
+
           tl.to(chars, {
             opacity: 1,
             x: 0,
@@ -717,7 +678,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.025,
             ease: "power3.out",
           }, 0.4);
-          
+
           tl.to(chars, {
             opacity: 0,
             x: 0.1,
@@ -725,7 +686,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.01,
             ease: "power2.in",
           }, 3.5);
-          
+
           return tl;
         }}
       />
@@ -739,7 +700,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
         color={colors.secondary}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, scale: 0.9, y: 0.15 });
-          
+
           tl.to(chars, {
             opacity: 1,
             scale: 1,
@@ -748,7 +709,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.02,
             ease: "power2.out",
           }, 0.8);
-          
+
           tl.to(chars, {
             opacity: 0,
             y: -0.1,
@@ -756,7 +717,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.01,
             ease: "power2.in",
           }, 3.6);
-          
+
           return tl;
         }}
       />
@@ -770,7 +731,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
         color={colors.accent}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, x: 0.3 });
-          
+
           tl.to(chars, {
             opacity: 1,
             x: 0,
@@ -778,7 +739,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.025,
             ease: "power3.out",
           }, 1.2);
-          
+
           tl.to(chars, {
             opacity: 0,
             x: -0.1,
@@ -786,7 +747,7 @@ const Scene3Features: React.FC<{ exitFrame: number }> = ({ exitFrame }) => {
             stagger: 0.01,
             ease: "power2.in",
           }, 3.7);
-          
+
           return tl;
         }}
       />
@@ -843,7 +804,7 @@ const Scene4CTA: React.FC = () => {
         }}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, y: 1, scale: 0.5, rotationX: Math.PI / 4 });
-          
+
           // Powerful entrance
           tl.to(chars, {
             opacity: 1,
@@ -854,7 +815,7 @@ const Scene4CTA: React.FC = () => {
             stagger: 0.05,
             ease: "power3.out",
           }, 0);
-          
+
           // Subtle scale pulse - very refined
           tl.to(chars, {
             scale: 1.02,
@@ -863,7 +824,7 @@ const Scene4CTA: React.FC = () => {
             yoyo: true,
             repeat: -1,
           }, 1.2);
-          
+
           return tl;
         }}
       />
@@ -877,7 +838,7 @@ const Scene4CTA: React.FC = () => {
         color={colors.gray}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, y: -0.2 });
-          
+
           tl.to(chars, {
             opacity: 0.85,
             y: 0,
@@ -885,7 +846,7 @@ const Scene4CTA: React.FC = () => {
             stagger: 0.03,
             ease: "power2.out",
           }, 0.7);
-          
+
           return tl;
         }}
       />
@@ -902,7 +863,7 @@ const Scene4CTA: React.FC = () => {
         }}
         createTimeline={({ tl, chars }) => {
           tl.set(chars, { opacity: 0, scale: 1.2 });
-          
+
           tl.to(chars, {
             opacity: 1,
             scale: 1,
@@ -910,7 +871,7 @@ const Scene4CTA: React.FC = () => {
             stagger: 0.04,
             ease: "power2.out",
           }, 1.0);
-          
+
           return tl;
         }}
       />
@@ -924,7 +885,7 @@ const Scene4CTA: React.FC = () => {
       <GlowingOrb position={[5.5, 2, -2]} color={colors.secondary} delay={35} size={0.42} />
       <GlowingOrb position={[-4.5, -2.2, -1.5]} color={colors.accent} delay={45} size={0.32} />
       <GlowingOrb position={[4.5, -2.5, -1.5]} color={colors.gold} delay={55} size={0.36} />
-      
+
       {/* Final light effects */}
       <LightStreak position={[0, 0.6, 1.5]} color={colors.primary} delay={10} duration={45} />
       <LightStreak position={[0, -2, 1]} color={colors.secondary} delay={65} duration={35} />
@@ -990,7 +951,7 @@ export const Main: React.FC = () => {
 
   // Scene timing with proper transition overlap
   const transitionDuration = 20; // frames for crossfade
-  
+
   const scene1Start = 0;
   const scene1Duration = 120;
   const scene1Exit = scene1Start + scene1Duration - transitionDuration;
@@ -1089,23 +1050,11 @@ export const Main: React.FC = () => {
           {/* ============================================================== */}
           {/* SCENE TRANSITIONS - Smooth crossfades                          */}
           {/* ============================================================== */}
-          
-          {/* Fade in from black at start */}
-          <SceneTransition startFrame={0} duration={25} type="fadeIn" />
-          
-          {/* Scene 1 to 2 transition */}
-          <SceneTransition startFrame={scene1Exit} duration={transitionDuration * 2} type="lightLeak" />
-          
-          {/* Scene 2 to 3 transition */}
-          <SceneTransition startFrame={scene2Exit} duration={transitionDuration * 2} type="lightLeak" />
-          
-          {/* Scene 3 to 4 transition */}
-          <SceneTransition startFrame={scene3Exit} duration={transitionDuration * 2} type="lightLeak" />
+
 
           {/* ============================================================== */}
           {/* LIGHTING                                                       */}
           {/* ============================================================== */}
-          <Lights />
 
           {/* ============================================================== */}
           {/* MULTI-LAYER PARTICLES - Subtle accents                         */}
