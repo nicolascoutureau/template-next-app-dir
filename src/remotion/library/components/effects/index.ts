@@ -78,6 +78,20 @@ export {
   type ParticlesProps,
   type ParticleType,
 } from "./Particles";
+export { Letterbox, type LetterboxProps } from "./Letterbox";
+export { Highlight, type HighlightProps, type HighlightStyle } from "./Highlight";
+export { ProgressRing, type ProgressRingProps, type ProgressStyle } from "./ProgressRing";
+export { AudioBars, type AudioBarsProps, type AudioBarsLayout } from "./AudioBars";
+export { Callout, type CalloutProps, type CalloutStyle } from "./Callout";
+export { AnimatedBorder, type AnimatedBorderProps, type BorderStyle } from "./AnimatedBorder";
+export { LightLeak, type LightLeakProps, type LightLeakStyle } from "./LightLeak";
+export { Divider, type DividerProps, type DividerStyle, type DividerOrientation } from "./Divider";
+export { Badge, type BadgeProps, type BadgeStyle, type BadgeAnimation } from "./Badge";
+export { RetroOverlay, type RetroOverlayProps, type RetroStyle } from "./RetroOverlay";
+export { LiquidShape, type LiquidShapeProps, type LiquidPreset } from "./LiquidShape";
+export { GradientStroke, type GradientStrokeProps, type StrokeShape } from "./GradientStroke";
+export { Wiggle, type WiggleProps, type WiggleMode } from "./Wiggle";
+export { Spotlight, type SpotlightProps } from "./Spotlight";
 
 // SVG Effects
 export * from "./svg";

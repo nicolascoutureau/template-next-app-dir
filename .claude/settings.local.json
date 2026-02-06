@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:motionarray.com)",
+      "WebSearch",
+      "WebFetch(domain:elements.envato.com)",
+      "WebFetch(domain:filtergrade.com)",
+      "WebFetch(domain:videohive.net)",
+      "WebFetch(domain:www.lummi.ai)"
     ]
   }
 }

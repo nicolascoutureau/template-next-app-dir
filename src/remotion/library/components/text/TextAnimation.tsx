@@ -44,6 +44,7 @@ export interface TextAnimationProps {
 /**
  * GSAP-powered text animation component.
  * Provides access to SplitText for character, word, and line-based animations.
+ * Children should not contain react components, only text and html elements.
  *
  * @example
  * // Fade in characters one by one
