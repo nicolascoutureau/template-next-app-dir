@@ -669,6 +669,62 @@ export const Glitch: Story = {
   ),
 };
 
+// === MORPH TRANSITIONS ===
+
+export const MorphCircle: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [35])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("morphCircle")}
+        timing={linearTiming({ durationInFrames: 35 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
+export const MorphRounded: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper
+        durationInFrames={getTotalDuration([60, 60], [35])}
+        backgroundColor="#000"
+      >
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
+  render: () => (
+    <TransitionSeries>
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneA />
+      </TransitionSeries.Sequence>
+      <TransitionSeries.Transition
+        presentation={getPresentation("morphRounded")}
+        timing={linearTiming({ durationInFrames: 35 })}
+      />
+      <TransitionSeries.Sequence durationInFrames={60}>
+        <SceneB />
+      </TransitionSeries.Sequence>
+    </TransitionSeries>
+  ),
+};
+
 // === MULTI-SCENE TRANSITIONS ===
 
 export const ThreeSceneTransition: Story = {
@@ -769,6 +825,8 @@ export const TransitionGallery: Story = {
       { type: "maskReveal", label: "Iris" },
       { type: "clockWipe", label: "Clock" },
       { type: "warpLeft", label: "Warp" },
+      { type: "morphCircle", label: "Morph" },
+      { type: "morphRounded", label: "Morph R" },
     ];
     
     return (

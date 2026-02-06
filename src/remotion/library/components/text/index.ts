@@ -24,3 +24,5 @@ export { KineticText, type KineticTextProps } from "./KineticText";
 export { TextAnimation, type TextAnimationProps } from "./TextAnimation";
 export { Typewriter, type TypewriterProps } from "./Typewriter";
 export { LowerThird, type LowerThirdProps, type LowerThirdStyle } from "./LowerThird";
+export { SplitFlap, type SplitFlapProps } from "./SplitFlap";
+export { TitleCard, type TitleCardProps, type TitleCardStyle } from "./TitleCard";

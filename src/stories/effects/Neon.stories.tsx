@@ -6,13 +6,6 @@ import { RemotionWrapper } from "../helpers/RemotionWrapper";
 const meta: Meta<typeof Neon> = {
   title: "Effects/Neon",
   component: Neon,
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0a">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   argTypes: {
     color: { control: "color" },
     glow: { control: { type: "range", min: 5, max: 40, step: 5 } },
@@ -25,6 +18,13 @@ export default meta;
 type Story = StoryObj<typeof Neon>;
 
 export const Default: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0a">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     color: "#00ff00",
     glow: 15,
@@ -40,6 +40,13 @@ export const Default: Story = {
 };
 
 export const FlickeringSign: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0a">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Neon color="#ff0055" glow={25} flicker={0.15} flickerSpeed={2}>
@@ -52,6 +59,13 @@ export const FlickeringSign: Story = {
 };
 
 export const NeonBox: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0a">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <AbsoluteFill style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Neon color="#00ffff" glow={20} borderWidth={2} borderRadius={16} flicker={0.03}>
@@ -64,6 +78,13 @@ export const NeonBox: Story = {
 };
 
 export const MultipleColors: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#0a0a0a">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <AbsoluteFill
       style={{

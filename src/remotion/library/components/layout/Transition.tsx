@@ -21,6 +21,7 @@ import {
   maskReveal,
   clockWipe,
   directionalWarp,
+  morph,
 } from "./transitions/presentations";
 import { flip } from "./transitions/presentations/flip";
 
@@ -56,7 +57,9 @@ export type TransitionType =
   | "maskReveal"
   | "clockWipe"
   | "warpLeft"
-  | "warpRight";
+  | "warpRight"
+  | "morphCircle"
+  | "morphRounded";
 
 export type TimingType = "linear" | "spring" | "smooth" | "snappy" | "expo";
 
@@ -147,6 +150,10 @@ export function getPresentation(type: TransitionType): AnyPresentation {
       return directionalWarp("left");
     case "warpRight":
       return directionalWarp("right");
+    case "morphCircle":
+      return morph({ shape: "circle" });
+    case "morphRounded":
+      return morph({ shape: "rounded" });
     default:
       throw new Error(`Invalid transition type: ${type}`);
   }
@@ -180,6 +187,8 @@ export const TRANSITION_TYPES: TransitionType[] = [
   "clockWipe",
   "warpLeft",
   "warpRight",
+  "morphCircle",
+  "morphRounded",
 ];
 
 export const TIMING_TYPES: TimingType[] = [

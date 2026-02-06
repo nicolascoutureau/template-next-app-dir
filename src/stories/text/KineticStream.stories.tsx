@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { 
-  FlipTextStream, 
-  ZoomTextStream, 
-  BlurTextStream, 
-  ElasticStream, 
-  BlockStream, 
+import {
+  FlipTextStream,
+  ZoomTextStream,
+  BlurTextStream,
+  ElasticStream,
+  BlockStream,
   ChromaticStream,
   DynamicSizeStream,
   StompStream,
@@ -26,10 +26,10 @@ const meta: Meta = {
   },
   decorators: [
     (Story) => (
-      <RemotionWrapper 
-        durationInFrames={180} 
-        fps={30} 
-        width={800} 
+      <RemotionWrapper
+        durationInFrames={180}
+        fps={30}
+        width={800}
         height={450}
         backgroundColor="#111111"
       >
@@ -75,6 +75,7 @@ export const FlipGrouped: FlipStory = {
   args: {
     text: "Reading in chunks is often faster and easier to comprehend",
     fontSize: 60,
+    wordsPerGroup: 2,
   },
 };
 
@@ -91,7 +92,7 @@ export const Blur: BlurStory = {
   args: {
     text: "Motion blur creates a sense of extreme speed",
     fontSize: 80,
-    transitionDuration: 5,
+    transitionDuration: 0.17,
   },
 };
 
@@ -100,7 +101,7 @@ export const Elastic: ElasticStory = {
   args: {
     text: "Bouncing words feel alive and energetic like rubber",
     fontSize: 80,
-    transitionDuration: 15,
+    transitionDuration: 0.5,
   },
 };
 
@@ -110,7 +111,7 @@ export const Block: BlockStory = {
     text: "Solid block reveal creates a modern professional look",
     fontSize: 70,
     blockColor: "#ff0055",
-    transitionDuration: 15,
+    transitionDuration: 0.5,
   },
 };
 
@@ -119,7 +120,7 @@ export const Chromatic: ChromaticStory = {
   args: {
     text: "Glitchy chromatic aberration for cyber punk vibes",
     fontSize: 80,
-    transitionDuration: 8,
+    transitionDuration: 0.27,
   },
 };
 
@@ -128,7 +129,7 @@ export const DynamicSize: DynamicSizeStory = {
   args: {
     text: "Pulsing sizes create a rhythmic and organic visual flow",
     fontSize: 80,
-    transitionDuration: 10,
+    transitionDuration: 0.33,
   },
 };
 
@@ -138,7 +139,7 @@ export const Stomp: StompStory = {
     text: "STOMP STOMP IMPACT HEAVY LOUD",
     fontSize: 100,
     fontWeight: "900",
-    transitionDuration: 12,
+    transitionDuration: 0.4,
   },
 };
 
@@ -147,7 +148,7 @@ export const SlotMachine: SlotMachineStory = {
   args: {
     text: "Rolling reeling spinning winning jackpot",
     fontSize: 80,
-    transitionDuration: 15,
+    transitionDuration: 0.5,
   },
 };
 
@@ -157,7 +158,7 @@ export const Outline: OutlineStory = {
     text: "Hollow fills solid empty becomes full",
     fontSize: 90,
     fontWeight: "900",
-    transitionDuration: 20,
+    transitionDuration: 0.65,
   },
 };
 
@@ -167,7 +168,7 @@ export const Sliced: SlicedStory = {
     text: "SLICED CUT SEPARATED SPLIT DIVIDED",
     fontSize: 100,
     fontWeight: "900",
-    transitionDuration: 15,
+    transitionDuration: 0.5,
   },
 };
 
@@ -177,7 +178,7 @@ export const Turbulence: TurbulenceStory = {
     text: "Wavy liquid distorted turbulence water",
     fontSize: 80,
     fontWeight: "bold",
-    transitionDuration: 20,
+    transitionDuration: 0.65,
   },
 };
 
@@ -189,7 +190,7 @@ export const Neon: NeonStory = {
     fontWeight: "900",
     color: "#ffffff",
     neonColor: "#00ffcc",
-    transitionDuration: 5,
+    transitionDuration: 0.17,
   },
 };
 
@@ -198,7 +199,7 @@ export const SlideAlternate: SlideStory = {
   args: {
     text: "Left Right Left Right Keep Moving",
     fontSize: 80,
-    transitionDuration: 12,
+    transitionDuration: 0.4,
     direction: 'alternate',
   },
 };
@@ -217,16 +218,16 @@ export const Swipe: SwipeStory = {
   args: {
     text: "Fast aggressive swipe transition",
     fontSize: 80,
-    transitionDuration: 8,
+    transitionDuration: 0.27,
   },
 };
 
 export const CustomDuration: FlipStory = {
   render: (args) => <FlipTextStream {...args} />,
   args: {
-    text: "This animation finishes in 100 frames regardless of total video length",
+    text: "This animation finishes in 3.3 seconds regardless of total video length",
     fontSize: 60,
-    duration: 100, // Finish early
+    duration: 3.33,
   },
   decorators: [
     (Story) => (
@@ -244,7 +245,7 @@ export const WithEndDelay: FlipStory = {
   args: {
     text: "This last word stays visible for a moment",
     fontSize: 70,
-    delayAfterLastWord: 45, // 1.5 seconds at 30fps
+    delayAfterLastWord: 1.5,
   },
 };
 
@@ -253,7 +254,7 @@ export const ZoomWithEndDelay: ZoomStory = {
   args: {
     text: "Smooth ending with delay",
     fontSize: 90,
-    delayAfterLastWord: 60, // 2 seconds at 30fps
+    delayAfterLastWord: 2,
   },
 };
 
@@ -309,5 +310,6 @@ export const PushGrouped: PushStory = {
     text: "Two words at a time push through",
     fontSize: 70,
     direction: "up",
+    wordsPerGroup: 2,
   },
 };

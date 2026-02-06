@@ -43,28 +43,21 @@ const ShadowBox = ({
 
 const meta: Meta = {
   title: "Presets/Shadows",
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            overflow: "auto",
-            padding: 20,
-          }}
-        >
-          <Story />
-        </div>
-      </RemotionWrapper>
-    ),
-  ],
 };
 
 export default meta;
 type Story = StoryObj;
 
 export const SubtleShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -82,6 +75,15 @@ export const SubtleShadows: Story = {
 };
 
 export const ElevatedShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -101,6 +103,15 @@ export const ElevatedShadows: Story = {
 };
 
 export const DiffusedShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -118,6 +129,15 @@ export const DiffusedShadows: Story = {
 };
 
 export const SharpShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -135,6 +155,15 @@ export const SharpShadows: Story = {
 };
 
 export const LayeredShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -185,6 +214,15 @@ export const GlowEffects: Story = {
 };
 
 export const ColoredShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -205,6 +243,15 @@ export const ColoredShadows: Story = {
 };
 
 export const DramaticShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -222,6 +269,15 @@ export const DramaticShadows: Story = {
 };
 
 export const LongShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -238,6 +294,15 @@ export const LongShadows: Story = {
 };
 
 export const ComponentShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{
@@ -306,6 +371,15 @@ export const NeonGlows: Story = {
 };
 
 export const CustomColorShadows: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={60} backgroundColor="#f8fafc">
+        <div style={{ width: "100%", height: "100%", overflow: "auto", padding: 20 }}>
+          <Story />
+        </div>
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <div
       style={{

@@ -10,4 +10,5 @@ export { slideOver } from "./slideOver";
 export { maskReveal } from "./maskReveal";
 export { clockWipe } from "./clockWipe";
 export { directionalWarp } from "./directionalWarp";
+export { morph } from "./morph";
 export type { CustomProps, PresentationComponentProps } from "./types";

@@ -6,13 +6,6 @@ import { RemotionWrapper } from "../helpers/RemotionWrapper";
 const meta: Meta<typeof Glass> = {
   title: "Effects/Glass",
   component: Glass,
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={150} backgroundColor="#1a1a2e">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   argTypes: {
     blur: { control: { type: "range", min: 0, max: 40, step: 2 } },
     opacity: { control: { type: "range", min: 0, max: 0.5, step: 0.05 } },
@@ -44,6 +37,13 @@ const GradientBg = ({ children }: { children: React.ReactNode }) => (
 );
 
 export const Default: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     blur: 16,
     opacity: 0.1,
@@ -65,6 +65,13 @@ export const Default: Story = {
 };
 
 export const AnimatedFrost: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <GradientBg>
       <Glass blur={20} opacity={0.15} duration={1} borderRadius={20} style={{ width: 350, padding: 32 }}>
@@ -78,6 +85,13 @@ export const AnimatedFrost: Story = {
 };
 
 export const ChromaticBorder: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={150} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   render: () => (
     <GradientBg>
       <Glass blur={20} opacity={0.1} chromatic borderRadius={16} style={{ width: 300, padding: 28 }}>

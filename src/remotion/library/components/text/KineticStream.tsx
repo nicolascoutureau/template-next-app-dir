@@ -1,12 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import {
   useCurrentFrame,
   useVideoConfig,
   interpolate,
   Easing,
 } from "remotion";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
-// --- Shared Types & Utils ---
+// ============================================
+// Shared Types
+// ============================================
 
 export interface KineticStreamProps {
   text: string;
@@ -27,24 +30,61 @@ export interface KineticStreamProps {
   duration?: number;
   /**
    * Delay in seconds after the last word appears before the animation ends.
-   * This prevents the animation from ending abruptly.
    * @default 0
    */
   delayAfterLastWord?: number;
+  /** Number of words to display at once. @default 1 */
+  wordsPerGroup?: number;
 }
 
-/**
- * Helper to split text into individual words
- */
-const useWords = (text: string) => {
+export type PushDirection = "up" | "down" | "left" | "right";
+
+// ============================================
+// Curated Easing Presets
+// ============================================
+
+const E = {
+  appleSwift: toRemotionEasing("appleSwift"), // power2.out
+  appleBounce: toRemotionEasing("appleBounce"), // back.out(1.4)
+  appleSnap: toRemotionEasing("appleSnap"), // expo.out
+  dramaticIn: toRemotionEasing("dramaticIn"), // power4.in
+  dramaticOut: toRemotionEasing("dramaticOut"), // power4.out
+  dramaticInOut: toRemotionEasing("dramaticInOut"), // power4.inOut
+  epicIn: toRemotionEasing("epicIn"), // power3.in
+  slowReveal: toRemotionEasing("slowReveal"), // expo.out
+  snappy: toRemotionEasing("snappy"), // power3.out
+  instant: toRemotionEasing("instant"), // power4.out
+  gentle: toRemotionEasing("gentle"), // sine.inOut
+} as const;
+
+const CLAMP = {
+  extrapolateLeft: "clamp" as const,
+  extrapolateRight: "clamp" as const,
+};
+
+// ============================================
+// Shared Utilities
+// ============================================
+
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+const useWords = (text: string, groupSize: number = 1): string[] => {
   return useMemo(() => {
-    return text.split(/\s+/).filter(Boolean);
-  }, [text]);
+    const allWords = text.split(/\s+/).filter(Boolean);
+    if (groupSize <= 1) return allWords;
+    const groups: string[] = [];
+    for (let i = 0; i < allWords.length; i += groupSize) {
+      groups.push(allWords.slice(i, i + groupSize).join(" "));
+    }
+    return groups;
+  }, [text, groupSize]);
 };
 
 /**
- * Helper to get timing info.
- * All time parameters are in seconds, converted to frames internally.
+ * Shared timing hook. Returns raw (uneased) progress — each variant applies its own easing.
  */
 const useStreamTiming = (
   totalGroups: number,
@@ -55,52 +95,126 @@ const useStreamTiming = (
   const frame = useCurrentFrame();
   const { durationInFrames, fps } = useVideoConfig();
 
-  // Convert seconds to frames, or fall back to composition duration
-  const totalFrames = totalDurationSecProp != null
-    ? Math.round(totalDurationSecProp * fps)
-    : durationInFrames;
+  const totalFrames =
+    totalDurationSecProp != null
+      ? Math.round(totalDurationSecProp * fps)
+      : durationInFrames;
   const delayFrames = Math.round(delayAfterLastWordSec * fps);
   const transitionFrames = Math.round(transitionDurationSec * fps);
 
-  // Subtract the delay from the total duration to calculate group timing
   const effectiveDuration = totalFrames - delayFrames;
   const durationPerGroup = effectiveDuration / totalGroups;
-  const currentIndex = Math.floor(frame / durationPerGroup);
-
-  // Clamp index
-  const safeCurrentIndex = Math.min(totalGroups - 1, Math.max(0, currentIndex));
-  const prevIndex = safeCurrentIndex - 1;
-
-  const timeInSlot = frame % durationPerGroup;
-
-  // Transition progress
-  const progress = interpolate(
-    timeInSlot,
-    [0, transitionFrames],
-    [0, 1],
-    {
-      extrapolateRight: "clamp",
-      easing: Easing.bezier(0.19, 1, 0.22, 1),
-    }
+  const clampedTransitionFrames = Math.min(
+    transitionFrames,
+    durationPerGroup * 0.9
   );
 
-  const isTransitioning = timeInSlot < transitionFrames && safeCurrentIndex > 0;
+  const currentIndex = Math.floor(frame / durationPerGroup);
+  const safeCurrentIndex = Math.min(
+    totalGroups - 1,
+    Math.max(0, currentIndex)
+  );
+  const prevIndex = safeCurrentIndex - 1;
+
+  // Fixed: absolute position instead of modulo — prevents phantom transitions during delay
+  const timeInSlot = frame - safeCurrentIndex * durationPerGroup;
+
+  const progress = interpolate(
+    timeInSlot,
+    [0, clampedTransitionFrames],
+    [0, 1],
+    { extrapolateRight: "clamp" }
+  );
+
+  const isTransitioning =
+    timeInSlot < clampedTransitionFrames && safeCurrentIndex > 0;
+
+  const holdProgress = interpolate(
+    timeInSlot,
+    [clampedTransitionFrames, durationPerGroup],
+    [0, 1],
+    CLAMP
+  );
 
   return {
     currentIndex: safeCurrentIndex,
     prevIndex,
     isTransitioning,
     progress,
+    holdProgress,
+    fps,
   };
 };
 
-// --- Components ---
+/**
+ * Compute motion blur from easing curve velocity (derivative).
+ */
+function getMotionBlur(
+  progress: number,
+  easing: (t: number) => number,
+  maxBlur: number = 8
+): number {
+  const dt = 0.02;
+  const p0 = easing(Math.max(0, progress - dt));
+  const p1 = easing(Math.min(1, progress + dt));
+  const velocity = Math.abs(p1 - p0) / (2 * dt);
+  return Math.min(velocity * 2, 1) * maxBlur;
+}
+
+// ============================================
+// StreamContainer
+// ============================================
+
+const StreamContainer: React.FC<{
+  fontSize: number;
+  fontWeight: React.CSSProperties["fontWeight"];
+  color: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+  perspective?: number;
+  overflow?: "hidden" | "visible";
+}> = ({
+  fontSize,
+  fontWeight,
+  color,
+  className,
+  style,
+  children,
+  perspective,
+  overflow = "hidden",
+}) => (
+  <div
+    className={className}
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+      height: "100%",
+      fontSize,
+      fontWeight,
+      color,
+      fontFamily: "inherit",
+      overflow,
+      ...(perspective ? { perspective: `${perspective}px` } : {}),
+      ...style,
+    }}
+  >
+    {children}
+  </div>
+);
+
+// ============================================
+// Stream Variants
+// ============================================
 
 /**
- * SlideStream: Alternating slide in from left/right.
- * Clean, modern, corporate or creative.
+ * SlideStream: Alternating slide with position overshoot and velocity blur.
  */
-export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | 'right' | 'alternate' }> = ({
+export const SlideStream: React.FC<
+  KineticStreamProps & { direction?: "left" | "right" | "alternate" }
+> = ({
   text,
   fontSize = 80,
   fontWeight = "bold",
@@ -108,96 +222,104 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
   className,
   style,
   transitionDuration = 0.4,
-  direction = 'alternate',
+  direction = "alternate",
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
-  
-  // Easing
-  // A nice snappy easing: cubic-bezier(0.65, 0, 0.35, 1)
-  const easeProgress = isTransitioning 
-      ? interpolate(progress, [0, 1], [0, 1], { 
-          easing: Easing.bezier(0.65, 0, 0.35, 1),
-          extrapolateRight: "clamp"
-      }) 
-      : 1;
 
-  const getDirection = (index: number) => {
-    if (direction === 'left') return 'left'; // Enters FROM left
-    if (direction === 'right') return 'right'; // Enters FROM right
-    return index % 2 === 0 ? 'left' : 'right'; // Alternate
+  const getDir = (i: number) => {
+    if (direction === "left") return "left";
+    if (direction === "right") return "right";
+    return i % 2 === 0 ? "left" : "right";
   };
+  const dir = getDir(currentIndex);
+  const enterFrom = dir === "left" ? -100 : 100;
+  const exitTo = dir === "left" ? 100 : -100;
 
-  const currentDir = getDirection(currentIndex);
-  
-  // Slide logic
-  // If direction is 'left', it means it enters FROM the Left (start: -100%).
-  // If direction is 'right', it means it enters FROM the Right (start: 100%).
-  
-  const enterStart = currentDir === 'left' ? -100 : 100;
-  
-  // Exit transforms (Old word)
-  // If New word comes from Left (pushing Right?), usually we want flow.
-  // If new comes from Left, old goes to Right.
-  const exitEnd = currentDir === 'left' ? 100 : -100;
-  
+  // Enter: position leads with overshoot
+  const enterX = isTransitioning
+    ? interpolate(progress, [0, 0.7], [enterFrom, 0], {
+        ...CLAMP,
+        easing: E.appleBounce,
+      })
+    : 0;
+  const enterOpacity = isTransitioning
+    ? interpolate(progress, [0, 0.4], [0, 1], CLAMP)
+    : 1;
+  const enterScale = isTransitioning
+    ? interpolate(progress, [0, 0.85], [0.95, 1], {
+        ...CLAMP,
+        easing: E.appleSwift,
+      })
+    : 1;
+
+  // Exit: accelerating out
+  const exitX = isTransitioning
+    ? interpolate(progress, [0, 0.6], [0, exitTo], {
+        ...CLAMP,
+        easing: E.dramaticIn,
+      })
+    : 0;
+  const exitOpacity = isTransitioning
+    ? interpolate(progress, [0, 0.5], [1, 0], CLAMP)
+    : 1;
+
+  const blur = isTransitioning ? getMotionBlur(progress, E.appleSwift, 6) : 0;
+
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
     >
-        {/* Previous Word */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `translateX(${interpolate(easeProgress, [0, 1], [0, exitEnd])}%)`,
-              opacity: interpolate(easeProgress, [0, 0.6], [1, 0]),
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
-
-        {/* Current Word */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: isTransitioning
-                    ? `translateX(${interpolate(easeProgress, [0, 1], [enterStart, 0])}%)`
-                    : `translateX(0)`,
-                opacity: isTransitioning ? interpolate(easeProgress, [0, 0.3], [0, 1]) : 1,
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `translateX(${exitX}%) scale(${interpolate(progress, [0, 0.6], [1, 0.97], CLAMP)})`,
+            opacity: exitOpacity,
+            filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: isTransitioning
+              ? `translateX(${enterX}%) scale(${enterScale})`
+              : "translateX(0)",
+            opacity: isTransitioning ? enterOpacity : 1,
+            filter: blur > 0.5 ? `blur(${blur * 0.7}px)` : "none",
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * SwipeStream: A very fast, swipe-like transition where words pass each other.
+ * SwipeStream: Aggressive swipe with velocity-driven skew and blur.
  */
 export const SwipeStream: React.FC<KineticStreamProps> = ({
   text,
@@ -209,83 +331,78 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
-  
-  // Swipe is aggressive
-  const easeProgress = isTransitioning 
-      ? interpolate(progress, [0, 1], [0, 1], { 
-          easing: Easing.bezier(0.85, 0, 0.15, 1),
-          extrapolateRight: "clamp"
-      })
-      : 1;
-
-  // Alternate swipe direction based on index to keep it dynamic
-  // Word 0: Left to Right?
-  // Word 1: Right to Left?
   const dir = currentIndex % 2 === 0 ? 1 : -1;
 
-  return (
-    <div
-      className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
-    >
-        {/* Previous Word */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              // If dir=1, old goes Left (-100%).
-              transform: `translateX(${interpolate(easeProgress, [0, 1], [0, -100 * dir])}%) skewX(${interpolate(easeProgress, [0, 0.5, 1], [0, 20 * dir, 0])}deg)`,
-              opacity: 1 - easeProgress,
-              filter: `blur(${easeProgress * 10}px)`,
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
+  const blur = isTransitioning
+    ? getMotionBlur(progress, E.dramaticInOut, 10)
+    : 0;
+  // Skew from velocity
+  const skew = isTransitioning
+    ? getMotionBlur(progress, E.dramaticInOut, 1) * 20 * dir
+    : 0;
 
-        {/* Current Word */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                // If dir=1, new comes from Right (100%).
-                transform: isTransitioning
-                    ? `translateX(${interpolate(easeProgress, [0, 1], [100 * dir, 0])}%) skewX(${interpolate(easeProgress, [0, 0.5, 1], [20 * dir, 0])}deg)`
-                    : `translateX(0)`,
-                opacity: isTransitioning ? easeProgress : 1,
-                filter: isTransitioning ? `blur(${(1-easeProgress) * 10}px)` : 'none',
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+  const easedPos = isTransitioning
+    ? interpolate(progress, [0, 1], [0, 1], {
+        ...CLAMP,
+        easing: E.dramaticInOut,
+      })
+    : 1;
+
+  return (
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
+      className={className}
+      style={style}
+    >
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `translateX(${interpolate(easedPos, [0, 1], [0, -100 * dir])}%) skewX(${skew}deg) scale(${interpolate(easedPos, [0.5, 1], [1, 0.95], CLAMP)})`,
+            opacity: 1 - easedPos,
+            filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: isTransitioning
+              ? `translateX(${interpolate(easedPos, [0, 1], [100 * dir, 0])}%) skewX(${-skew}deg)`
+              : "translateX(0)",
+            opacity: isTransitioning ? easedPos : 1,
+            filter: blur > 0.5 ? `blur(${blur * 0.8}px)` : "none",
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * DynamicSizeStream: Words cycle through but with dynamically changing sizes.
- * Creates a pulsing, rhythmic visual.
+ * DynamicSizeStream: Words cycle with dynamic sizes and staggered enter.
  */
 export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   text,
@@ -297,81 +414,97 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
-  
-  // Deterministic size generator based on string hash or length
-  // Or simply alternate: Big, Small, Big, Small
-  // Or randomize within a range.
-  
+
   const getSize = (index: number) => {
-      // Simple pseudo-random
-      const seed = index * 12345;
-      const variation = (Math.sin(seed) + 1) / 2; // 0 to 1
-      return 0.7 + variation * 0.8; // 0.7x to 1.5x scale
+    const variation = (Math.sin(index * 12345) + 1) / 2;
+    return 0.7 + variation * 0.8;
   };
-  
+
   const currentScale = getSize(currentIndex);
   const prevScale = getSize(prevIndex);
 
-  return (
-    <div
-      className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
-    >
-        {/* Exiting Word */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `scale(${prevScale * interpolate(progress, [0, 1], [1, 0.8])}) translateY(${interpolate(progress, [0, 1], [0, -100])}px)`,
-              opacity: interpolate(progress, [0, 0.5], [1, 0]),
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
+  // Enter: Y leads, scale bounces, opacity follows
+  const enterY = isTransitioning
+    ? interpolate(progress, [0, 0.6], [80, 0], {
+        ...CLAMP,
+        easing: E.appleSwift,
+      })
+    : 0;
+  const enterScaleAnim = isTransitioning
+    ? interpolate(progress, [0.1, 0.8], [0.5, 1], {
+        ...CLAMP,
+        easing: E.appleBounce,
+      })
+    : 1;
+  const enterOpacity = isTransitioning
+    ? interpolate(progress, [0, 0.4], [0, 1], CLAMP)
+    : 1;
 
-        {/* Entering Word */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: isTransitioning
-                    ? `scale(${currentScale * interpolate(progress, [0, 1], [0.5, 1])}) translateY(${interpolate(progress, [0, 1], [100, 0])}px)`
-                    : `scale(${currentScale})`,
-                opacity: isTransitioning ? interpolate(progress, [0, 0.8], [0, 1]) : 1,
-                willChange: "transform",
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+  // Exit: shrink + blur away
+  const exitScale = isTransitioning
+    ? interpolate(progress, [0, 0.5], [1, 0.7], {
+        ...CLAMP,
+        easing: E.dramaticIn,
+      })
+    : 1;
+  const exitBlur = isTransitioning
+    ? interpolate(progress, [0, 0.5], [0, 6], CLAMP)
+    : 0;
+
+  return (
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
+      className={className}
+      style={style}
+    >
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `scale(${prevScale * exitScale}) translateY(${interpolate(progress, [0, 0.5], [0, -40], CLAMP)}px)`,
+            opacity: interpolate(progress, [0, 0.4], [1, 0], CLAMP),
+            filter: exitBlur > 0.5 ? `blur(${exitBlur}px)` : "none",
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: isTransitioning
+              ? `scale(${currentScale * enterScaleAnim}) translateY(${enterY}px)`
+              : `scale(${currentScale})`,
+            opacity: isTransitioning ? enterOpacity : 1,
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * StompStream: Huge text slams down into the frame.
- * High impact, shakes the screen.
+ * StompStream: Text slams down with multi-frequency shake and squash-settle.
  */
 export const StompStream: React.FC<KineticStreamProps> = ({
   text,
@@ -383,82 +516,94 @@ export const StompStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
-  const currentWord = words[currentIndex];
-  
-  // Stomp Animation:
-  // Starts huge (Scale 5, Opacity 0)
-  // Slams to Scale 1 very fast
-  // Shakes a bit after landing
-  
-  // We don't really transition OUT the old word, it just gets covered or disappears?
-  // Let's have the old word just exist until the new one stomps?
-  // Or old word fades out as new one stomps.
-  
-  // Custom timing curve for stomp
-  // 0-0.3: Slam down
-  // 0.3-1.0: Shake/Settle
-  
-  const stompProgress = isTransitioning ? progress : 1;
-  
-  const scale = isTransitioning 
-      ? interpolate(stompProgress, [0, 0.3], [3, 1], { extrapolateRight: "clamp", easing: Easing.in(Easing.exp) })
-      : 1;
-      
-  const opacity = isTransitioning 
-      ? interpolate(stompProgress, [0, 0.1], [0, 1], { extrapolateRight: "clamp" })
-      : 1;
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
 
-  // Camera Shake (applied to container or word?)
-  // Let's apply to word for simplicity
-  const shake = (isTransitioning && stompProgress > 0.3 && stompProgress < 0.6)
-      ? Math.sin(stompProgress * 50) * 10 * (1 - (stompProgress - 0.3)/0.3)
-      : 0;
+  const currentWord = words[currentIndex];
+
+  // Phase 1 (0-0.3): Slam from scale 4 to 1
+  const slamScale = interpolate(progress, [0, 0.3], [4, 1], {
+    ...CLAMP,
+    easing: E.epicIn,
+  });
+
+  // Phase 2 (0.3-0.6): Multi-frequency shake with exponential decay
+  const shakeActive = isTransitioning && progress > 0.3 && progress < 0.6;
+  const shakeDecay = shakeActive ? Math.exp(-10 * (progress - 0.3)) : 0;
+  const shakeX = shakeActive
+    ? (Math.sin(progress * 147) * 8 +
+        Math.sin(progress * 297) * 5 +
+        Math.sin(progress * 573) * 3) *
+      shakeDecay
+    : 0;
+  const shakeY = shakeActive
+    ? (Math.sin(progress * 173) * 6 + Math.sin(progress * 347) * 4) *
+      shakeDecay
+    : 0;
+
+  // Phase 3 (0.3-1): Squash-settle
+  const settleScale = interpolate(
+    progress,
+    [0.3, 0.45, 0.65, 1],
+    [1, 0.97, 1.01, 1],
+    CLAMP
+  );
+
+  const finalScale = isTransitioning
+    ? progress <= 0.3
+      ? slamScale
+      : settleScale
+    : 1;
+
+  // Snap opacity (instant appearance)
+  const opacity = isTransitioning
+    ? interpolate(progress, [0, 0.05], [0, 1], { extrapolateRight: "clamp" })
+    : 1;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
     >
-        {/* Previous Word (Disappears quickly) */}
-        {isTransitioning && prevIndex >= 0 && (
-             <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.2], [1, 0]) }}>
-                 {words[prevIndex]}
-             </div>
-        )}
-
-        {/* Current Word (Stomping) */}
+      {isTransitioning && prevIndex >= 0 && (
         <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: `scale(${scale}) translate(${shake}px, ${shake}px)`,
-                opacity,
-            }}
+          style={{
+            position: "absolute",
+            opacity: interpolate(progress, [0, 0.12], [1, 0], {
+              extrapolateRight: "clamp",
+            }),
+          }}
         >
-            {currentWord}
+          {words[prevIndex]}
         </div>
-    </div>
+      )}
+      <div
+        style={{
+          position: "absolute",
+          whiteSpace: "nowrap",
+          transform: `scale(${finalScale}) translate(${shakeX}px, ${shakeY}px)`,
+          opacity,
+        }}
+      >
+        {currentWord}
+      </div>
+    </StreamContainer>
   );
 };
 
 /**
- * SlotMachineStream: Vertical blur roll, like a slot machine reel.
+ * SlotMachineStream: Vertical reel snap with overshoot and velocity blur.
  */
 export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   text,
@@ -470,71 +615,70 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
-  
-  // Slot machine motion: Fast vertical move with intense vertical blur
-  
-  return (
-    <div
-      className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
-    >
-        {/* Exiting Word: Moves Down/Up fast */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `translateY(${interpolate(progress, [0, 1], [0, 200])}%)`,
-              filter: `blur(0px ${interpolate(progress, [0, 0.5, 1], [0, 20, 0])}px)`,
-              opacity: interpolate(progress, [0, 0.8], [1, 0]),
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
 
-        {/* Entering Word: Moves In from Top */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: isTransitioning
-                    ? `translateY(${interpolate(progress, [0, 1], [-200, 0])}%)`
-                    : `translateY(0)`,
-                filter: isTransitioning 
-                    ? `blur(0px ${interpolate(progress, [0, 0.5, 1], [20, 10, 0])}px)` 
-                    : "none",
-                opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1,
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+  const blur = isTransitioning
+    ? getMotionBlur(progress, E.appleSnap, 12)
+    : 0;
+
+  return (
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
+      className={className}
+      style={style}
+    >
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `translateY(${interpolate(progress, [0, 0.7], [0, 250], { ...CLAMP, easing: E.dramaticIn })}%)`,
+            opacity: interpolate(progress, [0, 0.6], [1, 0], CLAMP),
+            filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            // Overshoot: slides past 0 then snaps back
+            transform: isTransitioning
+              ? `translateY(${interpolate(progress, [0, 0.85], [-300, 0], { ...CLAMP, easing: E.appleBounce })}%)`
+              : "translateY(0)",
+            opacity: isTransitioning
+              ? interpolate(progress, [0, 0.3], [0, 1], CLAMP)
+              : 1,
+            filter:
+              isTransitioning && blur > 0.5 ? `blur(${blur * 0.7}px)` : "none",
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * OutlineStream: Stroke to Fill animation.
+ * OutlineStream: Stroke-to-fill with clip-path wipe reveal.
  */
 export const OutlineStream: React.FC<KineticStreamProps> = ({
   text,
@@ -546,80 +690,103 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.65,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
-  
-  // Animation:
-  // 0.0 - 0.3: Text appears as Outline
-  // 0.3 - 0.7: Text fills in
-  // 0.7 - 1.0: Text stays filled
-  
-  // Or better:
-  // Always outline, fills up like water?
-  // Let's do: Outline Stroke Dashoffset animation? (Hard with variable text width)
-  // Easier: Two layers (Outline and Fill). Fill clips in or opacity fades in.
-  
-  const fillProgress = isTransitioning 
-      ? interpolate(progress, [0.2, 0.6], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
-      : 1;
+
+  // Fill wipe: left-to-right reveal via clip-path
+  const fillPct = isTransitioning
+    ? interpolate(progress, [0.15, 0.75], [0, 100], {
+        ...CLAMP,
+        easing: E.slowReveal,
+      })
+    : 100;
+
+  // Micro-scale settle
+  const scale = isTransitioning
+    ? interpolate(progress, [0.1, 0.8], [1.02, 1], {
+        ...CLAMP,
+        easing: E.appleBounce,
+      })
+    : 1;
+
+  // Stroke width animation
+  const strokeWidth = isTransitioning
+    ? interpolate(progress, [0, 0.5, 0.85], [3, 2, 0], CLAMP)
+    : 0;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
+      overflow="visible"
     >
-        {/* Previous Word (Fades out) */}
-        {isTransitioning && prevIndex >= 0 && (
-            <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.2], [1, 0]) }}>
-                {words[prevIndex]}
-            </div>
-        )}
-
-        {/* Current Word */}
-        <div style={{ position: "relative" }}>
-             {/* Outline Layer (Always visible) */}
-             <div style={{ 
-                 position: "absolute", 
-                 top: 0, left: 0, 
-                 WebkitTextStroke: `2px ${color}`,
-                 color: "transparent",
-                 opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
-             }}>
-                 {currentWord}
-             </div>
-             
-             {/* Fill Layer (Reveals) */}
-             <div style={{ 
-                 position: "relative",
-                 color: color,
-                 opacity: fillProgress,
-                 transform: `scale(${interpolate(fillProgress, [0, 1], [1.1, 1])})`, // Slight scale in effect
-             }}>
-                 {currentWord}
-             </div>
+      {isTransitioning && prevIndex >= 0 && (
+        <div
+          style={{
+            position: "absolute",
+            opacity: interpolate(progress, [0, 0.15], [1, 0], {
+              extrapolateRight: "clamp",
+            }),
+          }}
+        >
+          {words[prevIndex]}
         </div>
-    </div>
+      )}
+      <div
+        style={{
+          position: "relative",
+          transform: `scale(${scale})`,
+        }}
+      >
+        {/* Outline layer */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            WebkitTextStroke: `${Math.max(strokeWidth, 1)}px ${color}`,
+            color: "transparent",
+            opacity: isTransitioning
+              ? interpolate(progress, [0, 0.15], [0, 1], {
+                  extrapolateRight: "clamp",
+                })
+              : fillPct < 100
+                ? 1
+                : 0,
+          }}
+        >
+          {currentWord}
+        </div>
+        {/* Fill layer — clip-path wipe */}
+        <div
+          style={{
+            position: "relative",
+            color: color,
+            clipPath: `inset(0 ${100 - fillPct}% 0 0)`,
+          }}
+        >
+          {currentWord}
+        </div>
+      </div>
+    </StreamContainer>
   );
 };
 
 /**
- * ElasticStream: Words pop in with a strong elastic bounce and subtle rotation.
- * Very energetic and playful.
+ * ElasticStream: Elastic pop-in with spring-out exit.
  */
 export const ElasticStream: React.FC<KineticStreamProps> = ({
   text,
@@ -631,74 +798,81 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.4,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
-  // Elastic easing for the enter animation
-  const elasticEnter = isTransitioning 
-    ? interpolate(progress, [0, 1], [0, 1], {
-        easing: Easing.elastic(1.5), // Bouncy
+  // Enter: elastic bounce with subtle rotation oscillation
+  const elasticScale = isTransitioning
+    ? interpolate(progress, [0.1, 1], [0, 1], {
+        ...CLAMP,
+        easing: Easing.elastic(1.5),
       })
     : 1;
+  const enterRotation = isTransitioning
+    ? interpolate(progress, [0.1, 0.35, 0.55, 0.75, 1], [0, 2, -1, 0.5, 0], CLAMP)
+    : 0;
+
+  // Exit: stretch then collapse
+  const exitScale = isTransitioning
+    ? interpolate(progress, [0, 0.12, 0.3], [1, 1.08, 0], CLAMP)
+    : 1;
+  const exitRotation = isTransitioning
+    ? interpolate(progress, [0, 0.3], [0, -8], CLAMP)
+    : 0;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
     >
-        {/* Exiting Word: Scales Down quickly */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `scale(${interpolate(progress, [0, 0.3], [1, 0])}) rotate(${interpolate(progress, [0, 0.3], [0, -15])}deg)`,
-              opacity: interpolate(progress, [0, 0.2], [1, 0]),
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
-
-        {/* Entering Word: Elastic Pop from 0 */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: `scale(${elasticEnter})`,
-                opacity: 1, // Always visible during its slot (after scale > 0)
-                willChange: "transform",
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `scale(${exitScale}) rotate(${exitRotation}deg)`,
+            opacity: interpolate(progress, [0.05, 0.25], [1, 0], CLAMP),
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `scale(${elasticScale}) rotate(${enterRotation}deg)`,
+            opacity: 1,
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * BlockStream: A solid block wipes the text to reveal new text.
- * Clean, modern, and professional.
+ * BlockStream: Solid block wipe with eased phases.
  */
-export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }> = ({
+export const BlockStream: React.FC<
+  KineticStreamProps & { blockColor?: string }
+> = ({
   text,
   fontSize = 80,
   fontWeight = "bold",
@@ -709,88 +883,94 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
   transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
-  // Block Animation Timing
-  // 0.0 - 0.5: Block grows to cover text
-  // 0.5: Text swaps
-  // 0.5 - 1.0: Block shrinks to reveal new text
-  
-  // Better Block logic:
-  // Phase 1 (0-0.5): Block scales X from 0 to 1 (origin left). Text Visible.
-  // Phase 2 (0.5): Swap Text.
-  // Phase 3 (0.5-1): Block scales X from 1 to 0 (origin right). New Text Visible.
-  
   const isPhase1 = progress < 0.5;
-  const blockScale = isPhase1 
-      ? interpolate(progress, [0, 0.5], [0, 1.1]) 
-      : interpolate(progress, [0.5, 1], [1.1, 0]);
-      
+  // Phase 1: block wipes in (accelerating)
+  // Phase 2: block wipes out (decelerating)
+  const blockScale = isPhase1
+    ? interpolate(progress, [0, 0.5], [0, 1.05], {
+        ...CLAMP,
+        easing: E.dramaticIn,
+      })
+    : interpolate(progress, [0.5, 1], [1.05, 0], {
+        ...CLAMP,
+        easing: E.dramaticOut,
+      });
   const blockOrigin = isPhase1 ? "left" : "right";
 
+  // Subtle text momentum during reveal
+  const textShift =
+    isTransitioning && !isPhase1
+      ? interpolate(progress, [0.5, 0.85], [4, 0], {
+          ...CLAMP,
+          easing: E.appleSwift,
+        })
+      : 0;
+
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        ...style,
-      }}
+      style={style}
+      overflow="visible"
     >
-        <div style={{ position: "relative" }}>
-            {/* The Text */}
-            <div style={{ opacity: isTransitioning ? 0 : 1 }}>
-                {/* During transition, we hide the main text container and rely on logic below? 
-                    Actually, we just show either Prev or Current based on phase. */}
-                {isTransitioning 
-                    ? (isPhase1 ? prevWord : currentWord) 
-                    : currentWord} 
-            </div>
-            
-             {/* During transition, we overlay the block logic */}
-             {isTransitioning && (
-                 <>
-                    {/* The text being covered/revealed */}
-                    <div style={{ position: "absolute", top: 0, left: 0, opacity: 1 }}>
-                        {isPhase1 ? prevWord : currentWord}
-                    </div>
-                    
-                    {/* The Block */}
-                    <div 
-                        style={{
-                            position: "absolute",
-                            top: -10,
-                            bottom: -10,
-                            left: -20,
-                            right: -20,
-                            backgroundColor: blockColor,
-                            transform: `scaleX(${blockScale})`,
-                            transformOrigin: blockOrigin,
-                            zIndex: 10
-                        }}
-                    />
-                 </>
-             )}
+      <div style={{ position: "relative" }}>
+        <div style={{ opacity: isTransitioning ? 0 : 1 }}>
+          {isTransitioning
+            ? isPhase1
+              ? prevWord
+              : currentWord
+            : currentWord}
         </div>
-    </div>
+        {isTransitioning && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                transform: `translateX(${textShift}px)`,
+              }}
+            >
+              {isPhase1 ? prevWord : currentWord}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: -10,
+                bottom: -10,
+                left: -20,
+                right: -20,
+                backgroundColor: blockColor,
+                transform: `scaleX(${blockScale})`,
+                transformOrigin: blockOrigin,
+                zIndex: 10,
+              }}
+            />
+          </>
+        )}
+      </div>
+    </StreamContainer>
   );
 };
 
-
 /**
- * ChromaticStream: RGB split / Glitch effect on transition.
+ * ChromaticStream: RGB split with green channel, velocity-driven intensity, and scan lines.
  */
 export const ChromaticStream: React.FC<KineticStreamProps> = ({
   text,
@@ -802,80 +982,117 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
-  
-  // Glitch intensity curve
-  const intensity = isTransitioning 
-    ? interpolate(progress, [0, 0.5, 1], [0, 1, 0], { easing: Easing.bounce }) 
+  const frame = useCurrentFrame();
+
+  // Velocity-driven intensity
+  const intensity = isTransitioning
+    ? getMotionBlur(progress, E.dramaticInOut, 1)
     : 0;
 
-  // Random offsets based on intensity
-  // Since we can't do random per frame easily without seed, we use deterministic math
-  const redOffset = intensity * 10;
-  const blueOffset = intensity * -10;
-  const opacity = isTransitioning ? interpolate(progress, [0, 0.5, 1], [1, 0.5, 1]) : 1;
+  // Deterministic per-frame jitter
+  const jR = seededRandom(frame * 7 + 1) * 2 - 1;
+  const jG = seededRandom(frame * 7 + 2) * 2 - 1;
+  const jB = seededRandom(frame * 7 + 3) * 2 - 1;
 
-  // Text content swap at 50%
-  const displayText = isTransitioning && progress < 0.5 ? words[prevIndex] : currentWord;
+  const redX = intensity * (10 + jR * 3);
+  const redY = intensity * (2 + jR * 1.5);
+  const greenX = intensity * (-2 + jG * 2);
+  const greenY = intensity * (-8 + jG * 2);
+  const blueX = intensity * (-10 + jB * 3);
+  const blueY = intensity * (-2 + jB * 1.5);
+
+  const opacity = isTransitioning
+    ? interpolate(progress, [0, 0.5, 1], [1, 0.6, 1])
+    : 1;
+  const displayText =
+    isTransitioning && progress < 0.5 ? words[prevIndex] : currentWord;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        ...style,
-      }}
+      style={style}
+      overflow="visible"
     >
-        <div style={{ position: "relative" }}>
-             {/* Main Text */}
-             <div style={{ opacity, filter: `blur(${intensity * 2}px)` }}>
-                 {displayText}
-             </div>
-             
-             {/* Red Channel */}
-             {isTransitioning && (
-                 <div style={{ 
-                     position: "absolute", top: 0, left: 0, 
-                     transform: `translate(${redOffset}px, ${intensity * 2}px)`,
-                     color: "rgba(255,0,0,0.8)",
-                     mixBlendMode: "screen",
-                     opacity: intensity
-                 }}>
-                     {displayText}
-                 </div>
-             )}
-             
-             {/* Blue Channel */}
-             {isTransitioning && (
-                 <div style={{ 
-                     position: "absolute", top: 0, left: 0, 
-                     transform: `translate(${blueOffset}px, ${intensity * -2}px)`,
-                     color: "rgba(0,0,255,0.8)",
-                     mixBlendMode: "screen",
-                     opacity: intensity
-                 }}>
-                     {displayText}
-                 </div>
-             )}
+      <div style={{ position: "relative" }}>
+        <div style={{ opacity, filter: `blur(${intensity * 2}px)` }}>
+          {displayText}
         </div>
-    </div>
+        {intensity > 0.01 && (
+          <>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                transform: `translate(${redX}px, ${redY}px)`,
+                color: "rgba(255,0,0,0.8)",
+                mixBlendMode: "screen",
+                opacity: intensity,
+              }}
+            >
+              {displayText}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                transform: `translate(${greenX}px, ${greenY}px)`,
+                color: "rgba(0,255,0,0.6)",
+                mixBlendMode: "screen",
+                opacity: intensity * 0.7,
+              }}
+            >
+              {displayText}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                transform: `translate(${blueX}px, ${blueY}px)`,
+                color: "rgba(0,0,255,0.8)",
+                mixBlendMode: "screen",
+                opacity: intensity,
+              }}
+            >
+              {displayText}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,${intensity * 0.12}) 2px, rgba(0,0,0,${intensity * 0.12}) 4px)`,
+                pointerEvents: "none",
+              }}
+            />
+          </>
+        )}
+      </div>
+    </StreamContainer>
   );
 };
 
 /**
- * FlipTextStream: Words flip in 3D like a mechanical display.
+ * FlipTextStream: 3D flip with brightness simulation and overlapping timing.
  */
 export const FlipTextStream: React.FC<KineticStreamProps> = ({
   text,
@@ -887,39 +1104,68 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
+  // Exit: flips out 0-0.45
+  const exitRotation = isTransitioning
+    ? interpolate(progress, [0, 0.45], [0, 90], {
+        ...CLAMP,
+        easing: E.dramaticIn,
+      })
+    : 0;
+  // Brightness dims as face rotates away
+  const exitBrightness = isTransitioning
+    ? interpolate(progress, [0, 0.45], [1, 0.6], CLAMP)
+    : 1;
+
+  // Enter: flips in 0.3-1.0 (overlaps with exit)
+  const enterRotation = isTransitioning
+    ? interpolate(progress, [0.3, 1], [-90, 0], {
+        ...CLAMP,
+        easing: E.appleBounce,
+      })
+    : 0;
+  const enterBrightness = isTransitioning
+    ? interpolate(progress, [0.3, 0.7], [0.6, 1], CLAMP)
+    : 1;
+
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        perspective: "1000px", // Essential for 3D
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        ...style,
-      }}
+      style={style}
+      perspective={1000}
     >
-      <div style={{ position: "relative", transformStyle: "preserve-3d", display: "grid", placeItems: "center" }}>
-        {/* Exiting Word: Flips Up/Out (Rotation X 0 -> -90) */}
+      <div
+        style={{
+          position: "relative",
+          transformStyle: "preserve-3d",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
         {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
-              transformOrigin: "center bottom", // Pivot at bottom
-              transform: `translate3d(0, -50%, 0) rotateX(${interpolate(progress, [0, 1], [0, 90])}deg) translateZ(${interpolate(progress, [0, 1], [0, 50])}px)`,
-              opacity: interpolate(progress, [0, 0.5], [1, 0]),
+              transformOrigin: "center bottom",
+              transform: `rotateX(${exitRotation}deg)`,
+              opacity: interpolate(progress, [0.2, 0.45], [1, 0], CLAMP),
+              filter: `brightness(${exitBrightness})`,
               backfaceVisibility: "hidden",
               whiteSpace: "nowrap",
             }}
@@ -927,33 +1173,32 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
             {prevWord}
           </div>
         )}
-
-        {/* Entering Word: Flips In (Rotation X -90 -> 0) */}
         {currentWord && (
           <div
             style={{
-                position: isTransitioning ? "absolute" : "relative",
-                transformOrigin: "center top",
-                // Start from -90 (perpendicular, bottom facing out) to 0
-                transform: isTransitioning
-                    ? `translate3d(0, -50%, 0) rotateX(${interpolate(progress, [0, 1], [-90, 0])}deg)`
-                    : `translate3d(0, 0, 0)`,
-                opacity: isTransitioning ? interpolate(progress, [0.4, 1], [0, 1]) : 1,
-                backfaceVisibility: "hidden",
-                whiteSpace: "nowrap",
+              position: isTransitioning ? "absolute" : "relative",
+              transformOrigin: "center top",
+              transform: isTransitioning
+                ? `rotateX(${enterRotation}deg)`
+                : "rotateX(0)",
+              opacity: isTransitioning
+                ? interpolate(progress, [0.3, 0.6], [0, 1], CLAMP)
+                : 1,
+              filter: `brightness(${enterBrightness})`,
+              backfaceVisibility: "hidden",
+              whiteSpace: "nowrap",
             }}
           >
             {currentWord}
           </div>
         )}
       </div>
-    </div>
+    </StreamContainer>
   );
 };
 
 /**
- * ZoomTextStream: Current word flies towards camera, new word flies in from distance.
- * High impact.
+ * ZoomTextStream: Fly-through zoom with S-curve depth-of-field blur and parallax.
  */
 export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   text,
@@ -965,70 +1210,70 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
-  return (
-    <div
-      className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        ...style,
-      }}
-    >
-        {/* Exiting Word: Scales Up and Fades Out (Fly Through) */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `scale(${interpolate(progress, [0, 1], [1, 3])})`,
-              filter: `blur(${interpolate(progress, [0, 1], [0, 20])}px)`,
-              opacity: interpolate(progress, [0, 0.8], [1, 0]),
-              willChange: "transform, opacity, filter",
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
+  // S-curve depth-of-field blur
+  const enterBlur = isTransitioning
+    ? interpolate(progress, [0, 0.3, 0.7, 1], [0, 12, 5, 0])
+    : 0;
 
-        {/* Entering Word: Scales Up from 0 (From Distance) */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: isTransitioning
-                    ? `scale(${interpolate(progress, [0, 1], [0.2, 1])})`
-                    : `scale(1)`,
-                opacity: isTransitioning ? interpolate(progress, [0, 0.6], [0, 1]) : 1,
-                willChange: "transform, opacity",
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+  return (
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
+      className={className}
+      style={style}
+    >
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `scale(${interpolate(progress, [0, 0.7], [1, 4], { ...CLAMP, easing: E.dramaticIn })})`,
+            filter: `blur(${interpolate(progress, [0, 0.7], [0, 20], CLAMP)}px) brightness(${interpolate(progress, [0, 0.7], [1, 1.4], CLAMP)})`,
+            opacity: interpolate(progress, [0, 0.6], [1, 0], CLAMP),
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            // Scale with overshoot + subtle Y parallax
+            transform: isTransitioning
+              ? `scale(${interpolate(progress, [0, 0.9], [0.1, 1], { ...CLAMP, easing: E.appleBounce })}) translateY(${interpolate(progress, [0, 1], [5, 0], CLAMP)}px)`
+              : "scale(1)",
+            opacity: isTransitioning
+              ? interpolate(progress, [0, 0.5], [0, 1], CLAMP)
+              : 1,
+            filter: enterBlur > 0.5 ? `blur(${enterBlur}px)` : "none",
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
-
 /**
- * BlurTextStream: Cinematic horizontal blur transition.
- * Words slide slightly and blur violently during transition.
+ * BlurTextStream: Cinematic horizontal blur with velocity-driven motion blur.
  */
 export const BlurTextStream: React.FC<KineticStreamProps> = ({
   text,
@@ -1040,70 +1285,76 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
-  return (
-    <div
-      className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
-    >
-        {/* Exiting Word: Slides Left + Motion Blur */}
-        {isTransitioning && prevWord && (
-          <div
-            style={{
-              position: "absolute",
-              whiteSpace: "nowrap",
-              transform: `translateX(${interpolate(progress, [0, 1], [0, -100])}px) scale(${interpolate(progress, [0, 0.5, 1], [1, 0.9, 0.8])})`,
-              filter: `blur(${interpolate(progress, [0, 0.5, 1], [0, 10, 20])}px)`,
-              opacity: interpolate(progress, [0, 0.5], [1, 0]),
-            }}
-          >
-            {prevWord}
-          </div>
-        )}
+  const blur = isTransitioning
+    ? getMotionBlur(progress, E.dramaticInOut, 14)
+    : 0;
 
-        {/* Entering Word: Slides In from Right + Motion Blur */}
-        {currentWord && (
-          <div
-            style={{
-                position: "absolute",
-                whiteSpace: "nowrap",
-                transform: isTransitioning
-                    ? `translateX(${interpolate(progress, [0, 1], [100, 0])}px) scale(${interpolate(progress, [0, 0.5, 1], [0.8, 1.1, 1])})`
-                    : `scale(1)`,
-                filter: isTransitioning 
-                    ? `blur(${interpolate(progress, [0, 0.5, 1], [20, 10, 0])}px)` 
-                    : "none",
-                opacity: isTransitioning ? interpolate(progress, [0, 0.5], [0, 1]) : 1,
-            }}
-          >
-            {currentWord}
-          </div>
-        )}
-    </div>
+  const easedPos = isTransitioning
+    ? interpolate(progress, [0, 1], [0, 1], {
+        ...CLAMP,
+        easing: E.dramaticInOut,
+      })
+    : 1;
+
+  return (
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
+      className={className}
+      style={style}
+    >
+      {isTransitioning && prevWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: `translateX(${interpolate(easedPos, [0, 1], [0, -80])}px) translateY(${interpolate(easedPos, [0.5, 1], [0, 3], CLAMP)}px) scale(${interpolate(easedPos, [0, 0.5, 1], [1, 0.95, 0.9])})`,
+            opacity: interpolate(easedPos, [0, 0.5], [1, 0], CLAMP),
+            filter: blur > 0.5 ? `blur(${blur}px)` : "none",
+          }}
+        >
+          {prevWord}
+        </div>
+      )}
+      {currentWord && (
+        <div
+          style={{
+            position: "absolute",
+            whiteSpace: "nowrap",
+            transform: isTransitioning
+              ? `translateX(${interpolate(easedPos, [0, 1], [80, 0])}px) scale(${interpolate(easedPos, [0, 0.5, 1], [0.95, 1.02, 1])})`
+              : "scale(1)",
+            opacity: isTransitioning
+              ? interpolate(easedPos, [0, 0.5], [0, 1], CLAMP)
+              : 1,
+            filter:
+              isTransitioning && blur > 0.5 ? `blur(${blur * 0.8}px)` : "none",
+          }}
+        >
+          {currentWord}
+        </div>
+      )}
+    </StreamContainer>
   );
 };
 
 /**
- * SlicedStream: Words are sliced horizontally and slide together.
- * High-end fashion / cinematic look.
+ * SlicedStream: Split halves with staggered arrival timing.
  */
 export const SlicedStream: React.FC<KineticStreamProps> = ({
   text,
@@ -1115,78 +1366,91 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
-  
-  // Animation:
-  // Top half slides in from Left
-  // Bottom half slides in from Right
-  // (Or Split Out for exit)
-  
-  // Actually, let's just animate the ENTRY. The EXIT can be a simple fade or slide out.
-  // Or better: Current word splits out, New word splits in.
-  
-  const offset = isTransitioning 
-      ? interpolate(progress, [0, 1], [100, 0], { easing: Easing.bezier(0.2, 1, 0.3, 1) })
-      : 0;
+
+  // Staggered: top half arrives earlier
+  const topOffset = isTransitioning
+    ? interpolate(progress, [0, 0.8], [100, 0], {
+        ...CLAMP,
+        easing: E.appleSwift,
+      })
+    : 0;
+  const bottomOffset = isTransitioning
+    ? interpolate(progress, [0.12, 0.92], [100, 0], {
+        ...CLAMP,
+        easing: E.appleSwift,
+      })
+    : 0;
+
+  const topOpacity = isTransitioning
+    ? interpolate(progress, [0, 0.2], [0, 1], CLAMP)
+    : 1;
+  const bottomOpacity = isTransitioning
+    ? interpolate(progress, [0.12, 0.32], [0, 1], CLAMP)
+    : 1;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
     >
-        {/* Previous Word (Fades out) */}
-        {isTransitioning && prevIndex >= 0 && (
-            <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.3], [1, 0]) }}>
-                {words[prevIndex]}
-            </div>
-        )}
-
-        {/* Current Word */}
-        <div style={{ position: "relative" }}>
-             {/* Top Half */}
-             <div style={{ 
-                 position: "absolute", 
-                 top: 0, left: 0, 
-                 clipPath: "polygon(0 0, 100% 0, 100% 50%, 0 50%)",
-                 transform: `translateX(${-offset}px)`,
-                 opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
-             }}>
-                 {currentWord}
-             </div>
-             
-             {/* Bottom Half */}
-             <div style={{ 
-                 position: "relative", // Keeps layout size
-                 clipPath: "polygon(0 50%, 100% 50%, 100% 100%, 0 100%)",
-                 transform: `translateX(${offset}px)`,
-                 opacity: isTransitioning ? interpolate(progress, [0, 0.2], [0, 1]) : 1
-             }}>
-                 {currentWord}
-             </div>
+      {isTransitioning && prevIndex >= 0 && (
+        <div
+          style={{
+            position: "absolute",
+            opacity: interpolate(progress, [0, 0.25], [1, 0], CLAMP),
+            filter: `blur(${interpolate(progress, [0, 0.3], [0, 4], CLAMP)}px)`,
+          }}
+        >
+          {words[prevIndex]}
         </div>
-    </div>
+      )}
+      <div style={{ position: "relative" }}>
+        {/* Top half */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            clipPath: "polygon(0 0, 100% 0, 100% 50%, 0 50%)",
+            transform: `translateX(${-topOffset}px)`,
+            opacity: topOpacity,
+          }}
+        >
+          {currentWord}
+        </div>
+        {/* Bottom half */}
+        <div
+          style={{
+            position: "relative",
+            clipPath: "polygon(0 50%, 100% 50%, 100% 100%, 0 100%)",
+            transform: `translateX(${bottomOffset}px)`,
+            opacity: bottomOpacity,
+          }}
+        >
+          {currentWord}
+        </div>
+      </div>
+    </StreamContainer>
   );
 };
 
 /**
- * TurbulenceStream: Words distort turbulently like heat haze or water.
- * Requires SVG filters.
+ * TurbulenceStream: Organic displacement distortion.
  */
 export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   text,
@@ -1198,72 +1462,88 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   transitionDuration = 0.65,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
-  
-  // Unique ID for filter
-  const filterId = useMemo(() => `turb-${Math.random().toString(36).substr(2, 9)}`, []);
-  
-  // Distortion amount
-  // 0 -> High -> 0
-  const scale = isTransitioning 
-      ? interpolate(progress, [0, 0.5, 1], [0, 50, 0]) // Displacement scale
-      : 0;
+  const filterId = useId();
+
+  // Asymmetric distortion: ramps up fast, settles slowly
+  const displacement = isTransitioning
+    ? interpolate(progress, [0, 0.3, 1], [0, 60, 0], {
+        easing: E.gentle,
+      })
+    : 0;
+
+  // Animated base frequency
+  const baseFreq = isTransitioning
+    ? interpolate(progress, [0, 0.3, 1], [0.03, 0.08, 0.03])
+    : 0.03;
 
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        overflow: "hidden",
-        ...style,
-      }}
+      style={style}
     >
-        {/* SVG Filter Definition */}
-        <svg width="0" height="0" style={{ position: "absolute" }}>
-            <defs>
-                <filter id={filterId}>
-                    <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale={scale} />
-                </filter>
-            </defs>
-        </svg>
-
-        {/* Previous Word (Fades out) */}
-        {isTransitioning && prevIndex >= 0 && (
-            <div style={{ position: "absolute", opacity: interpolate(progress, [0, 0.5], [1, 0]) }}>
-                {words[prevIndex]}
-            </div>
-        )}
-
-        {/* Current Word */}
-        <div style={{ 
-            position: "relative",
-            filter: `url(#${filterId})`,
-            opacity: isTransitioning ? interpolate(progress, [0, 0.5], [0, 1]) : 1,
-            willChange: "filter",
-        }}>
-            {currentWord}
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <filter id={filterId}>
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency={baseFreq}
+              numOctaves={2}
+              result="noise"
+            />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale={displacement}
+            />
+          </filter>
+        </defs>
+      </svg>
+      {isTransitioning && prevIndex >= 0 && (
+        <div
+          style={{
+            position: "absolute",
+            opacity: interpolate(progress, [0, 0.4], [1, 0], CLAMP),
+          }}
+        >
+          {words[prevIndex]}
         </div>
-    </div>
+      )}
+      <div
+        style={{
+          position: "relative",
+          filter: displacement > 0.5 ? `url(#${filterId})` : "none",
+          opacity: isTransitioning
+            ? interpolate(progress, [0.1, 0.5], [0, 1], CLAMP)
+            : 1,
+        }}
+      >
+        {currentWord}
+      </div>
+    </StreamContainer>
   );
 };
 
 /**
- * NeonStream: Flickering neon light effect.
+ * NeonStream: Flickering neon with turn-on sequence and glow warmup.
  */
-export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> = ({
+export const NeonStream: React.FC<
+  KineticStreamProps & { neonColor?: string }
+> = ({
   text,
   fontSize = 80,
   fontWeight = "bold",
@@ -1274,87 +1554,87 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
   transitionDuration = 0.15,
   duration,
   delayAfterLastWord = 0,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const frame = useCurrentFrame();
-  
-  // Flicker effect
-  // Random opacity jumps between 0.8 and 1, with occasional drops to 0.2
-  // Deterministic random based on frame
-  const noise = (f: number) => {
-      return (Math.sin(f * 0.5) + Math.sin(f * 3.3) + Math.sin(f * 10)) / 3;
-  };
-  
-  // Base flicker
-  const opacity = 0.9 + noise(frame) * 0.1;
-  
-  // Text Shadow (Glow)
-  const glow = `
-    0 0 5px ${neonColor},
-    0 0 10px ${neonColor},
-    0 0 20px ${neonColor},
-    0 0 40px ${neonColor}
-  `;
-  
-  // Transition logic
-  // Just hard cut or quick fade
-  const transitionOpacity = isTransitioning 
-    ? interpolate(progress, [0, 0.5], [0, 1])
+
+  // Deterministic flicker
+  const flicker = 0.92 + seededRandom(frame * 3) * 0.08;
+
+  // Turn-on sequence: flash / dim / flash / settle
+  const turnOn = isTransitioning
+    ? progress < 0.15
+      ? interpolate(progress, [0, 0.15], [0, 0.7])
+      : progress < 0.25
+        ? interpolate(progress, [0.15, 0.25], [0.7, 0.15])
+        : progress < 0.4
+          ? interpolate(progress, [0.25, 0.4], [0.15, 0.95])
+          : progress < 0.55
+            ? interpolate(progress, [0.4, 0.55], [0.95, 0.8])
+            : interpolate(progress, [0.55, 0.75], [0.8, 1], CLAMP)
     : 1;
 
+  // Glow warmup
+  const warmup = isTransitioning
+    ? interpolate(progress, [0.3, 1], [0.3, 1], CLAMP)
+    : 1;
+
+  const glow = `0 0 ${2 + warmup * 3}px ${neonColor}, 0 0 ${5 + warmup * 5}px ${neonColor}, 0 0 ${10 + warmup * 10}px ${neonColor}, 0 0 ${20 + warmup * 20}px ${neonColor}`;
+
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        fontSize,
-        fontWeight,
-        color, // Core color usually white
-        fontFamily: "inherit",
-        ...style,
-      }}
+      style={style}
     >
-         {/* Previous Word */}
-         {isTransitioning && prevIndex >= 0 && (
-            <div style={{ 
-                position: "absolute", 
-                opacity: interpolate(progress, [0, 0.2], [1, 0]),
-                textShadow: glow 
-            }}>
-                {words[prevIndex]}
-            </div>
-        )}
-        
-        {/* Current Word */}
-        <div style={{ 
-            position: "relative",
-            opacity: opacity * transitionOpacity,
+      {isTransitioning && prevIndex >= 0 && (
+        <div
+          style={{
+            position: "absolute",
+            opacity: interpolate(progress, [0, 0.12], [1, 0], {
+              extrapolateRight: "clamp",
+            }),
             textShadow: glow,
-        }}>
-            {currentWord}
+          }}
+        >
+          {words[prevIndex]}
         </div>
-    </div>
+      )}
+      <div
+        style={{
+          position: "relative",
+          opacity: flicker * turnOn,
+          textShadow: glow,
+        }}
+      >
+        {currentWord}
+      </div>
+    </StreamContainer>
   );
 };
 
-export type PushDirection = "up" | "down" | "left" | "right";
-
 /**
- * PushStream: Words push each other out in a specified direction.
- * Clean, high-energy kinetic typography effect.
+ * PushStream: Directional push with velocity skew, overshoot, and momentum compression.
  */
-export const PushStream: React.FC<KineticStreamProps & { 
-  direction?: PushDirection;
-  /** Apply motion blur-like skew during movement */
-  withSkew?: boolean;
-}> = ({
+export const PushStream: React.FC<
+  KineticStreamProps & {
+    direction?: PushDirection;
+    /** Apply motion blur-like skew during movement */
+    withSkew?: boolean;
+  }
+> = ({
   text,
   fontSize = 80,
   fontWeight = "bold",
@@ -1366,129 +1646,139 @@ export const PushStream: React.FC<KineticStreamProps & {
   delayAfterLastWord = 0,
   direction = "up",
   withSkew = true,
+  wordsPerGroup = 1,
 }) => {
-  const words = useWords(text);
-  const { currentIndex, prevIndex, isTransitioning, progress } = useStreamTiming(words.length, transitionDuration, duration, delayAfterLastWord);
-  
+  const words = useWords(text, wordsPerGroup);
+  const { currentIndex, prevIndex, isTransitioning, progress } =
+    useStreamTiming(
+      words.length,
+      transitionDuration,
+      duration,
+      delayAfterLastWord
+    );
+
   const currentWord = words[currentIndex];
   const prevWord = words[prevIndex];
 
-  // Helper to calculate transform based on progress
-  const getTransform = (type: "enter" | "exit", p: number) => {
-    // Skew logic: Max skew in middle of movement
-    const skewMax = 20;
-    const currentSkew = withSkew 
-      ? interpolate(p, [0, 0.2, 0.8, 1], [0, skewMax, skewMax, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
-      : 0;
+  // Velocity-based skew
+  const velocity = isTransitioning
+    ? getMotionBlur(progress, E.snappy, 1)
+    : 0;
+  const skewAmount = withSkew ? velocity * 18 : 0;
 
-    let x = "0", y = "0";
-    let skewX = "0deg", skewY = "0deg";
+  // Momentum compression (scaleY for vertical, scaleX for horizontal)
+  const isVertical = direction === "up" || direction === "down";
+  const compression = 1 - velocity * 0.03;
+
+  const getTransform = (type: "enter" | "exit", p: number) => {
+    let x = "0",
+      y = "0";
+    let skewX = "0deg",
+      skewY = "0deg";
+    const scaleComp = isVertical
+      ? `scaleY(${compression})`
+      : `scaleX(${compression})`;
 
     if (direction === "up") {
-       if (type === "enter") {
-          const val = interpolate(p, [0, 1], [100, 0]);
-          y = `${val}%`;
-          skewY = `${-currentSkew}deg`;
-       } else {
-          const val = interpolate(p, [0, 1], [0, -100]);
-          y = `${val}%`;
-          skewY = `${-currentSkew}deg`;
-       }
+      const val =
+        type === "enter"
+          ? interpolate(p, [0, 0.8], [100, 0], {
+              ...CLAMP,
+              easing: E.appleBounce,
+            })
+          : interpolate(p, [0, 0.65], [0, -100], {
+              ...CLAMP,
+              easing: E.dramaticIn,
+            });
+      y = `${val}%`;
+      skewY = `${-skewAmount}deg`;
     } else if (direction === "down") {
-       if (type === "enter") {
-          const val = interpolate(p, [0, 1], [-100, 0]);
-          y = `${val}%`;
-          skewY = `${currentSkew}deg`;
-       } else {
-          const val = interpolate(p, [0, 1], [0, 100]);
-          y = `${val}%`;
-          skewY = `${currentSkew}deg`;
-       }
+      const val =
+        type === "enter"
+          ? interpolate(p, [0, 0.8], [-100, 0], {
+              ...CLAMP,
+              easing: E.appleBounce,
+            })
+          : interpolate(p, [0, 0.65], [0, 100], {
+              ...CLAMP,
+              easing: E.dramaticIn,
+            });
+      y = `${val}%`;
+      skewY = `${skewAmount}deg`;
     } else if (direction === "left") {
-       if (type === "enter") {
-          const val = interpolate(p, [0, 1], [100, 0]);
-          x = `${val}%`;
-          skewX = `${currentSkew}deg`;
-       } else {
-          const val = interpolate(p, [0, 1], [0, -100]);
-          x = `${val}%`;
-          skewX = `${currentSkew}deg`;
-       }
-    } else if (direction === "right") {
-       if (type === "enter") {
-          const val = interpolate(p, [0, 1], [-100, 0]);
-          x = `${val}%`;
-          skewX = `${-currentSkew}deg`;
-       } else {
-          const val = interpolate(p, [0, 1], [0, 100]);
-          x = `${val}%`;
-          skewX = `${-currentSkew}deg`;
-       }
+      const val =
+        type === "enter"
+          ? interpolate(p, [0, 0.8], [100, 0], {
+              ...CLAMP,
+              easing: E.appleBounce,
+            })
+          : interpolate(p, [0, 0.65], [0, -100], {
+              ...CLAMP,
+              easing: E.dramaticIn,
+            });
+      x = `${val}%`;
+      skewX = `${skewAmount}deg`;
+    } else {
+      const val =
+        type === "enter"
+          ? interpolate(p, [0, 0.8], [-100, 0], {
+              ...CLAMP,
+              easing: E.appleBounce,
+            })
+          : interpolate(p, [0, 0.65], [0, 100], {
+              ...CLAMP,
+              easing: E.dramaticIn,
+            });
+      x = `${val}%`;
+      skewX = `${-skewAmount}deg`;
     }
 
-    return `translate3d(${x}, ${y}, 0) skew(${skewX}, ${skewY})`;
+    return `translate3d(${x}, ${y}, 0) skew(${skewX}, ${skewY}) ${scaleComp}`;
   };
 
-  // Easing for smooth motion
-  const easeProgress = isTransitioning 
-    ? interpolate(progress, [0, 1], [0, 1], { 
-        easing: Easing.bezier(0.2, 0.0, 0.2, 1),
-        extrapolateRight: "clamp"
-      }) 
-    : 1;
-
   return (
-    <div
+    <StreamContainer
+      fontSize={fontSize}
+      fontWeight={fontWeight}
+      color={color}
       className={className}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        fontSize,
-        fontWeight,
-        color,
-        fontFamily: "inherit",
-        ...style,
-      }}
+      style={style}
     >
-      <div style={{ position: "relative", textAlign: "center", display: "grid", placeItems: "center" }}>
-        
-        {/* Previous Word (Exiting) */}
+      <div
+        style={{
+          position: "relative",
+          textAlign: "center",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
         {isTransitioning && prevWord && (
           <div
             style={{
               position: "absolute",
               whiteSpace: "nowrap",
-              transform: getTransform("exit", easeProgress),
-              opacity: interpolate(easeProgress, [0.6, 1], [1, 0]),
-              willChange: "transform, opacity",
+              transform: getTransform("exit", progress),
+              opacity: interpolate(progress, [0.4, 0.65], [1, 0], CLAMP),
             }}
           >
             {prevWord}
           </div>
         )}
-
-        {/* Current Word (Entering or Static) */}
         {currentWord && (
           <div
             style={{
               position: isTransitioning ? "absolute" : "relative",
               whiteSpace: "nowrap",
-              transform: isTransitioning 
-                ? getTransform("enter", easeProgress)
+              transform: isTransitioning
+                ? getTransform("enter", progress)
                 : "translate3d(0,0,0)",
-              willChange: "transform",
               opacity: 1,
             }}
           >
             {currentWord}
           </div>
         )}
-        
       </div>
-    </div>
+    </StreamContainer>
   );
 };

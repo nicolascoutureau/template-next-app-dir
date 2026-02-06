@@ -92,6 +92,24 @@ export { LiquidShape, type LiquidShapeProps, type LiquidPreset } from "./LiquidS
 export { GradientStroke, type GradientStrokeProps, type StrokeShape } from "./GradientStroke";
 export { Wiggle, type WiggleProps, type WiggleMode } from "./Wiggle";
 export { Spotlight, type SpotlightProps } from "./Spotlight";
+export { Scribble, type ScribbleProps, type ScribbleShape } from "./Scribble";
+export { BarChart, type BarChartProps, type BarChartBar, type ChartOrientation } from "./BarChart";
+export { PieChart, type PieChartProps, type PieSlice } from "./PieChart";
+export { CountdownTimer, type CountdownTimerProps, type CountdownStyle } from "./CountdownTimer";
+export { Smoke, type SmokeProps, type SmokeStyle } from "./Smoke";
+export { LogoReveal, type LogoRevealProps, type LogoRevealStyle } from "./LogoReveal";
+export { GradientBlur, type GradientBlurProps, type BlurDirection } from "./GradientBlur";
+export { Ticker, type TickerProps } from "./Ticker";
+export { ChromaticAberration, type ChromaticAberrationProps } from "./ChromaticAberration";
+export { Duotone, type DuotoneProps, type DuotonePreset } from "./Duotone";
+export {
+  ShapeAnimation,
+  type ShapeAnimationProps,
+  type ShapeType,
+  type ShapeAnimationType,
+} from "./ShapeAnimation";
+export { WaveDistortion, type WaveDistortionProps, type WaveType } from "./WaveDistortion";
+export { SocialFrame, type SocialFrameProps, type SocialPlatform } from "./SocialFrame";
 
 // SVG Effects
 export * from "./svg";

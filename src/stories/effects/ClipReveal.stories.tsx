@@ -6,13 +6,6 @@ import { RemotionWrapper } from "../helpers/RemotionWrapper";
 const meta: Meta<typeof ClipReveal> = {
   title: "Effects/ClipReveal",
   component: ClipReveal,
-  decorators: [
-    (Story) => (
-      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
-        <Story />
-      </RemotionWrapper>
-    ),
-  ],
   argTypes: {
     shape: {
       control: "select",
@@ -60,6 +53,13 @@ const Content = () => (
 // ============================================
 
 export const CircleExpand: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "circle",
     direction: "expand",
@@ -73,6 +73,13 @@ export const CircleExpand: Story = {
 };
 
 export const InsetReveal: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "inset",
     direction: "expand",
@@ -86,6 +93,13 @@ export const InsetReveal: Story = {
 };
 
 export const DiamondReveal: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "diamond",
     direction: "expand",
@@ -99,6 +113,13 @@ export const DiamondReveal: Story = {
 };
 
 export const DiagonalWipe: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "diagonal",
     direction: "right",
@@ -112,6 +133,13 @@ export const DiagonalWipe: Story = {
 };
 
 export const SplitReveal: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "split",
     direction: "expand",
@@ -125,6 +153,13 @@ export const SplitReveal: Story = {
 };
 
 export const CustomOrigin: Story = {
+  decorators: [
+    (Story) => (
+      <RemotionWrapper durationInFrames={120} backgroundColor="#1a1a2e">
+        <Story />
+      </RemotionWrapper>
+    ),
+  ],
   args: {
     shape: "circle",
     direction: "expand",
