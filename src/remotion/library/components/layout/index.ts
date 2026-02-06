@@ -39,5 +39,3 @@ export {
   type ShakeProps,
 } from "./Camera";
 export { MaskedReveal, type MaskedRevealProps, type RevealType } from "./MaskedReveal";
-export { PerspectiveCard, type PerspectiveCardProps } from "./PerspectiveCard";
-export { ZoomTransition, type ZoomTransitionProps } from "./ZoomTransition";

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useVideoConfig } from "remotion";
 
-export type RevealType = "circle" | "wipe" | "brush" | "polygon";
+export type RevealType = "circle" | "wipe" | "polygon";
 
 export interface MaskedRevealProps {
   children: React.ReactNode;

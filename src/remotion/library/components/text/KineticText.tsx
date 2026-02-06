@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useId, useMemo } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
 export type KineticType = "path" | "marquee" | "cylinder";
@@ -62,8 +62,8 @@ export const KineticText: React.FC<KineticTextProps> = ({
   const { fps, width } = useVideoConfig();
   const time = frame / fps;
   
-  // Path Text Implementation - Memoize ID unconditionally
-  const pathId = useMemo(() => `path-${Math.random().toString(36).substr(2, 9)}`, []);
+  // Path Text Implementation - Deterministic ID (no Math.random in Remotion)
+  const pathId = useId();
 
   // Cylinder Implementation - Memoize items unconditionally (or with dependency on repeat)
   const cylinderItems = useMemo(() => {

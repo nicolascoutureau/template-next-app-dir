@@ -14,8 +14,3 @@ export {
   type BrowserType,
   type BrowserTheme,
 } from "./BrowserMockup";
-export {
-  SearchBar,
-  type SearchBarProps,
-  type SearchBarVariant,
-} from "./SearchBar";

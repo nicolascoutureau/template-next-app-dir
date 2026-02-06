@@ -3,12 +3,6 @@
  */
 
 export {
-  Shimmer,
-  ShimmerText,
-  type ShimmerProps,
-  type ShimmerTextProps,
-} from "./Shimmer";
-export {
   Glow,
   AnimatedGlow,
   type GlowProps,
@@ -76,6 +70,14 @@ export { Neon, type NeonProps } from "./Neon";
 export { SpeedLines, type SpeedLinesProps } from "./SpeedLines";
 export { LensFlare, type LensFlareProps } from "./LensFlare";
 export { Pixelate, type PixelateProps } from "./Pixelate";
+
+export { Noise, type NoiseProps, type NoiseType } from "./Noise";
+export { Vignette, type VignetteProps, type VignetteShape } from "./Vignette";
+export {
+  Particles,
+  type ParticlesProps,
+  type ParticleType,
+} from "./Particles";
 
 // SVG Effects
 export * from "./svg";
