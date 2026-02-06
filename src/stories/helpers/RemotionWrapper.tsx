@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Player } from "@remotion/player";
-import { AbsoluteFill } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 
 /**
  * Props for the RemotionWrapper component.
@@ -63,6 +63,8 @@ export const RemotionWrapper: React.FC<RemotionWrapperProps> = ({
 
   // Create a component that renders the children
   const StoryComponent: React.FC = () => {
+    const frame = useCurrentFrame();
+    console.log(frame);
     return (
       <AbsoluteFill
         style={{
