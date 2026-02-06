@@ -1,62 +1,98 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 export interface PixelateProps {
   children: React.ReactNode;
-  /** Pixel size in px */
+  /** Target pixel size in px (larger = more pixelated) */
   pixelSize?: number;
+  /** Animation duration in seconds (0 = static) */
+  duration?: number;
+  /** Animation delay in seconds */
+  delay?: number;
+  /** Easing preset */
+  ease?: EasingName | string;
+  /**
+   * Animation direction:
+   * - "in": sharp to pixelated
+   * - "out": pixelated to sharp
+   */
+  direction?: "in" | "out";
   /** Additional CSS class names */
   className?: string;
   /** Additional CSS styles */
   style?: React.CSSProperties;
 }
 
+/**
+ * Pixelation effect with optional animation.
+ * Uses scale-down + pixelated upscale for a mosaic look.
+ *
+ * @example
+ * // Static pixelation
+ * <Pixelate pixelSize={10}>
+ *   <Image />
+ * </Pixelate>
+ *
+ * @example
+ * // Animated reveal (pixelated to sharp)
+ * <Pixelate pixelSize={20} duration={1} direction="out">
+ *   <Image />
+ * </Pixelate>
+ *
+ * @example
+ * // Animated pixelation (sharp to pixelated)
+ * <Pixelate pixelSize={15} duration={0.5} direction="in" ease="smooth">
+ *   <Image />
+ * </Pixelate>
+ */
 export const Pixelate: React.FC<PixelateProps> = ({
   children,
   pixelSize = 10,
+  duration = 0,
+  delay = 0,
+  ease = "smooth",
+  direction = "in",
   className,
   style,
 }) => {
-  // SVG filter for pixelation
-  // Logic: 
-  // 1. Dilate/Erode is one way, but flood+composite is better for "mosaic".
-  // Actually, a simpler approximation for DOM elements is strict upscaling or
-  // using an SVG filter with feImage (complex).
-  // The most reliable cross-browser way for *dynamic* content without Canvas 
-  // is often SVG feMorphology (blocky) or a specific matrix, but true pixelation 
-  // is hard with just CSS filters on vector content.
-  // 
-  // However, there is a trick using multiple SVG filters:
-  // 1. Scale down using a transform
-  // 2. Scale up using 'image-rendering: pixelated'
-  // BUT that only works on Raster images usually.
-  //
-  // Let's use the SVG filter method:
-  // <feFlood x="0" y="0" width="1" height="1" ... /> tile pattern?
-  //
-  // A robust method for "Mosaic" in SVG filters:
-  // Unfortunately standard SVG filters don't have a direct "Mosaic" primitive.
-  //
-  // ALTERNATIVE: Use the CSS "backdrop-filter" trick if supported? No.
-  //
-  // Let's stick to a very high quality SVG filter implementation if possible.
-  // Actually, for Remotion (Chrome/Headless), we can use a specific SVG filter chain.
-  //
-  // <filter id="pixelate" x="0" y="0">
-  //   <feFlood x="2" y="2" height="1" width="1"/>
-  //   <feComposite width="4" height="4"/>
-  //   <feTile result="a"/>
-  //   <feComposite in="SourceGraphic" in2="a" operator="in"/>
-  //   <feMorphology operator="dilate" radius="2"/>
-  // </filter>
-  //
-  // Wait, the standard "easy" way is actually not easy in CSS.
-  // Let's assume we want a "Blocky" look. `feMorphology` dilate makes things look blocky.
-  //
-  // Better approach for general usage:
-  // Simply wrap the content in a div that is scaled down and then scaled back up 
-  // with `image-rendering: pixelated`. This is supported in Chrome (Remotion's engine).
-  
-  const scaleFactor = 1 / Math.max(1, pixelSize);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const easing = useMemo(() => toRemotionEasing(ease), [ease]);
+
+  const progress = useMemo(() => {
+    if (duration <= 0) return 1;
+    const delayFrames = Math.round(delay * fps);
+    const durationFrames = Math.round(duration * fps);
+    const effectiveFrame = frame - delayFrames;
+    if (effectiveFrame <= 0) return 0;
+    if (effectiveFrame >= durationFrames) return 1;
+    return interpolate(effectiveFrame, [0, durationFrames], [0, 1], {
+      easing,
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+    });
+  }, [frame, fps, duration, delay, easing]);
+
+  // "in" = sharp to pixelated (progress 0→1 maps to size 1→pixelSize)
+  // "out" = pixelated to sharp (progress 0→1 maps to size pixelSize→1)
+  const currentPixelSize = direction === "out"
+    ? interpolate(progress, [0, 1], [pixelSize, 1])
+    : duration <= 0
+      ? pixelSize
+      : interpolate(progress, [0, 1], [1, pixelSize]);
+
+  // No pixelation needed if pixel size is 1 or less
+  if (currentPixelSize <= 1) {
+    return (
+      <div className={className} style={{ width: "100%", height: "100%", ...style }}>
+        {children}
+      </div>
+    );
+  }
+
+  const scaleFactor = 1 / Math.max(1, currentPixelSize);
 
   return (
     <div
@@ -68,16 +104,17 @@ export const Pixelate: React.FC<PixelateProps> = ({
         ...style,
       }}
     >
-        <div style={{
-            width: `${100 / scaleFactor}%`,
-            height: `${100 / scaleFactor}%`,
-            transform: `scale(${scaleFactor})`,
-            transformOrigin: "top left",
-             // Force hardware acceleration and pixelated rendering
-            imageRendering: "pixelated", 
-        }}>
-            {children}
-        </div>
+      <div
+        style={{
+          width: `${100 / scaleFactor}%`,
+          height: `${100 / scaleFactor}%`,
+          transform: `scale(${scaleFactor})`,
+          transformOrigin: "top left",
+          imageRendering: "pixelated",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

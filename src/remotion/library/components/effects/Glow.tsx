@@ -21,9 +21,10 @@ export interface GlowProps {
    */
   layers?: number;
   /**
-   * Decay factor for layered glow (how fast intensity drops per layer)
+   * Growth factor for layered glow blur radius (each layer = previous * growth).
+   * Default 2 means each layer is 2x the blur of the previous, creating a natural light scatter.
    */
-  decay?: number;
+  layerGrowth?: number;
   /** Spread radius for additional diffuse glow */
   spread?: number;
   /** Additional CSS styles */
@@ -62,7 +63,7 @@ export const Glow: React.FC<GlowProps> = ({
   pulseMin = 0.5,
   spread = 0,
   layers = 1,
-  decay = 2,
+  layerGrowth = 2,
   style,
   className,
 }) => {
@@ -92,7 +93,7 @@ export const Glow: React.FC<GlowProps> = ({
 
     let shadows = "";
     for (let i = 0; i < layers; i++) {
-        const layerIntensity = currentIntensity * Math.pow(decay, i);
+        const layerIntensity = currentIntensity * Math.pow(layerGrowth, i);
         // We can also increase opacity falloff if we switched to box-shadow, 
         // but for drop-shadow we just layer them. 
         // Note: multiple drop-shadows on one element can be expensive, 
@@ -103,7 +104,7 @@ export const Glow: React.FC<GlowProps> = ({
         shadows += `drop-shadow(0 0 ${layerIntensity}px ${color}) `;
     }
     return shadows.trim();
-  }, [currentIntensity, color, spread, layers, decay]);
+  }, [currentIntensity, color, spread, layers, layerGrowth]);
 
   const glowStyle: CSSProperties = {
     filter: dropShadows,
@@ -148,7 +149,7 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
   pulsateAfter = false,
   spread = 0,
   layers = 1,
-  decay = 2,
+  layerGrowth = 2,
   style,
   className,
 }) => {
@@ -210,11 +211,11 @@ export const AnimatedGlow: React.FC<AnimatedGlowProps> = ({
 
       let shadows = "";
       for (let i = 0; i < layers; i++) {
-          const layerIntensity = currentIntensity * Math.pow(decay, i);
+          const layerIntensity = currentIntensity * Math.pow(layerGrowth, i);
           shadows += `drop-shadow(0 0 ${layerIntensity}px ${color}) `;
       }
       return shadows.trim();
-  }, [currentIntensity, color, spread, layers, decay]);
+  }, [currentIntensity, color, spread, layers, layerGrowth]);
 
   const glowStyle: CSSProperties = {
     filter: dropShadows,

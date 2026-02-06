@@ -1,6 +1,31 @@
 import React, { useMemo } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
+/**
+ * Color palette for flare artifact elements.
+ * Each color corresponds to a different artifact along the flare line.
+ */
+export interface FlarePalette {
+  /** Color for ring artifacts */
+  ring?: string;
+  /** Color for hexagonal artifacts */
+  hex?: string;
+  /** Color for disc artifacts */
+  disc?: string;
+  /** Secondary ring color */
+  ringAlt?: string;
+  /** Secondary disc color */
+  discAlt?: string;
+}
+
+const defaultPalette: Required<FlarePalette> = {
+  ring: "purple",
+  hex: "cyan",
+  disc: "orange",
+  ringAlt: "blue",
+  discAlt: "magenta",
+};
+
 export interface LensFlareProps {
   /** Opacity of the flare (0-1) */
   opacity?: number;
@@ -10,8 +35,10 @@ export interface LensFlareProps {
   x?: number;
   /** Y position (0-1) relative to container */
   y?: number;
-  /** Color tint */
+  /** Color tint for the main glow */
   color?: string;
+  /** Color palette for flare artifacts (overrides individual artifact colors) */
+  palette?: FlarePalette;
   /** Animate the flare movement automatically */
   animate?: boolean;
   /** Speed of animation */
@@ -28,11 +55,13 @@ export const LensFlare: React.FC<LensFlareProps> = ({
   x: staticX = 0.5,
   y: staticY = 0.5,
   color = "rgba(255, 255, 255, 0.8)",
+  palette: paletteProp,
   animate = false,
   speed = 1,
   style,
   className,
 }) => {
+  const palette = { ...defaultPalette, ...paletteProp };
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const time = frame / fps;
@@ -64,15 +93,15 @@ export const LensFlare: React.FC<LensFlareProps> = ({
       { type: "burst", pos: 0, size: 400, alpha: 0.6, color: "white" },
       { type: "glow", pos: 0, size: 800, alpha: 0.2, color: color },
       // Artifacts along the line
-      { type: "ring", pos: -0.2, size: 100, alpha: 0.1, color: "purple" },
-      { type: "hex", pos: -0.4, size: 60, alpha: 0.2, color: "cyan" },
-      { type: "ring", pos: -0.5, size: 120, alpha: 0.05, color: "blue" },
-      { type: "disc", pos: -0.8, size: 40, alpha: 0.1, color: "orange" },
-      { type: "hex", pos: 0.3, size: 80, alpha: 0.1, color: "teal" },
-      { type: "disc", pos: 0.5, size: 200, alpha: 0.05, color: "magenta" },
+      { type: "ring", pos: -0.2, size: 100, alpha: 0.1, color: palette.ring },
+      { type: "hex", pos: -0.4, size: 60, alpha: 0.2, color: palette.hex },
+      { type: "ring", pos: -0.5, size: 120, alpha: 0.05, color: palette.ringAlt },
+      { type: "disc", pos: -0.8, size: 40, alpha: 0.1, color: palette.disc },
+      { type: "hex", pos: 0.3, size: 80, alpha: 0.1, color: palette.hex },
+      { type: "disc", pos: 0.5, size: 200, alpha: 0.05, color: palette.discAlt },
       { type: "ring", pos: 1.2, size: 300, alpha: 0.05, color: "rgba(255,255,255,0.1)" },
     ];
-  }, [color]);
+  }, [color, palette]);
 
   return (
     <div

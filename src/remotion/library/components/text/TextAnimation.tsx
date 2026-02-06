@@ -428,15 +428,29 @@ export const SlideInText: React.FC<
 };
 
 /**
+ * Deterministic pseudo-random for consistent renders.
+ */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+/**
  * Matrix / Hacker effect - Cycles random characters before resolving.
  */
 export const HackerText: React.FC<
-  TextAnimationPresetProps & { chars?: string }
+  TextAnimationPresetProps & {
+    /** Character set to cycle through */
+    chars?: string;
+    /** Initial color before resolving (e.g., "#0f0" for matrix green) */
+    initialColor?: string;
+  }
 > = ({
   children,
   stagger = 0.02,
   duration = 1,
   chars = "01",
+  initialColor = "#0f0",
   className,
   style,
   startFrom,
@@ -456,6 +470,9 @@ export const HackerText: React.FC<
         const charDuration = duration;
         const startTime = i * stagger;
 
+        // Track a seed counter for deterministic cycling
+        let updateCount = 0;
+
         // Random character cycling
         tl.to(
           char,
@@ -464,13 +481,16 @@ export const HackerText: React.FC<
             onUpdate: function () {
               // Only update random char during the first 80% of duration
               if (this.progress() < 0.8) {
+                // Deterministic: seed from char index + update count
+                const rand = seededRandom(i * 1000 + updateCount);
                 char.innerText =
-                  charsArray[Math.floor(Math.random() * charsArray.length)];
+                  charsArray[Math.floor(rand * charsArray.length)];
+                updateCount++;
               } else {
                 char.innerText = originalText;
               }
             },
-            ease: "none", // Constant scrambling speed
+            ease: "none",
           },
           startTime,
         );
@@ -478,7 +498,7 @@ export const HackerText: React.FC<
         // Reveal opacity/color alongside
         tl.fromTo(
           char,
-          { opacity: 0, color: "#0f0" },
+          { opacity: 0, color: initialColor },
           {
             opacity: 1,
             color: "inherit",

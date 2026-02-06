@@ -1,5 +1,14 @@
-import React, { CSSProperties, ReactNode } from "react";
-import { useCurrentFrame } from "remotion";
+import React, { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useCurrentFrame, useVideoConfig } from "remotion";
+
+/**
+ * Deterministic pseudo-random based on frame number.
+ * Produces consistent output across renders for the same frame.
+ */
+function seededRandom(frame: number, seed: number = 0): number {
+  const x = Math.sin((frame + seed) * 12.9898 + seed * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+}
 
 export interface NeonProps {
   children: ReactNode;
@@ -7,9 +16,9 @@ export interface NeonProps {
   color?: string;
   /** Glow intensity (blur radius) */
   glow?: number;
-  /** Flicker intensity (0-1) */
+  /** Flicker intensity (0-1, 0 = no flicker) */
   flicker?: number;
-  /** Flicker speed */
+  /** Flicker speed multiplier */
   flickerSpeed?: number;
   /** Inner color (usually white or lighter version of color) */
   innerColor?: string;
@@ -24,9 +33,15 @@ export interface NeonProps {
 /**
  * Neon glow effect container.
  * Adds a realistic neon glow with optional flickering.
- * 
+ *
  * @example
  * <Neon color="#ff0055" glow={20}>
+ *   <Text>OPEN</Text>
+ * </Neon>
+ *
+ * @example
+ * // Flickering neon sign
+ * <Neon color="#00ff00" glow={25} flicker={0.15} flickerSpeed={2}>
  *   <Text>OPEN</Text>
  * </Neon>
  */
@@ -43,11 +58,25 @@ export const Neon: React.FC<NeonProps> = ({
   style,
 }) => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
 
-  // Flicker effect
-  const flickerOp = flicker > 0
-    ? 1 - (Math.random() * flicker * (Math.sin(frame * flickerSpeed) > 0 ? 1 : 0.5))
-    : 1;
+  // Deterministic flicker: combines slow sine wave with frame-seeded noise
+  // for a realistic neon tube effect (stable glow with occasional dropouts)
+  const flickerOp = useMemo(() => {
+    if (flicker <= 0) return 1;
+
+    const time = frame / fps;
+    // Base oscillation (slow warm hum of the tube)
+    const baseOsc = Math.sin(time * flickerSpeed * 4) * 0.3 + 0.7;
+    // Rapid micro-flicker (electrical noise)
+    const microFlicker = seededRandom(frame, 1) * 0.4 + 0.6;
+    // Occasional dropout (neon tube momentary loss)
+    const dropout = seededRandom(frame, 2) > 0.97 ? 0.3 : 1;
+
+    const combined = baseOsc * microFlicker * dropout;
+    // Scale by flicker intensity: 0 = fully stable, 1 = heavy flicker
+    return 1 - flicker * (1 - combined);
+  }, [frame, fps, flicker, flickerSpeed]);
 
   const shadow = `
     0 0 ${glow * 0.2}px ${color},
@@ -56,7 +85,7 @@ export const Neon: React.FC<NeonProps> = ({
     0 0 ${glow * 2}px ${color},
     0 0 ${glow * 4}px ${color}
   `;
-  
+
   const textShadow = `
     0 0 ${glow * 0.1}px ${innerColor},
     0 0 ${glow * 0.3}px ${color},
@@ -79,7 +108,7 @@ export const Neon: React.FC<NeonProps> = ({
         boxShadow: isBox ? shadow : undefined,
         border: isBox ? `${borderWidth}px solid ${innerColor}` : undefined,
         borderRadius: isBox ? borderRadius : undefined,
-        backgroundColor: isBox ? `${color}10` : "transparent", // Subtle background tint for boxes
+        backgroundColor: isBox ? `${color}10` : "transparent",
         ...style,
       }}
     >

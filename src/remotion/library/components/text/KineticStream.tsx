@@ -18,15 +18,15 @@ export interface KineticStreamProps {
   color?: string;
   className?: string;
   style?: React.CSSProperties;
-  /** Duration of the transition in frames */
+  /** Duration of each word transition in seconds */
   transitionDuration?: number;
   /**
-   * Total duration of the animation in frames.
+   * Total duration of the animation in seconds.
    * If not provided, it uses the composition's duration.
    */
   duration?: number;
   /**
-   * Delay in frames after the last word appears before the animation ends.
+   * Delay in seconds after the last word appears before the animation ends.
    * This prevents the animation from ending abruptly.
    * @default 0
    */
@@ -43,44 +43,48 @@ const useWords = (text: string) => {
 };
 
 /**
- * Helper to get timing info
+ * Helper to get timing info.
+ * All time parameters are in seconds, converted to frames internally.
  */
 const useStreamTiming = (
-  totalGroups: number, 
-  transitionDuration: number, 
-  totalDurationProp?: number,
-  delayAfterLastWord: number = 0
+  totalGroups: number,
+  transitionDurationSec: number,
+  totalDurationSecProp?: number,
+  delayAfterLastWordSec: number = 0
 ) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  
-  const duration = totalDurationProp ?? durationInFrames;
+  const { durationInFrames, fps } = useVideoConfig();
+
+  // Convert seconds to frames, or fall back to composition duration
+  const totalFrames = totalDurationSecProp != null
+    ? Math.round(totalDurationSecProp * fps)
+    : durationInFrames;
+  const delayFrames = Math.round(delayAfterLastWordSec * fps);
+  const transitionFrames = Math.round(transitionDurationSec * fps);
+
   // Subtract the delay from the total duration to calculate group timing
-  const effectiveDuration = duration - delayAfterLastWord;
+  const effectiveDuration = totalFrames - delayFrames;
   const durationPerGroup = effectiveDuration / totalGroups;
   const currentIndex = Math.floor(frame / durationPerGroup);
-  
+
   // Clamp index
   const safeCurrentIndex = Math.min(totalGroups - 1, Math.max(0, currentIndex));
   const prevIndex = safeCurrentIndex - 1;
-  
+
   const timeInSlot = frame % durationPerGroup;
-  
+
   // Transition progress
-  // If we are at the very first group, there's no previous group to transition from, 
-  // so we might just want to be static or fade in.
-  // We'll treat transition as "entering the new slot".
   const progress = interpolate(
     timeInSlot,
-    [0, transitionDuration],
+    [0, transitionFrames],
     [0, 1],
     {
       extrapolateRight: "clamp",
-      easing: Easing.bezier(0.19, 1, 0.22, 1), // Expo-like ease
+      easing: Easing.bezier(0.19, 1, 0.22, 1),
     }
   );
 
-  const isTransitioning = timeInSlot < transitionDuration && safeCurrentIndex > 0;
+  const isTransitioning = timeInSlot < transitionFrames && safeCurrentIndex > 0;
 
   return {
     currentIndex: safeCurrentIndex,
@@ -103,7 +107,7 @@ export const SlideStream: React.FC<KineticStreamProps & { direction?: 'left' | '
   color = "currentColor",
   className,
   style,
-  transitionDuration = 12,
+  transitionDuration = 0.4,
   direction = 'alternate',
   duration,
   delayAfterLastWord = 0,
@@ -202,7 +206,7 @@ export const SwipeStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 8,
+  transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -290,7 +294,7 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 10,
+  transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -372,11 +376,11 @@ export const DynamicSizeStream: React.FC<KineticStreamProps> = ({
 export const StompStream: React.FC<KineticStreamProps> = ({
   text,
   fontSize = 80,
-  fontWeight = "900", // Default to super bold
+  fontWeight = "900",
   color = "currentColor",
   className,
   style,
-  transitionDuration = 10,
+  transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -463,7 +467,7 @@ export const SlotMachineStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 15,
+  transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -539,7 +543,7 @@ export const OutlineStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 20,
+  transitionDuration = 0.65,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -624,7 +628,7 @@ export const ElasticStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 12,
+  transitionDuration = 0.4,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -702,7 +706,7 @@ export const BlockStream: React.FC<KineticStreamProps & { blockColor?: string }>
   blockColor = "currentColor",
   className,
   style,
-  transitionDuration = 15,
+  transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -795,7 +799,7 @@ export const ChromaticStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 8,
+  transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -880,7 +884,7 @@ export const FlipTextStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 10,
+  transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -958,7 +962,7 @@ export const ZoomTextStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 15,
+  transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -1033,7 +1037,7 @@ export const BlurTextStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 8,
+  transitionDuration = 0.25,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -1108,7 +1112,7 @@ export const SlicedStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 15,
+  transitionDuration = 0.5,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -1191,7 +1195,7 @@ export const TurbulenceStream: React.FC<KineticStreamProps> = ({
   color = "currentColor",
   className,
   style,
-  transitionDuration = 20,
+  transitionDuration = 0.65,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -1267,7 +1271,7 @@ export const NeonStream: React.FC<KineticStreamProps & { neonColor?: string }> =
   neonColor = "#ff00ff",
   className,
   style,
-  transitionDuration = 5, // Short transition, mostly about the effect
+  transitionDuration = 0.15,
   duration,
   delayAfterLastWord = 0,
 }) => {
@@ -1357,7 +1361,7 @@ export const PushStream: React.FC<KineticStreamProps & {
   color = "currentColor",
   className,
   style,
-  transitionDuration = 10,
+  transitionDuration = 0.3,
   duration,
   delayAfterLastWord = 0,
   direction = "up",

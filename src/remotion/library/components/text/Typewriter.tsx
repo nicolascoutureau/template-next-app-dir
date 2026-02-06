@@ -1,6 +1,5 @@
 import React, { useMemo, type CSSProperties } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
-import type { EasingName } from "../../presets/easings";
 
 /**
  * Props for the Typewriter component.
@@ -20,8 +19,6 @@ export interface TypewriterProps {
   cursorBlinkRate?: number;
   /** Hide cursor after typing is complete */
   hideCursorOnComplete?: boolean;
-  /** Easing for typing speed (affects timing between characters) */
-  ease?: EasingName | string;
   /** Additional CSS styles for the container */
   style?: CSSProperties;
   /** Additional CSS class names */
@@ -64,8 +61,6 @@ export const Typewriter: React.FC<TypewriterProps> = ({
   cursorChar = "|",
   cursorBlinkRate = 0.5,
   hideCursorOnComplete = false,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ease = "linear",
   style,
   className,
   cursorStyle,
@@ -112,7 +107,6 @@ export const Typewriter: React.FC<TypewriterProps> = ({
         <span
           style={{
             opacity: showCursor ? 1 : 0,
-            transition: "opacity 0.1s",
             ...cursorStyle,
           }}
         >

@@ -76,7 +76,6 @@ export { Neon, type NeonProps } from "./Neon";
 export { SpeedLines, type SpeedLinesProps } from "./SpeedLines";
 export { LensFlare, type LensFlareProps } from "./LensFlare";
 export { Pixelate, type PixelateProps } from "./Pixelate";
-export { SimpleGlitch, type SimpleGlitchProps } from "./SimpleGlitch";
 
 // SVG Effects
 export * from "./svg";
