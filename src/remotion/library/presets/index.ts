@@ -61,3 +61,4 @@ export {
 } from "./springs";
 export * from "./durations";
 export * from "./shadows";
+export { toRemotionEasing } from "./remotionEasings";

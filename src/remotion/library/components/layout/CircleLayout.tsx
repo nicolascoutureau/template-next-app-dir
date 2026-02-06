@@ -1,6 +1,7 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 /**
  * Item rotation mode for circle layout.
@@ -44,19 +45,6 @@ export interface CircleLayoutProps {
   className?: string;
 }
 
-/**
- * Get Remotion easing function.
- */
-function getRemotionEasing(ease: EasingName | string): (t: number) => number {
-  const gsapEase = getEasing(ease as EasingName);
-  const easingMap: Record<string, (t: number) => number> = {
-    "power2.out": Easing.out(Easing.cubic),
-    "power3.out": Easing.out(Easing.poly(4)),
-    "back.out(1.7)": Easing.out(Easing.back(1.7)),
-    none: (t) => t,
-  };
-  return easingMap[gsapEase] ?? Easing.out(Easing.cubic);
-}
 
 /**
  * Arrange items in a circle with optional animation.
@@ -119,7 +107,7 @@ export const CircleLayout: React.FC<CircleLayoutProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const items = React.Children.toArray(children);
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
 
   // Calculate animated rotation
   const currentRotation = useMemo(() => {

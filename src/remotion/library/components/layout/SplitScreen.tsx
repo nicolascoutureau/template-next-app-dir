@@ -1,6 +1,7 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 /**
  * Split screen layout types.
@@ -32,21 +33,6 @@ export interface SplitScreenProps {
   style?: CSSProperties;
   /** Additional CSS class names */
   className?: string;
-}
-
-/**
- * Get Remotion easing function.
- */
-function getRemotionEasing(ease: EasingName | string): (t: number) => number {
-  const gsapEase = getEasing(ease as EasingName);
-  const easingMap: Record<string, (t: number) => number> = {
-    "power2.out": Easing.out(Easing.cubic),
-    "power2.inOut": Easing.inOut(Easing.cubic),
-    "power3.out": Easing.out(Easing.poly(4)),
-    "expo.out": Easing.out(Easing.exp),
-    none: (t) => t,
-  };
-  return easingMap[gsapEase] ?? Easing.out(Easing.cubic);
 }
 
 /**
@@ -97,7 +83,7 @@ export const SplitScreen: React.FC<SplitScreenProps> = ({
 
   const delayFrames = Math.round(delay * fps);
   const durationFrames = Math.round(duration * fps);
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
 
   // Calculate current ratio
   const currentRatio = useMemo(() => {

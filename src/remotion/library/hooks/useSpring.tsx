@@ -22,8 +22,8 @@ export interface UseSpringOptions {
   velocity?: number;
   /** Duration override in seconds (converts spring to timed animation) */
   duration?: number;
-  /** Starting frame for the animation */
-  from?: number;
+  /** Starting frame for the animation (frame number, not seconds) */
+  startFrame?: number;
 }
 
 /**
@@ -67,7 +67,7 @@ export function useSpring(options: UseSpringOptions = {}): UseSpringReturn {
   const {
     spring: springOption = "smooth",
     delay = 0,
-    from: startFrame,
+    startFrame,
   } = options;
 
   const frame = useCurrentFrame();
@@ -78,7 +78,7 @@ export function useSpring(options: UseSpringOptions = {}): UseSpringReturn {
   // Calculate the delay in frames
   const delayFrames = Math.round(delay * fps);
 
-  // Determine the starting frame
+  // Determine the starting frame (frame number, not seconds)
   const animationStartFrame = startFrame ?? 0;
 
   // Calculate the effective frame (accounting for delay)

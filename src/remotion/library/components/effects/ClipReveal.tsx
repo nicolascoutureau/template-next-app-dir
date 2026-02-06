@@ -1,7 +1,8 @@
 import React, { useMemo, type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
 import { getDuration, type DurationName } from "../../presets/durations";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 /**
  * Shape types for clip reveal.
@@ -57,23 +58,6 @@ export interface ClipRevealProps {
   style?: CSSProperties;
   /** Additional CSS class names */
   className?: string;
-}
-
-/**
- * Get Remotion easing function.
- */
-function getRemotionEasing(ease: EasingName | string): (t: number) => number {
-  const gsapEase = getEasing(ease as EasingName);
-  const easingMap: Record<string, (t: number) => number> = {
-    "power2.out": Easing.out(Easing.cubic),
-    "power2.inOut": Easing.inOut(Easing.cubic),
-    "power3.out": Easing.out(Easing.poly(4)),
-    "power4.out": Easing.out(Easing.poly(5)),
-    "expo.out": Easing.out(Easing.exp),
-    "back.out(1.7)": Easing.out(Easing.back(1.7)),
-    none: (t) => t,
-  };
-  return easingMap[gsapEase] ?? Easing.out(Easing.cubic);
 }
 
 /**
@@ -149,7 +133,7 @@ export const ClipReveal: React.FC<ClipRevealProps> = ({
   const duration = getDuration(durationProp);
   const delayFrames = Math.round(delay * fps);
   const durationFrames = Math.round(duration * fps);
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
 
   // Calculate progress
   const progress = useMemo(() => {

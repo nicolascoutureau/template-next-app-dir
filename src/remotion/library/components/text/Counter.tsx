@@ -1,12 +1,8 @@
 import React, { useMemo, type CSSProperties } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
 import { getDuration, type DurationName } from "../../presets/durations";
-
-/**
- * Animation style for digit transitions.
- */
-export type CounterAnimation = "instant" | "fade" | "slide" | "roll";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 /**
  * Props for the Counter component.
@@ -32,8 +28,6 @@ export interface CounterProps {
   decimalSeparator?: string;
   /** Use tabular (fixed-width) numbers */
   tabularNums?: boolean;
-  /** Digit animation style */
-  animation?: CounterAnimation;
   /** Abbreviate large numbers (K, M, B) */
   abbreviate?: boolean;
   /** Easing preset */
@@ -46,22 +40,6 @@ export interface CounterProps {
   style?: CSSProperties;
   /** Additional CSS class names */
   className?: string;
-}
-
-/**
- * Get Remotion easing function.
- */
-function getRemotionEasing(ease: EasingName | string): (t: number) => number {
-  const gsapEase = getEasing(ease as EasingName);
-  const easingMap: Record<string, (t: number) => number> = {
-    "power2.out": Easing.out(Easing.cubic),
-    "power2.inOut": Easing.inOut(Easing.cubic),
-    "power3.out": Easing.out(Easing.poly(4)),
-    "power4.out": Easing.out(Easing.poly(5)),
-    "expo.out": Easing.out(Easing.exp),
-    none: (t) => t,
-  };
-  return easingMap[gsapEase] ?? Easing.out(Easing.cubic);
 }
 
 /**
@@ -130,8 +108,6 @@ export const Counter: React.FC<CounterProps> = ({
   separator = ",",
   decimalSeparator = ".",
   tabularNums = true,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  animation = "instant",
   abbreviate = false,
   ease = "smooth",
   fixedWidth = true,
@@ -146,7 +122,7 @@ export const Counter: React.FC<CounterProps> = ({
   const delayFrames = Math.round(delay * fps);
   const durationFrames = Math.round(duration * fps);
 
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
 
   // Calculate current value
   const currentValue = useMemo(() => {
@@ -265,7 +241,7 @@ export const RollingCounter: React.FC<RollingCounterProps> = ({
   const durationFrames = Math.round(duration * fps);
   const staggerFrames = Math.round(stagger * fps);
 
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
 
   // Get the final formatted number
   const finalFormatted = to.toFixed(decimals);

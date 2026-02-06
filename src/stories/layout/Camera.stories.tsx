@@ -353,7 +353,7 @@ export const PushInEffect: Story = {
       targetScale={1.8}
       targetX={-100}
       targetY={-50}
-      duration={90}
+      duration={3}
       origin="center"
     >
       <SampleScene />
@@ -374,7 +374,7 @@ export const PullOutEffect: Story = {
       startScale={2}
       startX={50}
       startY={-30}
-      duration={90}
+      duration={3}
       origin="center"
     >
       <SampleScene />
@@ -391,7 +391,7 @@ export const ShakeEffect: Story = {
     ),
   ],
   render: () => (
-    <Shake intensity={10} speed={2} startFrame={30} duration={60}>
+    <Shake intensity={10} speed={2} startFrame={30} duration={2}>
       <SampleScene />
     </Shake>
   ),

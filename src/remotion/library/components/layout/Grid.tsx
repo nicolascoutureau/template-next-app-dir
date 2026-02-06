@@ -1,7 +1,8 @@
 import React, { type CSSProperties, type ReactNode } from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { getEasing, type EasingName } from "../../presets/easings";
+import { useCurrentFrame, useVideoConfig, interpolate } from "remotion";
+import { type EasingName } from "../../presets/easings";
 import { useStagger, type StaggerPattern } from "../../hooks/useStagger";
+import { toRemotionEasing } from "../../presets/remotionEasings";
 
 /**
  * Props for Grid component.
@@ -24,7 +25,7 @@ export interface GridProps {
   staggerPattern?: StaggerPattern;
   /** Animation duration per item in seconds */
   duration?: number;
-  /** Initial delay before animations start */
+  /** Initial delay before animations start in seconds */
   delay?: number;
   /** Animation type for items */
   animation?: "fadeIn" | "scaleIn" | "slideUp" | "slideIn" | "none";
@@ -34,20 +35,6 @@ export interface GridProps {
   style?: CSSProperties;
   /** Additional CSS class names */
   className?: string;
-}
-
-/**
- * Get Remotion easing function.
- */
-function getRemotionEasing(ease: EasingName | string): (t: number) => number {
-  const gsapEase = getEasing(ease as EasingName);
-  const easingMap: Record<string, (t: number) => number> = {
-    "power2.out": Easing.out(Easing.cubic),
-    "power3.out": Easing.out(Easing.poly(4)),
-    "back.out(1.7)": Easing.out(Easing.back(1.7)),
-    none: (t) => t,
-  };
-  return easingMap[gsapEase] ?? Easing.out(Easing.cubic);
 }
 
 /**
@@ -97,7 +84,7 @@ export const Grid: React.FC<GridProps> = ({
   const { fps } = useVideoConfig();
   const items = React.Children.toArray(children);
 
-  const easing = getRemotionEasing(ease);
+  const easing = toRemotionEasing(ease);
   const calculatedRows = rows ?? Math.ceil(items.length / columns);
 
   // Use stagger hook

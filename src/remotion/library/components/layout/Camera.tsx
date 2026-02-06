@@ -641,7 +641,7 @@ export interface PushInProps {
   targetX?: number | string;
   /** Target Y position */
   targetY?: number | string;
-  /** Duration in frames */
+  /** Duration in seconds */
   duration?: number;
   /** Starting frame */
   startFrame?: number;
@@ -658,7 +658,7 @@ export interface PushInProps {
 
 /**
  * Cinematic push-in effect (zoom + optional pan).
- * 
+ *
  * @example
  * // Safe push-in that never shows edges
  * <PushIn targetScale={2} targetX={-100} targetY={-50} constrainToBounds>
@@ -671,7 +671,7 @@ export const PushIn: React.FC<PushInProps> = ({
   targetScale = 1.8,
   targetX = 0,
   targetY = 0,
-  duration = 60,
+  duration = 2,
   startFrame = 0,
   origin = "center",
   easing = cameraEasings.pushIn,
@@ -679,12 +679,15 @@ export const PushIn: React.FC<PushInProps> = ({
   minScale = 1,
   style,
 }) => {
+  const { fps } = useVideoConfig();
+  const durationFrames = Math.round(duration * fps);
+
   return (
     <Camera
       keyframes={[
         { frame: startFrame, x: 0, y: 0, scale: startScale },
         {
-          frame: startFrame + duration,
+          frame: startFrame + durationFrames,
           x: targetX,
           y: targetY,
           scale: targetScale,
@@ -717,7 +720,7 @@ export interface PullOutProps {
   startX?: number | string;
   /** Starting Y position */
   startY?: number | string;
-  /** Duration in frames */
+  /** Duration in seconds */
   duration?: number;
   /** Starting frame */
   startFrame?: number;
@@ -734,7 +737,7 @@ export interface PullOutProps {
 
 /**
  * Pull-out/reveal effect.
- * 
+ *
  * @example
  * // Safe pull-out that never shows edges
  * <PullOut startScale={2.5} endScale={1.2} startX={50} constrainToBounds>
@@ -747,7 +750,7 @@ export const PullOut: React.FC<PullOutProps> = ({
   endScale = 1.1,
   startX = 0,
   startY = 0,
-  duration = 60,
+  duration = 2,
   startFrame = 0,
   origin = "center",
   easing = cameraEasings.pullOut,
@@ -755,11 +758,14 @@ export const PullOut: React.FC<PullOutProps> = ({
   minScale = 1,
   style,
 }) => {
+  const { fps } = useVideoConfig();
+  const durationFrames = Math.round(duration * fps);
+
   return (
     <Camera
       keyframes={[
         { frame: startFrame, x: startX, y: startY, scale: startScale },
-        { frame: startFrame + duration, x: 0, y: 0, scale: endScale, easing },
+        { frame: startFrame + durationFrames, x: 0, y: 0, scale: endScale, easing },
       ]}
       origin={origin}
       constrainToBounds={constrainToBounds}
@@ -779,7 +785,7 @@ export interface ShakeProps {
   speed?: number;
   /** Starting frame */
   startFrame?: number;
-  /** Duration in frames */
+  /** Duration in seconds */
   duration?: number;
   style?: CSSProperties;
 }
@@ -792,12 +798,14 @@ export const Shake: React.FC<ShakeProps> = ({
   intensity = 5,
   speed = 3,
   startFrame = 0,
-  duration = 30,
+  duration = 1,
   style,
 }) => {
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const durationFrames = Math.round(duration * fps);
 
-  const isShaking = frame >= startFrame && frame < startFrame + duration;
+  const isShaking = frame >= startFrame && frame < startFrame + durationFrames;
 
   const offsetX = useMemo(() => {
     if (!isShaking) return 0;
@@ -805,9 +813,9 @@ export const Shake: React.FC<ShakeProps> = ({
     return (
       Math.sin(t * Math.PI * 2) *
       intensity *
-      (1 - (frame - startFrame) / duration)
+      (1 - (frame - startFrame) / durationFrames)
     );
-  }, [frame, startFrame, isShaking, speed, intensity, duration]);
+  }, [frame, startFrame, isShaking, speed, intensity, durationFrames]);
 
   const offsetY = useMemo(() => {
     if (!isShaking) return 0;
@@ -816,9 +824,9 @@ export const Shake: React.FC<ShakeProps> = ({
       Math.cos(t * Math.PI * 2.5) *
       intensity *
       0.7 *
-      (1 - (frame - startFrame) / duration)
+      (1 - (frame - startFrame) / durationFrames)
     );
-  }, [frame, startFrame, isShaking, speed, intensity, duration]);
+  }, [frame, startFrame, isShaking, speed, intensity, durationFrames]);
 
   return (
     <AbsoluteFill

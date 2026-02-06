@@ -1,5 +1,4 @@
-import gsap from "gsap";
-import { useCallback, useEffect, useRef } from "react";
+import { useMemo, useCallback } from "react";
 import { useCurrentFrame, useVideoConfig } from "remotion";
 
 /**
@@ -12,8 +11,6 @@ export interface SequenceScene {
   at: number;
   /** Duration in seconds */
   duration: number;
-  /** Optional label for GSAP timeline positioning */
-  label?: string;
 }
 
 /**
@@ -30,32 +27,37 @@ export interface SequenceBeat {
  * Hook return type for useSequence.
  */
 export interface UseSequenceReturn {
-  /** The GSAP timeline instance */
-  timeline: gsap.core.Timeline | null;
-  /** Add a scene to the sequence */
-  addScene: (scene: SequenceScene) => void;
-  /** Add a beat marker */
-  addBeat: (beat: SequenceBeat) => void;
-  /** Get the current time in seconds */
+  /** Current time in seconds */
   currentTime: number;
   /** Check if a scene is currently active */
   isSceneActive: (sceneId: string) => boolean;
-  /** Get the progress of a scene (0-1) */
+  /** Get the progress of a scene (0-1). Returns 0 before scene starts, 1 after it ends. */
   getSceneProgress: (sceneId: string) => number;
-  /** Total duration of the sequence */
+  /** Check if a beat has been reached */
+  isBeatReached: (beatId: string) => boolean;
+  /** Total duration of the sequence in seconds */
   totalDuration: number;
 }
 
 /**
- * Hook to orchestrate multiple animations with labeled scenes and beats.
+ * Declarative hook to orchestrate multiple animations with labeled scenes and beats.
  * Integrates with Remotion's frame-based system.
  *
- * @example
- * const { timeline, addScene, isSceneActive, getSceneProgress } = useSequence();
+ * Scenes and beats are passed as static configuration. The hook returns
+ * query functions that reflect the current frame.
  *
- * // Define scenes
- * addScene({ id: 'intro', at: 0, duration: 1 });
- * addScene({ id: 'main', at: 1, duration: 2 });
+ * @example
+ * const scenes = [
+ *   { id: 'intro', at: 0, duration: 1 },
+ *   { id: 'main', at: 1, duration: 2 },
+ *   { id: 'outro', at: 3, duration: 1 },
+ * ];
+ *
+ * const beats = [
+ *   { id: 'impact', at: 1.5 },
+ * ];
+ *
+ * const { isSceneActive, getSceneProgress, isBeatReached } = useSequence(scenes, beats);
  *
  * // Check if scene is active
  * if (isSceneActive('intro')) {
@@ -63,86 +65,83 @@ export interface UseSequenceReturn {
  * }
  *
  * // Get scene progress for animations
- * const progress = getSceneProgress('main'); // 0-1
+ * const progress = getSceneProgress('main'); // 0 before, 0-1 during, 1 after
+ *
+ * // Check beat
+ * const impactHappened = isBeatReached('impact');
  */
-export function useSequence(): UseSequenceReturn {
+export function useSequence(
+  scenes: SequenceScene[],
+  beats: SequenceBeat[] = [],
+): UseSequenceReturn {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const scenesRef = useRef<Map<string, SequenceScene>>(new Map());
-  const beatsRef = useRef<Map<string, SequenceBeat>>(new Map());
 
-  // Current time in seconds
   const currentTime = frame / fps;
 
-  // Initialize timeline
-  useEffect(() => {
-    timelineRef.current = gsap.timeline({ paused: true });
-    return () => {
-      timelineRef.current?.kill();
-    };
-  }, []);
-
-  // Sync timeline with frame
-  useEffect(() => {
-    if (timelineRef.current) {
-      timelineRef.current.seek(currentTime);
+  // Build lookup maps once (stable across renders as long as array refs are stable)
+  const sceneMap = useMemo(() => {
+    const map = new Map<string, SequenceScene>();
+    for (const scene of scenes) {
+      map.set(scene.id, scene);
     }
-  }, [currentTime]);
+    return map;
+  }, [scenes]);
 
-  // Add a scene to the sequence
-  const addScene = useCallback((scene: SequenceScene) => {
-    scenesRef.current.set(scene.id, scene);
-    if (timelineRef.current && scene.label) {
-      timelineRef.current.addLabel(scene.label, scene.at);
+  const beatMap = useMemo(() => {
+    const map = new Map<string, SequenceBeat>();
+    for (const beat of beats) {
+      map.set(beat.id, beat);
     }
-  }, []);
+    return map;
+  }, [beats]);
 
-  // Add a beat marker
-  const addBeat = useCallback((beat: SequenceBeat) => {
-    beatsRef.current.set(beat.id, beat);
-    if (timelineRef.current) {
-      timelineRef.current.addLabel(`beat-${beat.id}`, beat.at);
-    }
-  }, []);
-
-  // Check if a scene is currently active
   const isSceneActive = useCallback(
     (sceneId: string): boolean => {
-      const scene = scenesRef.current.get(sceneId);
+      const scene = sceneMap.get(sceneId);
       if (!scene) return false;
       return currentTime >= scene.at && currentTime < scene.at + scene.duration;
     },
-    [currentTime],
+    [sceneMap, currentTime],
   );
 
-  // Get the progress of a scene (0-1)
   const getSceneProgress = useCallback(
     (sceneId: string): number => {
-      const scene = scenesRef.current.get(sceneId);
+      const scene = sceneMap.get(sceneId);
       if (!scene) return 0;
-
       if (currentTime < scene.at) return 0;
       if (currentTime >= scene.at + scene.duration) return 1;
-
       return (currentTime - scene.at) / scene.duration;
     },
-    [currentTime],
+    [sceneMap, currentTime],
   );
 
-  // Calculate total duration from all scenes
-  const totalDuration = Array.from(scenesRef.current.values()).reduce(
-    (max, scene) => Math.max(max, scene.at + scene.duration),
-    0,
+  const isBeatReached = useCallback(
+    (beatId: string): boolean => {
+      const beat = beatMap.get(beatId);
+      if (!beat) return false;
+      return currentTime >= beat.at;
+    },
+    [beatMap, currentTime],
   );
+
+  const totalDuration = useMemo(() => {
+    let max = 0;
+    for (const scene of scenes) {
+      const end = scene.at + scene.duration;
+      if (end > max) max = end;
+    }
+    for (const beat of beats) {
+      if (beat.at > max) max = beat.at;
+    }
+    return max;
+  }, [scenes, beats]);
 
   return {
-    timeline: timelineRef.current,
-    addScene,
-    addBeat,
     currentTime,
     isSceneActive,
     getSceneProgress,
+    isBeatReached,
     totalDuration,
   };
 }
