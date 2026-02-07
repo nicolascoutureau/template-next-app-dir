@@ -15,7 +15,8 @@ export const Main: React.FC = () => {
         <Artifact content={Artifact.Thumbnail} filename="thumbnail.jpeg" />
       )}
       <AbsoluteFill className="flex items-center justify-center bg-[#0f1115]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.25),transparent_45%),radial-gradient(circle_at_70%_60%,rgba(16,185,129,0.18),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.28),transparent_45%),radial-gradient(circle_at_70%_60%,rgba(16,185,129,0.2),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px] opacity-40" />
         <TextAnimation
           key={hmrKey}
           className="text-6xl md:text-7xl font-bold text-center tracking-tight text-white drop-shadow-[0_12px_32px_rgba(0,0,0,0.55)]"
