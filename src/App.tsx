@@ -78,25 +78,27 @@ export const App = () => {
   }, [initialFrame]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen w-screen p-2">
+    <div className="flex flex-col items-center justify-center h-screen w-screen p-4 bg-[#1e1e1e]">
       <div className="w-full h-full flex flex-col items-center justify-center">
         <div className="w-full h-full flex items-center justify-center">
-          <Player
-            ref={playerRef}
-            component={composition.component}
-            durationInFrames={composition.durationInFrames}
-            fps={composition.fps}
-            compositionHeight={composition.height}
-            compositionWidth={composition.width}
+          <div className="relative rounded-2xl border border-white/10 bg-black/30 shadow-[0_20px_80px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur-sm overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+            <Player
+              ref={playerRef}
+              component={composition.component}
+              durationInFrames={composition.durationInFrames}
+              fps={composition.fps}
+              compositionHeight={composition.height}
+              compositionWidth={composition.width}
             controls
             autoPlay={shouldAutoPlay}
-            loop
             style={playerSize}
-            allowFullscreen
-            doubleClickToFullscreen
-            initialFrame={initialFrame ?? 0}
-            numberOfSharedAudioTags={10}
-          />
+              allowFullscreen
+              doubleClickToFullscreen
+              initialFrame={initialFrame ?? 0}
+              numberOfSharedAudioTags={10}
+            />
+          </div>
         </div>
       </div>
     </div>
